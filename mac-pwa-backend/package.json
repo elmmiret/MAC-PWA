@@ -15,6 +15,10 @@
     "express": "^5.3.0"
   },
   "devDependencies": {
-    "prisma": "^8.0.0-rc.23"
+    "prisma": "^7.10.1"
+  },
+  "allowScripts": {
+    "prisma@7.10.1": true,
+    "@prisma/engines@7.10.1": true
   }
 }
