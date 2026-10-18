@@ -1,0 +1,16 @@
+services:
+  postgres-db:
+    image: postgres:17-alpine
+    container_name: mac_postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=admin_mac
+      - POSTGRES_PASSWORD=Password123!
+      - POSTGRES_DB=mac_pwa_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - mac_db_data:/var/lib/postgresql/data
+
+volumes:
+  mac_db_data:

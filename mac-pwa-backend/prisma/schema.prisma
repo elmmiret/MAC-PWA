@@ -1,13 +1,80 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+// 1. Taula d'Usuaris (Familiar/Gestor del compte)
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  role      Role      @default(USER)
+  athletes  Athlete[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+// 2. Taula d'Atletes
+model Athlete {
+  id          String       @id @default(uuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id])
+  firstName   String
+  lastName    String
+  dni         String?      @unique
+  birthDate   DateTime
+  category    Category
+  isMember    Boolean      @default(false)
+  licenseType LicenseType?
+  fees        Fee[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+// 3. Taula de Quotes/Rebuts
+model Fee {
+  id          String   @id @default(uuid())
+  athleteId   String
+  athlete     Athlete  @relation(fields: [athleteId], references: [id])
+  type        FeeType
+  amount      Float
+  isPaid      Boolean  @default(false)
+  dueDate     DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Enums (Valors tancats)
+enum Role {
+  ADMIN
+  USER
+}
+
+enum Category {
+  SUB_8
+  SUB_10
+  SUB_12
+  SUB_14
+  SUB_16
+  SUB_18
+  SUB_20
+  SUB_23
+  SENIOR
+  MASTER
+  SALUT
+  INDIVIDUAL
+}
+
+enum LicenseType {
+  FCA
+  RFEA
+}
+
+enum FeeType {
+  ACTIVITAT
+  COMPETICIO
+  SOCI
+  LLICENCIA
 }
