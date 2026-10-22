@@ -6,75 +6,209 @@ datasource db {
   provider = "postgresql"
 }
 
-// 1. Taula d'Usuaris (Familiar/Gestor del compte)
-model User {
-  id        String    @id @default(uuid())
-  email     String    @unique
-  role      Role      @default(USER)
-  athletes  Athlete[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+// ============================================
+// ENUMERACIONS
+// ============================================
+
+enum TUsuari {
+  Soci
+  NoSoci
+  Admin
 }
 
-// 2. Taula d'Atletes
-model Athlete {
-  id          String       @id @default(uuid())
-  userId      String
-  user        User         @relation(fields: [userId], references: [id])
-  firstName   String
-  lastName    String
-  dni         String?      @unique
-  birthDate   DateTime
-  category    Category
-  isMember    Boolean      @default(false)
-  licenseType LicenseType?
-  fees        Fee[]
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+enum TDocument {
+  DNI
+  NIF
 }
 
-// 3. Taula de Quotes/Rebuts
-model Fee {
-  id          String   @id @default(uuid())
-  athleteId   String
-  athlete     Athlete  @relation(fields: [athleteId], references: [id])
-  type        FeeType
-  amount      Float
-  isPaid      Boolean  @default(false)
-  dueDate     DateTime
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+enum TEstat {
+  Pendent
+  Pagat
+  Cancee
 }
 
-// Enums (Valors tancats)
-enum Role {
-  ADMIN
-  USER
+enum DiesSetmana {
+  Dilluns
+  Dimarts
+  Dimecres
+  Dijous
+  Divendres
 }
 
-enum Category {
+enum TCategoria {
   SUB_8
   SUB_10
   SUB_12
   SUB_14
   SUB_16
-  SUB_18
   SUB_20
   SUB_23
-  SENIOR
-  MASTER
-  SALUT
-  INDIVIDUAL
+  Senior
+  Master
+  G_A_S
+  Individual
+  NoAtleta
 }
 
-enum LicenseType {
-  FCA
-  RFEA
+enum TQuota {
+  Llicencia
+  Activitat
+  Competicio
+  Soci
 }
 
-enum FeeType {
-  ACTIVITAT
-  COMPETICIO
-  SOCI
-  LLICENCIA
+enum TSexe {
+  M
+  F
 }
+
+// ============================================
+// MODELS
+// ============================================
+
+model Categoria {
+  id                  String            @id @default(uuid())
+  tipus               TCategoria
+  anyNaixement        Int[]
+  diesActivitat       DiesSetmana[]
+  horaEntrada         DateTime?
+  horaSortida         DateTime?
+  detalls             String?
+
+  // Relacio amb Usuari, Ranking i QuotaConfig
+  usuaris             Usuari[]
+  rankings            Ranking[]
+  quotaConfigs        QuotaConfig[]
+
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+}
+
+model Usuari {
+  id                  String            @id @default(uuid())
+  imatgePerfil        String?
+  tipus               TUsuari
+  dataNaixement       DateTime?
+  LocalitatNaixement  String?
+  sexe                TSexe
+  numeroLlicencia     String?
+  nom                 String
+  cognom1             String
+  cognom2             String?
+  telefons            String[]
+  adreca              String?
+  codiPostal          String
+  poblacio            String
+  tipusDocument       TDocument
+  numeroDocument      String
+  nomTutor            String?
+  tipusDocumentTutor  TDocument?
+  numeroDocumentTutor String?
+  correusContacte     String[]
+  numAbPatronat       Int?
+  dataInscripcio      DateTime?
+  dataBaixa           DateTime?
+  dataAltaProva       DateTime?
+  iban                String?
+
+  // FK amb Categoria
+  categoriaId         String
+  categoria           Categoria         @relation(fields: [categoriaId], references: [id])
+
+  // Relacio amb Pagament i AtletaRanking
+  pagaments           Pagament[]
+  rankings            AtletaRanking[]
+
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+}
+
+model QuotaConfig {
+  id                  String          @id @default(uuid())
+  tipus               TQuota
+  nom                 String
+  preuBase            Float
+  temporadesAplicada  String[]
+  activa              Boolean         @default(false)
+
+  // FK amb Categoria
+  categoriaId         String
+  categoria           Categoria       @relation(fields: [categoriaId], references: [id])
+
+  // Relacio amb Pagament
+  pagaments           Pagament[]
+
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+}
+
+model Pagament {
+  id                  String          @id @default(uuid())
+  preu                Float
+  estat               TEstat          @default(Pendent)
+  dataPagament        DateTime?
+  dataLimit           DateTime
+  dataGeneracio       DateTime        @default(now())
+
+  // FK amb Usuari
+  usuariId            String
+  usuari              Usuari          @relation(fields: [usuariId], references: [id])
+
+  // FK amb QuotaConfig
+  quotaConfigId       String
+  quotaConfig         QuotaConfig     @relation(fields: [quotaConfigId], references: [id])
+
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+}
+
+model Prova {
+  id                  String          @id @default(uuid())
+  nom                 String
+
+  // Relacio amb Ranking
+  rankings            Ranking[]
+
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+}
+
+model Ranking {
+  id                  String          @id @default(uuid())
+  nom                 String
+  sexe                TSexe
+
+  // FK amb Prova
+  provaId             String
+  prova               Prova           @relation(fields: [provaId], references: [id])
+
+  // FK amb Categoria
+  categoriaId         String
+  categoria           Categoria       @relation(fields: [categoriaId], references: [id])
+
+  // Relacio amb AtletaRanking
+  atletaRankings      AtletaRanking[]
+
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+}
+
+model AtletaRanking {
+  id                  String          @id @default(uuid())
+  localitatMarca      String
+  dataMarca           DateTime
+  marca               String
+
+  // FK amb Usuari
+  usuariId            String
+  usuari              Usuari          @relation(fields: [usuariId], references: [id])
+
+  // FK amb Ranking
+  rankingId           String
+  ranking             Ranking         @relation(fields: [rankingId], references: [id])
+
+  @@unique([usuariId, rankingId])
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+}
+
