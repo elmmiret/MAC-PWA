@@ -1,57 +1,71 @@
-import { PrismaClient, type Categoria, type Prisma } from "@prisma/client";
+import { PrismaClient, Categoria, TCategoria, DiesSetmana} from "@prisma/client";
 
-export type CrearCategoriaData = Pick<
-  Prisma.CategoriaCreateInput,
-  | "tipus"
-  | "anyNaixement"
-  | "diesActivitat"
-  | "horaEntrada"
-  | "horaSortida"
-  | "detalls"
->;
+const prisma = new PrismaClient();
 
-export type ActualizarCategoriaData = Partial<CrearCategoriaData>;
-
-/** Acceso persistente a las categorias del club. */
 export class CategoriaRepository {
-  constructor(private readonly prisma: PrismaClient) {}
 
+  /**
+   * Finds all categories.
+   * @returns A promise resolving to an array of all categories.
+   */
   async findAll(): Promise<Categoria[]> {
-    return this.prisma.categoria.findMany({
+    return await prisma.categoria.findMany({
+      include: {
+        usuaris: true,
+        rankings: true,
+        quotaConfigs: true
+      },
       orderBy: { tipus: "asc" },
     });
   }
 
   async findById(id: string): Promise<Categoria | null> {
-    return this.prisma.categoria.findUnique({
+    return await prisma.categoria.findUnique({
       where: { id },
+      include: {
+        usuaris: true,
+        rankings: true,
+        quotaConfigs: true
+      },
     });
   }
 
-  async findByTipus(tipus: Prisma.TCategoria): Promise<Categoria[]> {
-    return this.prisma.categoria.findMany({
+  async findByTipus(tipus: TCategoria): Promise<Categoria[]> {
+    return await prisma.categoria.findMany({
       where: { tipus },
+      include: {
+        usuaris: true,
+        rankings: true,
+        quotaConfigs: true
+      },
       orderBy: { id: "asc" },
     });
   }
+  
 
-  async create(data: CrearCategoriaData): Promise<Categoria> {
-    return this.prisma.categoria.create({ data });
-  }
+  // async create(data: CrearCategoriaData): Promise<Categoria> {
+  //   return await prisma.categoria.create({ data });
+  // }
 
-  async update(
-    id: string,
-    data: ActualizarCategoriaData,
-  ): Promise<Categoria> {
-    return this.prisma.categoria.update({
+  // async update(
+  //   id: string,
+  //   data: ActualizarCategoriaData,
+  // ): Promise<Categoria> {
+  //   return prisma.categoria.update({
+  //     where: { id },
+  //     data,
+  //   });
+  // }
+
+  async deleteCategoria(id: string): Promise<void> {
+    await prisma.categoria.delete({
       where: { id },
-      data,
     });
   }
 
-  async delete(id: string): Promise<Categoria> {
-    return this.prisma.categoria.delete({
-      where: { id },
+  async deleteCategories(ids: string[]): Promise<void> {
+    await prisma.categoria.deleteMany({
+      where: { id: { in: ids } },
     });
   }
 }
