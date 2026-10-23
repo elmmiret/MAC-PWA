@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { CategoriaController } from '../controllers/categoria.controller.ts';
+import { isAdmin } from '../middlewares/auth.middleware.ts';
 
 const router = Router();
 const controller = new CategoriaController();
@@ -36,6 +37,6 @@ const controller = new CategoriaController();
  *         description: Categoria creada correctament
  */
 router.get('/categories', (req, res) => controller.getAll(req, res));
-//router.post('/categories', (req, res) => controller.createCategoria(req, res));
+//router.post('/categories', isAdmin, (req, res) => controller.createCategoria(req, res));
 
 export default router;
