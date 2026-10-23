@@ -1,6 +1,6 @@
-import { PrismaClient, Categoria, TCategoria, DiesSetmana} from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { Categoria, TCategoria, DiesSetmana} from "@prisma/client";
+import { prisma } from '../config/prisma';
+// import del dels DTOs
 
 export class CategoriaRepository {
 
