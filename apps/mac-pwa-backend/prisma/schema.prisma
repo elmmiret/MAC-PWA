@@ -116,8 +116,8 @@ model Usuari {
   iban                String?
 
   // FK amb Categoria
-  categoriaId         String
-  categoria           Categoria         @relation(fields: [categoriaId], references: [id])
+  categoriaId         String?
+  categoria           Categoria?         @relation(fields: [categoriaId], references: [id])
 
   // Relacio amb Pagament i AtletaRanking
   pagaments           Pagament[]

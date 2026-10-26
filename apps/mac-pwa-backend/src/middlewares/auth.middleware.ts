@@ -1,4 +1,5 @@
 import { Response, Request, NextFunction } from 'express';
+import { firebaseAdmin } from '../config/firebase';
 
 /**
  * Middleware per comprovar si l'usuari té permisos d'Administrador.
@@ -22,3 +23,41 @@ export const isAdmin = (req: Request, res: Response, next: NextFunction): void =
         res.status(500).json({ message: 'Error intern al validar els permisos.' });
     }
 }
+
+export interface AuthenticatedRequest extends Request {
+    user?: {
+        uid: string;
+        email?: string;
+    };
+}
+
+export const verifyFirebaseToken = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const authHeader = req.headers.authorization;
+
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            res.status(401).json({ message: 'Accés no autoritzat. Falta el token d\'autenticació.'});
+            return;
+        }
+
+        const token = authHeader.split('Bearer ')[1];
+
+        // Verificació del token amb Firebase Admin SDK
+        const decodedToken = await firebaseAdmin.auth().verifyIdToken(token);
+
+        // Adjuntar les dades de l'usuari a la request per utilitzar-les al controlador
+        req.user = {
+            uid: decodedToken.uid,
+            email: decodedToken.email
+        };
+
+        next();
+    } catch (error: any) {
+        res.status(403).json({ message: 'Token invàlid o caducat.', error: error.message });
+    }
+};
+

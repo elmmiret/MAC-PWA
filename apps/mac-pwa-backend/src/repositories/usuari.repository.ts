@@ -14,30 +14,28 @@ export class UsuariRepository {
         });
     }
 
-    async upsertByFirebaseUid(data: {
-        firebaseUid: string;
-        email: string;
-        nom?: string;
-        cognom1?: string;
-        cognom2?: string;
-    }): Promise<Usuari> {
+    // Upsert bàsic per al registre / login in ràpid (només firebaseUid i email)
+    async upsertBasicUser(firebaseUid: string, email: string): Promise<Usuari> {
         return await prisma.usuari.upsert({
-            where: { firebaseUid: data.firebaseUid },
-            update: { 
-                emailPrincipal: data.email,
-                ...(data.nom && { nom: data.nom }),
-                ...(data.cognom1 && { cognom1: data.cognom1 }),
-                ...(data.cognom2 && { cognom2: data.cognom2 }),
-             },
-            // falten atributs que son obligatoris (per això surt vermell)
-            // tambe cambiar que es obligatori i que no per a crear un Usuari
+            where: {firebaseUid },
+            update: { emailPrincipal: email },
             create: {
-                firebaseUid: data.firebaseUid,
-                emailPrincipal: data.email,
-                nom: data.nom || '',
-                cognom1: data.cognom1 || '',
-                cognom2: data.cognom2 || '',
-                tipus: TUsuari.NO_SOCI  // tipus per defecte en registrar-se
+                firebaseUid,
+                emailPrincipal: email,
+                perfilCompletat: false,
+                tipus: TUsuari.NO_SOCI
+            }
+        });
+    }
+
+    // Actualitzar perfil durant onboarding
+    // Afegir + atributs obligatoris, com la CATEGORIA
+    async updateProfile(userId: string, data: {nom: string; cognom1: string; cognom2: string }): Promise<Usuari> {
+        return await prisma.usuari.update({
+            where: { id: userId },
+            data: {
+                ...data,
+                perfilCompletat: true
             }
         });
     }

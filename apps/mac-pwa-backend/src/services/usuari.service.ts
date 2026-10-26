@@ -1,7 +1,7 @@
 import { Usuari } from '@prisma/client';
 import { UsuariRepository } from '../repositories/usuari.repository';
 import { firebaseAdmin } from '../config/firebase';
-import { SyncUsuariDTO, UsuariResponseDTO, TUsuari } from 'shared'
+import { SyncUsuariDTO, UpdatePerfilDTO, UsuariResponseDTO, TUsuari } from 'shared'
 
 export class UsuariService {
     private repository: UsuariRepository;
@@ -17,30 +17,44 @@ export class UsuariService {
             emailPrincipal: usuari.emailPrincipal,
             nom: usuari.nom,
             cognom1: usuari.cognom1,
-            cognom2: usuari.cognom2 || '',
-            tipus: usuari.tipus as TUsuari
+            cognom2: usuari.cognom2,
+            tipus: usuari.tipus as TUsuari,
+            perfilCompletat: usuari.perfilCompletat
         };
     }
 
     async sincronitzarUsuari(dto: SyncUsuariDTO): Promise<UsuariResponseDTO> {
-        // Validar token de Firebase
-        const decodedToken = await firebaseAdmin.auth().verifyIdToken(dto.firebaseToken);
+        const decodedToken = await firebaseAdmin.auth().verifyToken(dto.firebaseToken);
         const { uid, email } = decodedToken;
 
-        // Comprovar que l'email principal (obligatori) existeix al token
         if (!email) {
-            throw new Error('El token de Firebase no conté un correu electrònic vàlid i obligatori.');
+            throw new Error('El token de firebase no conté un correo electrònic vàlid.');
         }
 
-        // Upsert a la base de dades
-        const usuariDB = await this.repository.upsertByFirebaseUid({
-            firebaseUid: uid,
-            email,
+        const usuariDB = await this.repository.upsertBasicUser(uid, email);
+        return this.mapToDTO(usuariDB);
+    }
+
+    async completarPerfil(firebaseUid: string, dto: UpdatePerfilDTO): Promise<UsuariResponseDTO> {
+        const usuariExistent = await this.repository.findByFirebaseUid(firebaseUid);
+        if (!usuariExistent) {
+            throw new Error("L'usuari no existeix a la base de dades.");
+        }
+
+        const usuariActualitzat = await this.repository.updateProfile(usuariExistent.id, {
             nom: dto.nom,
             cognom1: dto.cognom1,
-            cognom2: dto.cognom2,
+            cognom2: dto.cognom2
         });
 
+        return this.mapToDTO(usuariActualitzat);
+    }
+
+    async obtenirUsuariPerId(id: string): Promise<UsuariResponseDTO> {
+        const usuariDB = await this.repository.findById(id);
+        if (!usuariDB) {
+            throw new Error("L'usuari no existeix.");
+        }
         return this.mapToDTO(usuariDB);
     }
 }
