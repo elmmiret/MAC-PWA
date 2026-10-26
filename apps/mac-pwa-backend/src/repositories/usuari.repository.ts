@@ -8,20 +8,36 @@ export class UsuariRepository {
         });
     }
 
-    async createOrUpdate(data: {
-        firebaseUid: string,
-        nom: string,
-        congnom1: string,
-        cognom2: string,
-        // atributs per a crear o actualitzar Usuari
+    async findById(id: string): Promise<Usuari | null> {
+        return await prisma.usuari.findUnique({
+            where: { id }
+        });
+    }
+
+    async upsertByFirebaseUid(data: {
+        firebaseUid: string;
+        email: string;
+        nom?: string;
+        cognom1?: string;
+        cognom2?: string;
     }): Promise<Usuari> {
-        return await prisma.usuari.create({
-            data: {
+        return await prisma.usuari.upsert({
+            where: { firebaseUid: data.firebaseUid },
+            update: { 
+                emailPrincipal: data.email,
+                ...(data.nom && { nom: data.nom }),
+                ...(data.cognom1 && { cognom1: data.cognom1 }),
+                ...(data.cognom2 && { cognom2: data.cognom2 }),
+             },
+            // falten atributs que son obligatoris (per això surt vermell)
+            // tambe cambiar que es obligatori i que no per a crear un Usuari
+            create: {
                 firebaseUid: data.firebaseUid,
-                nom: data.nom,
-                cognom1: data.congnom1,
-                cognom2: data.cognom2,
-                // demes atributs
+                emailPrincipal: data.email,
+                nom: data.nom || '',
+                cognom1: data.cognom1 || '',
+                cognom2: data.cognom2 || '',
+                tipus: TUsuari.NO_SOCI  // tipus per defecte en registrar-se
             }
         });
     }

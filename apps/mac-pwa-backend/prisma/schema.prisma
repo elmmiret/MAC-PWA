@@ -89,23 +89,25 @@ model Usuari {
   firebaseUid         String            @unique   // ID únic que ve de Firebase Auth
   imatgePerfil        String?
   tipus               TUsuari           @default(NO_SOCI)
-  dataNaixement       DateTime?
+  dataNaixement       DateTime
   LocalitatNaixement  String?
   sexe                TSexe
   numeroLlicencia     String?
   nom                 String
   cognom1             String
-  cognom2             String?
-  telefons            String[]
+  cognom2             String
+  telefonPrincipal    String
+  telefonSecundari    String?
   adreca              String?
-  codiPostal          String
+  codiPostal          String?
   poblacio            String
   tipusDocument       TDocument
   numeroDocument      String
   nomTutor            String?
   tipusDocumentTutor  TDocument?
   numeroDocumentTutor String?
-  correusContacte     String[]
+  emailPrincipal      String            @unique
+  emailSecundari      String?
   numAbPatronat       Int?
   dataInscripcio      DateTime?
   dataBaixa           DateTime?

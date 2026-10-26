@@ -1,7 +1,7 @@
-import { Usuari, TUsuari } from '@prisma/client';
+import { Usuari } from '@prisma/client';
 import { UsuariRepository } from '../repositories/usuari.repository';
 import { firebaseAdmin } from '../config/firebase';
-import { CreateUsuariDTO } from '../../../../packages/shared/src';
+import { SyncUsuariDTO, UsuariResponseDTO, TUsuari } from 'shared'
 
 export class UsuariService {
     private repository: UsuariRepository;
@@ -10,31 +10,37 @@ export class UsuariService {
         this.repository = new UsuariRepository();
     }
 
-    async registrarUsuari(dto: CreateUsuariDTO): Promise<Usuari> {
-        try {
-            // Verificar el token de Firebase enviat pel client
-            const decodedToken = await firebaseAdmin.auth().verifyIdToken(dto.firebaseToken);
-            const { uid, email, name} = decodedToken;
+    private mapToDTO(usuari: Usuari): UsuariResponseDTO {
+        return {
+            id: usuari.id,
+            firebaseUid: usuari.firebaseUid,
+            emailPrincipal: usuari.emailPrincipal,
+            nom: usuari.nom,
+            cognom1: usuari.cognom1,
+            cognom2: usuari.cognom2 || '',
+            tipus: usuari.tipus as TUsuari
+        };
+    }
 
-            if (!email) {
-                throw new Error('El token de Firebase no conté nu correu electrònic vàlid.');
-            }
+    async sincronitzarUsuari(dto: SyncUsuariDTO): Promise<UsuariResponseDTO> {
+        // Validar token de Firebase
+        const decodedToken = await firebaseAdmin.auth().verifyIdToken(dto.firebaseToken);
+        const { uid, email } = decodedToken;
 
-            // Comprovar si ja existeix a la base de dades
-            const usuariExistent = await this.repository.findByFirebaseUid(uid);
-            if (usuariExistent) {
-                throw new Error('Aquest usuari ja està registrar a la base de dades.');
-            }
-
-            // Crear l'usuari nou fent servir les dades del DTO i de Firebase
-            const nouUsuari = await this.repository.create({
-                firebaseUid: uid,
-                // atributs de creacio del dto
-            });
-
-            return nouUsuari;
-        } catch (error: any) {
-            throw new Error(`Error en el registre de l'usuari ${error.message}`);
+        // Comprovar que l'email principal (obligatori) existeix al token
+        if (!email) {
+            throw new Error('El token de Firebase no conté un correu electrònic vàlid i obligatori.');
         }
+
+        // Upsert a la base de dades
+        const usuariDB = await this.repository.upsertByFirebaseUid({
+            firebaseUid: uid,
+            email,
+            nom: dto.nom,
+            cognom1: dto.cognom1,
+            cognom2: dto.cognom2,
+        });
+
+        return this.mapToDTO(usuariDB);
     }
 }
