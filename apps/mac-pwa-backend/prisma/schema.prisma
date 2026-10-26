@@ -11,9 +11,9 @@ datasource db {
 // ============================================
 
 enum TUsuari {
-  Soci
-  NoSoci
-  Admin
+  ADMIN
+  SOCI
+  NO_SOCI
 }
 
 enum TDocument {
@@ -22,17 +22,17 @@ enum TDocument {
 }
 
 enum TEstat {
-  Pendent
-  Pagat
-  Cancee
+  PENDENT
+  PAGAT
+  CANCELAT
 }
 
 enum DiesSetmana {
-  Dilluns
-  Dimarts
-  Dimecres
-  Dijous
-  Divendres
+  DILLUNS
+  DIMARTS
+  DIMECRES
+  DIJOUS
+  DIVENDRES
 }
 
 enum TCategoria {
@@ -43,18 +43,18 @@ enum TCategoria {
   SUB_16
   SUB_20
   SUB_23
-  Senior
-  Master
+  SENIOR
+  MASTER
   G_A_S
-  Individual
-  NoAtleta
+  INDIVIDUAL
+  NO_ATLETA
 }
 
 enum TQuota {
-  Llicencia
-  Activitat
-  Competicio
-  Soci
+  LLICENCIA
+  ACTIVITAT
+  COMPETICIO
+  SOCI
 }
 
 enum TSexe {
@@ -68,7 +68,7 @@ enum TSexe {
 
 model Categoria {
   id                  String            @id @default(uuid())
-  tipus               TCategoria
+  tipus               TCategoria        @unique
   anyNaixement        Int[]
   diesActivitat       DiesSetmana[]
   horaEntrada         DateTime?
@@ -86,8 +86,9 @@ model Categoria {
 
 model Usuari {
   id                  String            @id @default(uuid())
+  firebaseUid         String            @unique   // ID únic que ve de Firebase Auth
   imatgePerfil        String?
-  tipus               TUsuari
+  tipus               TUsuari           @default(NO_SOCI)
   dataNaixement       DateTime?
   LocalitatNaixement  String?
   sexe                TSexe
@@ -145,7 +146,7 @@ model QuotaConfig {
 model Pagament {
   id                  String          @id @default(uuid())
   preu                Float
-  estat               TEstat          @default(Pendent)
+  estat               TEstat          @default(PENDENT)
   dataPagament        DateTime?
   dataLimit           DateTime
   dataGeneracio       DateTime        @default(now())
@@ -164,7 +165,7 @@ model Pagament {
 
 model Prova {
   id                  String          @id @default(uuid())
-  nom                 String
+  nom                 String          @unique
 
   // Relacio amb Ranking
   rankings            Ranking[]
@@ -175,7 +176,7 @@ model Prova {
 
 model Ranking {
   id                  String          @id @default(uuid())
-  nom                 String
+  nom                 String          @unique
   sexe                TSexe
 
   // FK amb Prova
