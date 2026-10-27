@@ -1,7 +1,7 @@
 import { Usuari } from '@prisma/client';
 import { UsuariRepository } from '../repositories/usuari.repository';
 import { firebaseAdmin } from '../config/firebase';
-import { SyncUsuariDTO, UpdatePerfilDTO, UsuariResponseDTO, TUsuari } from 'shared'
+import { SyncUsuariDTO, RegisterUsuariDTO, UpdatePerfilDTO, UsuariResponseDTO, TUsuari } from 'shared'
 
 export class UsuariService {
     private repository: UsuariRepository;
@@ -23,8 +23,30 @@ export class UsuariService {
         };
     }
 
+    async registrarUsuari(dto: RegisterUsuariDTO): Promise<UsuariResponseDTO> {
+        // Crear usuari a Firebase Auth
+        const firebaseUser = await firebaseAdmin.auth().createUser({
+            email: dto.emailPrincipal,
+            password: dto.password,
+            displayName: `${dto.nom} ${dto.cognom1}`
+        });
+
+        // Guardar usuari a PostgreSQL amb el rol indicat (o NO_SOCI per defecte si no s'indica)
+        const usuariDB = await this.repository.create({
+            firebaseUid: firebaseUser.uid,
+            emailPrincipal: dto.emailPrincipal,
+            nom: dto.nom,
+            cognom1: dto.cognom1,
+            cognom2: dto.cognom2 || null,
+            tipus: dto.tipus || TUsuari.NO_SOCI,    // Si no s'especifica, assigna NO_SOCI
+            perfilCompletat: false
+        });
+
+        return this.mapToDTO(usuariDB);
+    }
+
     async sincronitzarUsuari(dto: SyncUsuariDTO): Promise<UsuariResponseDTO> {
-        const decodedToken = await firebaseAdmin.auth().verifyToken(dto.firebaseToken);
+        const decodedToken = await firebaseAdmin.auth().verifyIdToken(dto.firebaseToken);
         const { uid, email } = decodedToken;
 
         if (!email) {

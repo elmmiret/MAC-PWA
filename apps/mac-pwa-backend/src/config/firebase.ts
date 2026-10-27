@@ -1,11 +1,20 @@
-var admin = require('firebase-admin');
-var serviceAccount = require('../../firebase-service-account.json');
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 
-if (!admin.apps.length) {
-    admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount)
+const appModule = require('firebase-admin/app');
+const authModule = require('firebase-admin/auth');
+
+// Carregar les credencials
+const serviceAccountModule = require('../../firebase-service-account.json');
+const serviceAccount = serviceAccountModule.default || serviceAccountModule;
+
+const firebaseApp = appModule.getApps().length
+    ? appModule.getApp()
+    : appModule.initializeApp({
+        credential: appModule.cert(serviceAccount)
     });
-}
 
-export const firebaseAdmin = admin;
-
+// Mantiene una interfaz comun para los servicios y middlewares de la aplicacion.
+export const firebaseAdmin = {
+    auth: () => authModule.getAuth(firebaseApp)
+};

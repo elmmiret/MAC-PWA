@@ -10,6 +10,7 @@ export class UsuariController {
         this.service = new UsuariService();
     }
 
+
     async updatePerfil(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
             // S'obté el UID de manera segura a través del token validat pel middleware
