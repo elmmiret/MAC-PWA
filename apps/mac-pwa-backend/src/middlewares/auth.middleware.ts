@@ -1,28 +1,11 @@
-import { Response, Request, NextFunction } from 'express';
+import { Response, Request, NextFunction, RequestHandler } from 'express';
+import { TUsuari } from '@prisma/client';
 import { firebaseAdmin } from '../config/firebase';
+import { UsuariRepository } from '../repositories/usuari.repository';
 
 /**
  * Middleware per comprovar si l'usuari té permisos d'Administrador.
  */
-
-export const isAdmin = (req: Request, res: Response, next: NextFunction): void => {
-    try {
-        // En el futur, això vindrà d'un token JWT o d'una sessió decodificada (ex: req.user.tipus)
-        // De moment, per a proves, es pot comprovar amb un header personalitzat o al cos.
-
-        const userTipus = req.headers['x-user-tipus'] || req.body.tipusUsuari;
-
-        if (userTipus === 'Admin' || userTipus === 'ADMIN') {
-            next(); // L'usuari és administrador, permet continuar
-        } else {
-            res.status(403).json({
-                message: 'Accés denegat. Aquesta acció requereix permisos d\'Administrador.'
-            });
-        }
-    } catch (error: any) {
-        res.status(500).json({ message: 'Error intern al validar els permisos.' });
-    }
-}
 
 export interface AuthenticatedRequest extends Request {
     user?: {
@@ -30,6 +13,37 @@ export interface AuthenticatedRequest extends Request {
         email?: string;
     };
 }
+
+const usuariRepository = new UsuariRepository();
+
+const requireRole = (role: TUsuari, roleName: string): RequestHandler => {
+    return async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const firebaseUid = req.user?.uid;
+
+            if (!firebaseUid) {
+                res.status(401).json({ message: 'Usuari no autenticat.' });
+                return;
+            }
+
+            const usuari = await usuariRepository.findByFirebaseUid(firebaseUid);
+
+            if (!usuari || usuari.tipus !== role) {
+                res.status(403).json({
+                    message: `Accés denegat. Es requereix el rol ${roleName}.`,
+                });
+                return;
+            }
+
+            next();
+        } catch (error) {
+            res.status(500).json({ message: 'Error intern al validar els permisos.' });
+        }
+    };
+};
+
+export const isAdmin = requireRole(TUsuari.ADMIN, 'ADMIN');
+export const isSoci = requireRole(TUsuari.SOCI, 'SOCI');
 
 export const verifyFirebaseToken = async (
     req: AuthenticatedRequest,
@@ -60,4 +74,3 @@ export const verifyFirebaseToken = async (
         res.status(403).json({ message: 'Token invàlid o caducat.', error: error.message });
     }
 };
-

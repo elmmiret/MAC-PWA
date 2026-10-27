@@ -29,20 +29,6 @@ export class UsuariRepository {
         });
     }
 
-    // Upsert bàsic per al registre / login in ràpid (només firebaseUid i email)
-    async upsertBasicUser(firebaseUid: string, email: string): Promise<Usuari> {
-        return await prisma.usuari.upsert({
-            where: {firebaseUid },
-            update: { emailPrincipal: email },
-            create: {
-                firebaseUid,
-                emailPrincipal: email,
-                perfilCompletat: false,
-                tipus: TUsuari.NO_SOCI
-            }
-        });
-    }
-
     // Actualitzar perfil durant onboarding
     // Afegir + atributs obligatoris, com la CATEGORIA
     async updateProfile(userId: string, data: {

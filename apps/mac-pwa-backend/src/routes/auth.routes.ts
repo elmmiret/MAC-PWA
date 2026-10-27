@@ -13,34 +13,6 @@ const authController = new AuthController();
 
 /**
  * @swagger
- * /api/auth/sync:
- *   post:
- *     summary: Sincronitza l'usuari amb Firebase i la base de dades relacional
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - firebaseToken
- *             properties:
- *               firebaseToken:
- *                 type: string
- *                 description: Token JWT obtingut en iniciar sessió a Firebase
- *           example:
- *             firebaseToken: "eyJhbGciOiJSUzI1NiIs..."
- *     responses:
- *       200:
- *         description: Sincronització completada correctament
- *       401:
- *         description: Token invàlid o no autoritzat
- */
-router.post('/sync', (req, res) => authController.sync(req, res));
-
-/**
- * @swagger
  * /api/auth/register:
  *   post:
  *     summary: Registra un nou usuari (o Administrador) a Firebase i PostgreSQL
@@ -84,5 +56,34 @@ router.post('/sync', (req, res) => authController.sync(req, res));
  *         description: Falten camps obligatoris o error en el registre
  */
 router.post('/register', (req, res) => authController.register(req, res));
+
+/**
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     summary: Inicia sessió i retorna un Firebase ID token
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - emailPrincipal
+ *               - password
+ *             properties:
+ *               emailPrincipal:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *                 format: password
+ *     responses:
+ *       200:
+ *         description: Token obtingut correctament
+ *       401:
+ *         description: Credencials invàlides
+ */
+router.post('/login', (req, res) => authController.login(req, res));
 
 export default router;

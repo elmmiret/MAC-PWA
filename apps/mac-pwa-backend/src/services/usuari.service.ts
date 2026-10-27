@@ -1,7 +1,9 @@
 import { Usuari } from '@prisma/client';
+import 'dotenv/config';
 import { UsuariRepository } from '../repositories/usuari.repository';
 import { firebaseAdmin } from '../config/firebase';
-import { SyncUsuariDTO, RegisterUsuariDTO, UpdatePerfilDTO, UsuariResponseDTO, TUsuari } from 'shared'
+import { RegisterUsuariDTO, UpdatePerfilDTO, UsuariResponseDTO, TUsuari } from 'shared'
+import { IUsuariService } from '../interfaces/usuari.interface';
 
 export class UsuariService {
     private repository: UsuariRepository;
@@ -45,16 +47,44 @@ export class UsuariService {
         return this.mapToDTO(usuariDB);
     }
 
-    async sincronitzarUsuari(dto: SyncUsuariDTO): Promise<UsuariResponseDTO> {
-        const decodedToken = await firebaseAdmin.auth().verifyIdToken(dto.firebaseToken);
-        const { uid, email } = decodedToken;
+    async iniciarSessio(email: string, password: string) {
+        const apiKey = process.env.FIREBASE_WEB_API_KEY;
 
-        if (!email) {
-            throw new Error('El token de firebase no conté un correo electrònic vàlid.');
+        if (!apiKey) {
+            throw new Error('FIREBASE_WEB_API_KEY no està definida.');
         }
 
-        const usuariDB = await this.repository.upsertBasicUser(uid, email);
-        return this.mapToDTO(usuariDB);
+        const response = await fetch(
+            `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email,
+                    password,
+                    returnSecureToken: true,
+                }),
+            },
+        );
+
+        const result = await response.json() as {
+            idToken?: string;
+            refreshToken?: string;
+            expiresIn?: string;
+            localId?: string;
+            error?: { message?: string };
+        };
+
+        if (!response.ok || !result.idToken) {
+            throw new Error(result.error?.message ?? 'No s\'ha pogut iniciar sessió.');
+        }
+
+        return {
+            idToken: result.idToken,
+            refreshToken: result.refreshToken,
+            expiresIn: result.expiresIn,
+            localId: result.localId,
+        };
     }
 
     async completarPerfil(firebaseUid: string, dto: UpdatePerfilDTO): Promise<UsuariResponseDTO> {
@@ -76,6 +106,14 @@ export class UsuariService {
         const usuariDB = await this.repository.findById(id);
         if (!usuariDB) {
             throw new Error("L'usuari no existeix.");
+        }
+        return this.mapToDTO(usuariDB);
+    }
+
+    async obtenirUsuariPerFirebaseId(firebaseId: string): Promise<UsuariResponseDTO> {
+        const usuariDB = await this.repository.findByFirebaseUid(firebaseId);
+        if(!usuariDB) {
+            throw new Error("L'usuair no existeix.");
         }
         return this.mapToDTO(usuariDB);
     }

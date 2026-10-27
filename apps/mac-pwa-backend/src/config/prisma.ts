@@ -1,9 +1,14 @@
+import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import pg from 'pg';
 
 // url de connexió a la base de dades PostgreSQL
 const connectionString = process.env.DATABASE_URL;
+
+if (!connectionString) {
+    throw new Error('DATABASE_URL no està definida. Revisa el fitxer .env.');
+}
 
 // pool de connexions a la base de dades PostgreSQL (utilitzant la llibreria 'pg')
 const pool = new pg.Pool({ connectionString });

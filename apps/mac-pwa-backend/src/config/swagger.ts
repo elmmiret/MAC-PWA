@@ -13,7 +13,17 @@ const options: swaggerJSDoc.Options = {
                 url: 'http://localhost:3000',
                 description: 'Servidor local de desenvolupament'
             }
-        ]
+        ],
+        components: {
+            securitySchemes: {
+                bearerAuth: {
+                    type: 'http',
+                    scheme: 'bearer',
+                    bearerFormat: 'JWT',
+                    description: 'Introdueix el token de Firebase.',
+                },
+            },
+        },
     },
     apis: ['./src/routes/*.ts'] // Ruta als fitxers on es troben les definicions de les rutes
 };
