@@ -4,10 +4,6 @@ export enum TUsuari {
     NO_SOCI = 'NO_SOCI'
 }
 
-export interface SyncUsuariDTO {
-    firebaseToken: string;
-}
-
 export interface RegisterUsuariDTO {
     emailPrincipal: string;
     password: string;
