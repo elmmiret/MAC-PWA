@@ -1,4 +1,4 @@
-export enum Tusuari {
+export enum TUsuari {
     ADMIN = 'ADMIN',
     SOCI = 'SOCI',
     NO_SOCI = 'NO_SOCI'
@@ -8,12 +8,19 @@ export interface SyncUsuariDTO {
     firebaseToken: string;
 }
 
-// arreglar
-// Atributs primordials per a crear un nou Usuari (després ja podrà afegir els demés)
-export interface CreateUsuariDTO {
-    firebaseToken: string;
-    nom?: string;
-    tipus?: Tusuari; // Per defecte serà NO_SOCI
+export interface RegisterUsuariDTO {
+    emailPrincipal: string;
+    password: string;
+    nom: string;
+    cognom1: string;
+    cognom2?: string;
+    tipus?: TUsuari;    // Triar si es vol que sigui ADMIN, SOCI, etc.
+}
+
+export interface UpdatePerfilDTO {
+    nom: string;
+    cognom1: string;
+    cognom2: string;
 }
 
 // arreglar
@@ -21,19 +28,10 @@ export interface CreateUsuariDTO {
 export interface UsuariResponseDTO {
     id: string;
     firebaseUid: string;
-    tipus: string;
-    nom: string;
-    congnom1: string;
-    congnom2: string;
-    emailsContacte: string[];
-    telefonsContacte: string[];
-    dataNaixement: Date;
-    sexe: string;
-    adreca: string;
-    codiPostal: string;
-    poblacio: string;
-
-    dataAlta?: Date;
-    dataBaixa?: Date;
-    dataUltimaModificacio?: Date;
+    emailPrincipal: string;
+    nom: string | null;
+    cognom1: string | null;
+    cognom2: string | null;
+    tipus: TUsuari;
+    perfilCompletat: boolean;
 }

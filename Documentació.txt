@@ -1,0 +1,14 @@
+PER A QUE A L'ONBOARDING ES DEMANIN MES COSES
+1 - Actualitzar prisma.schema per afegir nous atributs (si cal) i executar la migració
+2 - Actualitzar UpdatePerfilDTO (tambe UsuariResponseDTO si s'han afegit nous atributs)
+3 - Actualitzar el usuari.repository.ts (afegir els nous atributs a la funció updateProfile, al data que entra com a parametre)
+4 - Actualitzar el usuari.service.ts (funció completarPerfil ha de contemplar els nous atributs i mètode privat mapToDto ha de mapejar els nous atributs cap al UsuariResponseDTO)
+5 - Actualitzar el usuari.controller.ts (a la funció updatePerfil, extreure els nous atributs de req.body i validar si son obligatoris segons criteri propi)
+6 - Actualitzar el frontend
+
+
+27 octubre:
+- Implementat endpoint per a registrarse a Firebase Auth i crear l'Usuari a PostgreSQL.
+- Endpoints afegits al Swagger i llestos per a ser executats.
+- Problemes amb els endpoints (noms de les rutes, funcions incorrectes, etc.)
+- Funciona a Firebase Auth, però no a PostgreSQL
