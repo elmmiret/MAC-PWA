@@ -13,13 +13,35 @@ export interface RegisterUsuariDTO {
     tipus?: TUsuari;    // Triar si es vol que sigui ADMIN, SOCI, etc.
 }
 
+export interface LoginUsuariDTO {
+    emailPrincipal: string;
+    password: string;
+}
+
+export interface GoogleLoginDTO {
+    firebaseToken: string;
+}
+
+export interface LoginResponseDTO {
+    idToken: string;
+    refreshToken?: string;
+    expiresIn?: string;
+    firebaseUId?: string;
+    usuariId: string;
+}
+
+export interface OperacioUsuariResponseDTO {
+    message: string;
+    usuariId?: string;
+}
+
 export interface UpdatePerfilDTO {
     nom: string;
     cognom1: string;
     cognom2: string;
 }
 
-// arreglar
+// ARREGLAR
 // Torna tots els atributs d'un Usuari
 export interface UsuariResponseDTO {
     id: string;

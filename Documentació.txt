@@ -7,6 +7,19 @@ PER A QUE A L'ONBOARDING ES DEMANIN MES COSES
 6 - Actualitzar el frontend
 
 
+COSES PER FER:
+- Arreglar les interficies per a que estiguin implementades als serveis
+- Fer endpoint per obtenir usuari a partir del firebaseId (funcio feta, falta endpoint)
+- Fer endpoint per a /logout i /delete, on logout només ho podrà executar l'usuari per a sortir de la sessió i delete només l'usuari per al seu propi compte o l'admin
+
+- S'ha d'afegir la relació FAMILIARS a Usuari i també l'atribut DESCOMPTE a Pagaments (pot haber descomptes per numero de familiars al club, per altres motius, etc.).
+- Quan un Usuari es registra, cambiar el missatge output. Posa Usuari 'administrador', quan pot ser de qualsevol tipus. ---> DONE
+- Arreglar endpoint /perfil, per a fer l'onboarding un cop registrat (amb email i contrassenya o google).
+- Implementar oblit de contranssenya amb els dos mètodes ¿¿ (o només amb google)
+- Mirar de corregir la creació d'Usuaris ADMIN, ja que no pot ser que qualsevol es pugui crear un compte d'administrador només a partir d'un atribut de l'endpoint.
+- Fer FRONTEND per a registrarse i iniciar sessio amb els 2 métodes (email i contrassenya o google). Des d'on s'haurà de gestionar el pop up de Google
+
+
 27 octubre:
 - Implementat endpoint per a registrarse a Firebase Auth i crear l'Usuari a PostgreSQL.
 - Endpoints afegits al Swagger i llestos per a ser executats.
@@ -19,8 +32,19 @@ PER A QUE A L'ONBOARDING ES DEMANIN MES COSES
 - Afegit endpoint '/login' per a obtenir el Firebase Token (funció login a auth.controller.ts i funció iniciarSessio a usuari.service.ts)
 - Ara endpoints protegits amb validació de Firebase Token ja funcionen
 - Afegit isAdmin i isSoci a auth.middleware.ts per a comprovar, a partir del token i de l'usuari.repository.ts, que el Firebase Token es d'un Usuari de tipus ADMIN o SOCI (s'afegeix a les rutes, després del verifyFirebaseToken, el cual comprova que hi ha un header anomenat Authoritzation, amb 'Bearer <token>' correcte)
--
 
-Arnauet:
-id: ddfa7735-933d-4c0a-ad2a-42cc04cb7ac6
-token: IQRhjIS7VbQvyg21pwZlSfzyO7A2
+
+28 octubre:
+- S'ha d'implementar l'inici de sessió amb Google, implementar el /logout (que l'ha d'executar si o si el propietari del compte) i el /delete d'un Usuari (que l'ha d'executar el propietari del compte o un Usuari tipus ADMIN)
+- També s'ha d'implementar el guardar imatges a Firebase Storage per a la imatge de perfil d'un Usuari, per a les imatges de les noticies, etc.
+- Implementats endpoints /logout, delete /:id i /google (encara no es pot gestionar el popup de Google des del front)
+- Al middleware ja no s'accedeix a les dades directament des del repository desitjat, sinó que es fa servir el servei (usuari.service.ts en comptes de usuari.repository.ts).
+- S'han creat nous DTOs, com LoginUsuariDTO, GoogleLoginDTO, LoginResponseDTO, OperacioUsuariRespoonseDTO i els seus corresponents mappers a usuari.service.ts, que és on de moment es fan servir.
+
+
+arnaumiretadmin@gmail.com - nsbsn-7201-ma)81:
+id: 7d3b4a89-ec5a-4b97-9efb-ceb0117a71f8
+firebaseUid:
+token:
+eyJhbGciOiJSUzI1NiIsImtpZCI6IjkwNGIwZjkxYmU2ZWIwODY3ZGFiYmFhYjU4N2RmYzJlMzNmMDBhMjQiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiQXJuYXUgTWlyZXQiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vbWFjLXB3YS02MzlkMiIsImF1ZCI6Im1hYy1wd2EtNjM5ZDIiLCJhdXRoX3RpbWUiOjE3OTMyMDM2ODAsInVzZXJfaWQiOiJadWt1TWZHWjdGTTZ3UnpxMlN3SnlKcFdmbXAxIiwic3ViIjoiWnVrdU1mR1o3Rk02d1J6cTJTd0p5SnBXZm1wMSIsImlhdCI6MTc5MzIwMzY4MCwiZXhwIjoxNzkzMjA3MjgwLCJlbWFpbCI6ImFybmF1bWlyZXRhZG1pbkBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZW1haWwiOlsiYXJuYXVtaXJldGFkbWluQGdtYWlsLmNvbSJdfSwic2lnbl9pbl9wcm92aWRlciI6InBhc3N3b3JkIn19.TvXh1J33v1kkCjXYa9FixY7yz8pkVM2aJEzYt_q10Skaqv6-hlT51k4NgS8kVzskbvVzXjPtCwX6TxmOiRsLlkwPGjUWjZ23p4wMZ4RTzBm340-t5cKuUtXRjO_UfqO4tBeFyGgiVrMVrN5UxIBc30G8Dz4ypy9pWmGcbqk5QrRBATEqeuGi758BiDseza2r0ZHb3HoQ_YBeGJ24gN9DNjjwGyxCBhSy1WDx3DbjRTd2Ieu91OcGEZeBXMhBYDp-jgdFbW3w1F3RtE5n-XyepDd8_R5n0YpWEkFnfX3455WFZ8WMDt4Dl6BYOsGu0oZBAoKxhOtVhMB_4Bozq3gOcA
+

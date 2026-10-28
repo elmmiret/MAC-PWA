@@ -23,6 +23,18 @@ const options: swaggerJSDoc.Options = {
                     description: 'Introdueix el token de Firebase.',
                 },
             },
+            schemas: {
+                GoogleLoginDTO: {
+                    type: 'object',
+                    required: ['firebaseToken'],
+                    properties: {
+                        firebaseToken: {
+                            type: 'string',
+                            description: 'Firebase ID token obtingut després d\'iniciar sessió amb Google.',
+                        },
+                    },
+                },
+            },
         },
     },
     apis: ['./src/routes/*.ts'] // Ruta als fitxers on es troben les definicions de les rutes

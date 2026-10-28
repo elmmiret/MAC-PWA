@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { AuthController } from '../controllers/auth.controller';
+import { verifyFirebaseToken } from '../middlewares/auth.middleware';
 
 const router = Router();
 const authController = new AuthController();
@@ -43,19 +44,39 @@ const authController = new AuthController();
  *                 type: string
  *                 enum: [ADMIN, SOCI, NO_SOCI]
  *           example:
- *             emailPrincipal: "admin@martorell.cat"
+ *             emailPrincipal: "pere@gmail.com"
  *             password: "PasswordSegur123"
  *             nom: "Pere"
  *             cognom1: "Martorell"
  *             cognom2: "Atlètic"
- *             tipus: "ADMIN"
+ *             tipus: "NO_SOCI"
  *     responses:
  *       201:
- *         description: Usuari administrador registrat correctament
+ *         description: Usuari registrat correctament
  *       400:
  *         description: Falten camps obligatoris o error en el registre
  */
 router.post('/register', (req, res) => authController.register(req, res));
+
+/**
+ * @swagger
+ * /api/auth/google:
+ *   post:
+ *     summary: Inicia sessió amb Google mitjançant Firebase
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/GoogleLoginDTO'
+ *     responses:
+ *       200:
+ *         description: Usuari autenticat amb Google
+ *       401:
+ *         description: Token de Google invàlid
+ */
+router.post('/google', (req, res) => authController.google(req, res));
 
 /**
  * @swagger
@@ -85,5 +106,21 @@ router.post('/register', (req, res) => authController.register(req, res));
  *         description: Credencials invàlides
  */
 router.post('/login', (req, res) => authController.login(req, res));
+
+/**
+ * @swagger
+ * /api/auth/logout:
+ *   post:
+ *     summary: Tanca la sessió de l'usuari autenticat
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Sessió tancada correctament
+ *       401:
+ *         description: Token absent o invàlid
+ */
+router.post('/logout', verifyFirebaseToken, (req, res) => authController.logout(req, res));
 
 export default router;

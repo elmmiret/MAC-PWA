@@ -1,5 +1,5 @@
 import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
+const require = createRequire(__filename);
 
 const appModule = require('firebase-admin/app');
 const authModule = require('firebase-admin/auth');

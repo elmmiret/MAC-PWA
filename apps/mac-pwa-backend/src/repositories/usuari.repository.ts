@@ -14,12 +14,18 @@ export class UsuariRepository {
         });
     }
 
+    async deleteById(id: string): Promise<Usuari> {
+        return await prisma.usuari.delete({
+            where: { id }
+        });
+    }
+
     // Crear usuaris
     async create(data: {
         firebaseUid: string;
         emailPrincipal: string;
-        nom: string;
-        cognom1: string;
+        nom?: string | null;
+        cognom1?: string | null;
         cognom2?: string | null;
         tipus: TUsuari;
         perfilCompletat: boolean;

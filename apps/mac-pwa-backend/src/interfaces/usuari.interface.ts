@@ -1,7 +1,20 @@
-import { Usuari } from "@prisma/client";
+import {
+    GoogleLoginDTO,
+    LoginResponseDTO,
+    LoginUsuariDTO,
+    OperacioUsuariResponseDTO,
+    RegisterUsuariDTO,
+    UpdatePerfilDTO,
+    UsuariResponseDTO,
+} from 'shared';
 
 export interface IUsuariService {
-    getById(id: string): Promise<Usuari | null>;
-    getByCategoria(nomCategoria: string): Promise<Usuari[]>;
-    deleteUsuaris(id: string[]): Promise<void>;
+    registrarUsuari(dto: RegisterUsuariDTO): Promise<UsuariResponseDTO>;
+    iniciarSessio(dto: LoginUsuariDTO): Promise<LoginResponseDTO>;
+    iniciarSessioGoogle(dto: GoogleLoginDTO): Promise<UsuariResponseDTO>;
+    completarPerfil(firebaseUid: string, dto: UpdatePerfilDTO): Promise<UsuariResponseDTO>;
+    obtenirUsuariPerId(id: string): Promise<UsuariResponseDTO>;
+    obtenirUsuariPerFirebaseId(firebaseUid: string): Promise<UsuariResponseDTO>;
+    tancarSessio(firebaseUid: string): Promise<OperacioUsuariResponseDTO>;
+    eliminarUsuari(targetId: string, actorFirebaseUid: string): Promise<OperacioUsuariResponseDTO>;
 }

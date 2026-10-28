@@ -156,7 +156,7 @@ model Pagament {
 
   // FK amb Usuari
   usuariId            String
-  usuari              Usuari          @relation(fields: [usuariId], references: [id])
+  usuari              Usuari          @relation(fields: [usuariId], references: [id], onDelete: Cascade)
 
   // FK amb QuotaConfig
   quotaConfigId       String
@@ -205,7 +205,7 @@ model AtletaRanking {
 
   // FK amb Usuari
   usuariId            String
-  usuari              Usuari          @relation(fields: [usuariId], references: [id])
+  usuari              Usuari          @relation(fields: [usuariId], references: [id], onDelete: Cascade)
 
   // FK amb Ranking
   rankingId           String
@@ -215,4 +215,3 @@ model AtletaRanking {
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt
 }
-

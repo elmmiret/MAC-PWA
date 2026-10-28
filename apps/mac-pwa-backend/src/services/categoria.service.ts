@@ -1,4 +1,4 @@
-import { Categoria } from '@prisma/client';
+import { Categoria, TCategoria } from '@prisma/client';
 import { ICategoriaService } from '../interfaces/categoria.interface';
 import { CategoriaRepository } from '../repositories/categoria.repository';
 
@@ -17,6 +17,10 @@ export class CategoriaService implements ICategoriaService {
         const categoria = await this.repository.findById(id);
         if (!categoria) throw new Error('Categoria not found');
         return categoria;
+    }
+
+    async getByTipus(tipus: TCategoria): Promise<Categoria[]> {
+        return await this.repository.findByTipus(tipus);
     }
 
     // async createCategoria(data: CreateCategoriaDTO): Promise<Categoria> {
