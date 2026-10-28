@@ -17,7 +17,19 @@ COSES PER FER:
 - Arreglar endpoint /perfil, per a fer l'onboarding un cop registrat (amb email i contrassenya o google).
 - Implementar oblit de contranssenya amb els dos mètodes ¿¿ (o només amb google)
 - Mirar de corregir la creació d'Usuaris ADMIN, ja que no pot ser que qualsevol es pugui crear un compte d'administrador només a partir d'un atribut de l'endpoint.
-- Fer FRONTEND per a registrarse i iniciar sessio amb els 2 métodes (email i contrassenya o google). Des d'on s'haurà de gestionar el pop up de Google
+ ---Actualmente /register permite enviar "tipus": "ADMIN". Eso es un riesgo de seguridad, porque cualquier persona podría registrarse como administrador.
+ ---Lo recomendable es que los registros públicos siempre sean NO_SOCI y que la creación de administradores se haga por un flujo protegido.
+- Fer FRONTEND per a registrarse i iniciar sessio amb els 2 métodes (email i contrassenya o google). Des d'on s'haurà de gestionar el pop up de Google. Fer servir patrò bLoc.
+ ---El frontend debe iniciar sesión con Google mediante Firebase Client SDK y enviar el firebaseToken a /api/auth/google.
+
+- NOMES un ADMINISTRADOR podrà REGISTRAR nous Usuaris. (no cal que Categoria sigui obligatori a l'hora de crear l'Usuari, parlar-ho)
+- NO_SOCIs, es a dir, persones que visiten la web o webapp sense tenir un compte fet pel club, només podran accedir a les funcions bàsiques, sense necessitat de tenir un Usuari.
+- SOCIs seran els que tinguin un compte creat pel club, aixi que desapareix de TUsuari.
+    (Usuari haura de donar un compte de correu electrònic obligatoriament (i més dades si escau) per a poder registrar a l'Usuari, les demanaria el club)
+- ARREGLAR o ELIMINAR TUsuari, ja que amb aixo desapareix el NO_SOCI (com a molt tenir un indicador de si es atleta, entrenador, només soci, etc.) i el tipus ADMIN ha de desapareixer i
+    implementar-lo tindre del token que retorna Firebase (per a més seguretat).
+- Eliminar, si es viable (una vegada implementat el front per al registre / login amb Google), l'inici de sessió amb email i contrassenya. Es farà ús exclusivament del registre / login amb Google.
+    (probar d'implementar la recuperació de la contrassenya, però si només es pot accedir amb Google, em sembla que no caldrà).
 
 
 27 octubre:
@@ -40,6 +52,10 @@ COSES PER FER:
 - Implementats endpoints /logout, delete /:id i /google (encara no es pot gestionar el popup de Google des del front)
 - Al middleware ja no s'accedeix a les dades directament des del repository desitjat, sinó que es fa servir el servei (usuari.service.ts en comptes de usuari.repository.ts).
 - S'han creat nous DTOs, com LoginUsuariDTO, GoogleLoginDTO, LoginResponseDTO, OperacioUsuariRespoonseDTO i els seus corresponents mappers a usuari.service.ts, que és on de moment es fan servir.
+- Nova idea de que els Usuaris només podran ser creats per un ADMINISTRADOR, d'aquesta manera el club te control total sobre els Usuari.
+- Nova idea de que només es podrà registrar / iniciar sessió amb un compte de Google (que el club demanarà al nou soci, juntament amb més dades).
+- TUsuari desapareix degut a que els actuals NO_SOCIS no podran tenir un Usuari, els SOCIS seran tots els que tinguin un Usuari i ADMIN només ho seran uns Usuaris en concret.
+- Canvi de identificació dels ADMINISTRADORS, ara el si un Usuari és administrador o no vindrà donat pel token que retorna Firebase, no per un atribut (augment de la seguretat).
 
 
 arnaumiretadmin@gmail.com - nsbsn-7201-ma)81:
