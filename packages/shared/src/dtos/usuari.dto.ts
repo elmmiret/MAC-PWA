@@ -26,7 +26,7 @@ export interface LoginResponseDTO {
     idToken: string;
     refreshToken?: string;
     expiresIn?: string;
-    firebaseUId?: string;
+    localId: string;
     usuariId: string;
 }
 

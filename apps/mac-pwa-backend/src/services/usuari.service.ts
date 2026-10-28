@@ -38,14 +38,14 @@ export class UsuariService implements IUsuariService {
         idToken: string,
         refreshToken: string | undefined,
         expiresIn: string | undefined,
-        firebaseUId: string,
+        localId: string,
         usuariId: string
     ): LoginResponseDTO {
         return {
             idToken,
             refreshToken,
             expiresIn,
-            firebaseUId,
+            localId,
             usuariId,
         };
     }
@@ -103,7 +103,7 @@ export class UsuariService implements IUsuariService {
             idToken?: string;
             refreshToken?: string;
             expiresIn?: string;
-            firebaseUId?: string;
+            localId?: string;
             error?: { message?: string };
         };
 
@@ -111,11 +111,11 @@ export class UsuariService implements IUsuariService {
             throw new Error(result.error?.message ?? 'No s\'ha pogut iniciar sessió.');
         }
 
-        if (!result.firebaseUId) {
+        if (!result.localId) {
             throw new Error('Firebase no ha retornat un identificador d\'usuari.');
         }
 
-        const usuari = await this.repository.findByFirebaseUid(result.firebaseUId);
+        const usuari = await this.repository.findByFirebaseUid(result.localId);
 
         if (!usuari) {
             throw new Error('L\'usuari autenticat no existeix a la base de dades.');
@@ -125,7 +125,7 @@ export class UsuariService implements IUsuariService {
             result.idToken,
             result.refreshToken,
             result.expiresIn,
-            result.firebaseUId,
+            result.localId,
             usuari.id,
         );
     }
