@@ -11,9 +11,9 @@ datasource db {
 // ============================================
 
 enum TUsuari {
-  Soci
-  NoSoci
-  Admin
+  ADMIN
+  SOCI
+  NO_SOCI
 }
 
 enum TDocument {
@@ -22,17 +22,17 @@ enum TDocument {
 }
 
 enum TEstat {
-  Pendent
-  Pagat
-  Cancee
+  PENDENT
+  PAGAT
+  CANCELAT
 }
 
 enum DiesSetmana {
-  Dilluns
-  Dimarts
-  Dimecres
-  Dijous
-  Divendres
+  DILLUNS
+  DIMARTS
+  DIMECRES
+  DIJOUS
+  DIVENDRES
 }
 
 enum TCategoria {
@@ -43,18 +43,18 @@ enum TCategoria {
   SUB_16
   SUB_20
   SUB_23
-  Senior
-  Master
+  SENIOR
+  MASTER
   G_A_S
-  Individual
-  NoAtleta
+  INDIVIDUAL
+  NO_ATLETA
 }
 
 enum TQuota {
-  Llicencia
-  Activitat
-  Competicio
-  Soci
+  LLICENCIA
+  ACTIVITAT
+  COMPETICIO
+  SOCI
 }
 
 enum TSexe {
@@ -68,7 +68,7 @@ enum TSexe {
 
 model Categoria {
   id                  String            @id @default(uuid())
-  tipus               TCategoria
+  tipus               TCategoria        @unique
   anyNaixement        Int[]
   diesActivitat       DiesSetmana[]
   horaEntrada         DateTime?
@@ -86,25 +86,29 @@ model Categoria {
 
 model Usuari {
   id                  String            @id @default(uuid())
+  firebaseUid         String            @unique   // ID únic que ve de Firebase Auth
+  perfilCompletat     Boolean           @default(false)
   imatgePerfil        String?
-  tipus               TUsuari
+  tipus               TUsuari           @default(NO_SOCI)
+  emailPrincipal      String            @unique
+  emailSecundari      String?
+  telefonPrincipal    String?
+  telefonSecundari    String?
+  nom                 String?
+  cognom1             String?
+  cognom2             String?
+  sexe                TSexe?
   dataNaixement       DateTime?
   LocalitatNaixement  String?
-  sexe                TSexe
   numeroLlicencia     String?
-  nom                 String
-  cognom1             String
-  cognom2             String?
-  telefons            String[]
   adreca              String?
-  codiPostal          String
-  poblacio            String
-  tipusDocument       TDocument
-  numeroDocument      String
+  codiPostal          String?
+  poblacio            String?
+  tipusDocument       TDocument?
+  numeroDocument      String?
   nomTutor            String?
   tipusDocumentTutor  TDocument?
   numeroDocumentTutor String?
-  correusContacte     String[]
   numAbPatronat       Int?
   dataInscripcio      DateTime?
   dataBaixa           DateTime?
@@ -112,8 +116,8 @@ model Usuari {
   iban                String?
 
   // FK amb Categoria
-  categoriaId         String
-  categoria           Categoria         @relation(fields: [categoriaId], references: [id])
+  categoriaId         String?
+  categoria           Categoria?         @relation(fields: [categoriaId], references: [id])
 
   // Relacio amb Pagament i AtletaRanking
   pagaments           Pagament[]
@@ -145,14 +149,14 @@ model QuotaConfig {
 model Pagament {
   id                  String          @id @default(uuid())
   preu                Float
-  estat               TEstat          @default(Pendent)
+  estat               TEstat          @default(PENDENT)
   dataPagament        DateTime?
   dataLimit           DateTime
   dataGeneracio       DateTime        @default(now())
 
   // FK amb Usuari
   usuariId            String
-  usuari              Usuari          @relation(fields: [usuariId], references: [id])
+  usuari              Usuari          @relation(fields: [usuariId], references: [id], onDelete: Cascade)
 
   // FK amb QuotaConfig
   quotaConfigId       String
@@ -164,7 +168,7 @@ model Pagament {
 
 model Prova {
   id                  String          @id @default(uuid())
-  nom                 String
+  nom                 String          @unique
 
   // Relacio amb Ranking
   rankings            Ranking[]
@@ -175,7 +179,7 @@ model Prova {
 
 model Ranking {
   id                  String          @id @default(uuid())
-  nom                 String
+  nom                 String          @unique
   sexe                TSexe
 
   // FK amb Prova
@@ -201,7 +205,7 @@ model AtletaRanking {
 
   // FK amb Usuari
   usuariId            String
-  usuari              Usuari          @relation(fields: [usuariId], references: [id])
+  usuari              Usuari          @relation(fields: [usuariId], references: [id], onDelete: Cascade)
 
   // FK amb Ranking
   rankingId           String
@@ -211,4 +215,3 @@ model AtletaRanking {
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt
 }
-

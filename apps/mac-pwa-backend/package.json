@@ -4,6 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "postinstall": "prisma skills sync || exit 0"
   },
@@ -14,12 +17,23 @@
     "@prisma/client": "^7.10.1",
     "cors": "^2.8.6",
     "express": "^5.3.0",
-    "pg": "^8.23.1"
+    "firebase": "^13.1.0",
+    "firebase-admin": "^14.5.0",
+    "pg": "^8.23.1",
+    "shared": "*",
+    "swagger-jsdoc": "^6.3.0",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "@prisma/config": "^7.10.1",
+    "@types/express": "^5.0.6",
+    "@types/pg": "^8.23.1",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
     "dotenv": "^18.0.8",
-    "prisma": "^7.10.1"
+    "prisma": "^7.10.1",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
   },
   "allowScripts": {
     "prisma@7.10.1": true,

@@ -1,0 +1,8 @@
+{
+    "name": "martorell-atletic-club-monorepo",
+    "private": true,
+    "workspaces": [
+        "apps/*",
+        "packages/*"
+    ]
+}

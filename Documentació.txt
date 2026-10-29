@@ -1,0 +1,66 @@
+PER A QUE A L'ONBOARDING ES DEMANIN MES COSES
+1 - Actualitzar prisma.schema per afegir nous atributs (si cal) i executar la migració
+2 - Actualitzar UpdatePerfilDTO (tambe UsuariResponseDTO si s'han afegit nous atributs)
+3 - Actualitzar el usuari.repository.ts (afegir els nous atributs a la funció updateProfile, al data que entra com a parametre)
+4 - Actualitzar el usuari.service.ts (funció completarPerfil ha de contemplar els nous atributs i mètode privat mapToDto ha de mapejar els nous atributs cap al UsuariResponseDTO)
+5 - Actualitzar el usuari.controller.ts (a la funció updatePerfil, extreure els nous atributs de req.body i validar si son obligatoris segons criteri propi)
+6 - Actualitzar el frontend
+
+
+COSES PER FER:
+- Arreglar les interficies per a que estiguin implementades als serveis
+- Fer endpoint per obtenir usuari a partir del firebaseId (funcio feta, falta endpoint)
+- Fer endpoint per a /logout i /delete, on logout només ho podrà executar l'usuari per a sortir de la sessió i delete només l'usuari per al seu propi compte o l'admin
+
+- S'ha d'afegir la relació FAMILIARS a Usuari i també l'atribut DESCOMPTE a Pagaments (pot haber descomptes per numero de familiars al club, per altres motius, etc.).
+- Quan un Usuari es registra, cambiar el missatge output. Posa Usuari 'administrador', quan pot ser de qualsevol tipus. ---> DONE
+- Arreglar endpoint /perfil, per a fer l'onboarding un cop registrat (amb email i contrassenya o google).
+- Implementar oblit de contranssenya amb els dos mètodes ¿¿ (o només amb google)
+- Mirar de corregir la creació d'Usuaris ADMIN, ja que no pot ser que qualsevol es pugui crear un compte d'administrador només a partir d'un atribut de l'endpoint.
+ ---Actualmente /register permite enviar "tipus": "ADMIN". Eso es un riesgo de seguridad, porque cualquier persona podría registrarse como administrador.
+ ---Lo recomendable es que los registros públicos siempre sean NO_SOCI y que la creación de administradores se haga por un flujo protegido.
+- Fer FRONTEND per a registrarse i iniciar sessio amb els 2 métodes (email i contrassenya o google). Des d'on s'haurà de gestionar el pop up de Google. Fer servir patrò bLoc.
+ ---El frontend debe iniciar sesión con Google mediante Firebase Client SDK y enviar el firebaseToken a /api/auth/google.
+
+- NOMES un ADMINISTRADOR podrà REGISTRAR nous Usuaris. (no cal que Categoria sigui obligatori a l'hora de crear l'Usuari, parlar-ho)
+- NO_SOCIs, es a dir, persones que visiten la web o webapp sense tenir un compte fet pel club, només podran accedir a les funcions bàsiques, sense necessitat de tenir un Usuari.
+- SOCIs seran els que tinguin un compte creat pel club, aixi que desapareix de TUsuari.
+    (Usuari haura de donar un compte de correu electrònic obligatoriament (i més dades si escau) per a poder registrar a l'Usuari, les demanaria el club)
+- ARREGLAR o ELIMINAR TUsuari, ja que amb aixo desapareix el NO_SOCI (com a molt tenir un indicador de si es atleta, entrenador, només soci, etc.) i el tipus ADMIN ha de desapareixer i
+    implementar-lo tindre del token que retorna Firebase (per a més seguretat).
+- Eliminar, si es viable (una vegada implementat el front per al registre / login amb Google), l'inici de sessió amb email i contrassenya. Es farà ús exclusivament del registre / login amb Google.
+    (probar d'implementar la recuperació de la contrassenya, però si només es pot accedir amb Google, em sembla que no caldrà).
+
+
+27 octubre:
+- Implementat endpoint per a registrarse a Firebase Auth i crear l'Usuari a PostgreSQL.
+- Endpoints afegits al Swagger i llestos per a ser executats.
+- Problemes amb els endpoints (noms de les rutes, funcions incorrectes, etc.)
+- Funciona a Firebase Auth, però no a PostgreSQL
+- Arreglat, faltaba fer 'npm exec prisma migrate dev' per a aplicar les migracions pendents contra la base de dades.
+- Arreglar Swagger per a poder introduir 'firebaseToken' al Header dels endpoints i, per tant, poder executar endpoints que exigeixen el Token.
+- Arreglat afegint la part de 'components' a swagger.ts
+- Error de Token invalid quan es vol executar un endpoint que exigeix validar el Token.
+- Afegit endpoint '/login' per a obtenir el Firebase Token (funció login a auth.controller.ts i funció iniciarSessio a usuari.service.ts)
+- Ara endpoints protegits amb validació de Firebase Token ja funcionen
+- Afegit isAdmin i isSoci a auth.middleware.ts per a comprovar, a partir del token i de l'usuari.repository.ts, que el Firebase Token es d'un Usuari de tipus ADMIN o SOCI (s'afegeix a les rutes, després del verifyFirebaseToken, el cual comprova que hi ha un header anomenat Authoritzation, amb 'Bearer <token>' correcte)
+
+
+28 octubre:
+- S'ha d'implementar l'inici de sessió amb Google, implementar el /logout (que l'ha d'executar si o si el propietari del compte) i el /delete d'un Usuari (que l'ha d'executar el propietari del compte o un Usuari tipus ADMIN)
+- També s'ha d'implementar el guardar imatges a Firebase Storage per a la imatge de perfil d'un Usuari, per a les imatges de les noticies, etc.
+- Implementats endpoints /logout, delete /:id i /google (encara no es pot gestionar el popup de Google des del front)
+- Al middleware ja no s'accedeix a les dades directament des del repository desitjat, sinó que es fa servir el servei (usuari.service.ts en comptes de usuari.repository.ts).
+- S'han creat nous DTOs, com LoginUsuariDTO, GoogleLoginDTO, LoginResponseDTO, OperacioUsuariRespoonseDTO i els seus corresponents mappers a usuari.service.ts, que és on de moment es fan servir.
+- Nova idea de que els Usuaris només podran ser creats per un ADMINISTRADOR, d'aquesta manera el club te control total sobre els Usuari.
+- Nova idea de que només es podrà registrar / iniciar sessió amb un compte de Google (que el club demanarà al nou soci, juntament amb més dades).
+- TUsuari desapareix degut a que els actuals NO_SOCIS no podran tenir un Usuari, els SOCIS seran tots els que tinguin un Usuari i ADMIN només ho seran uns Usuaris en concret.
+- Canvi de identificació dels ADMINISTRADORS, ara el si un Usuari és administrador o no vindrà donat pel token que retorna Firebase, no per un atribut (augment de la seguretat).
+
+
+arnaumiretadmin@gmail.com - nsbsn-7201-ma)81:
+id: 7d3b4a89-ec5a-4b97-9efb-ceb0117a71f8
+firebaseUid:
+token:
+eyJhbGciOiJSUzI1NiIsImtpZCI6IjkwNGIwZjkxYmU2ZWIwODY3ZGFiYmFhYjU4N2RmYzJlMzNmMDBhMjQiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiQXJuYXUgTWlyZXQiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vbWFjLXB3YS02MzlkMiIsImF1ZCI6Im1hYy1wd2EtNjM5ZDIiLCJhdXRoX3RpbWUiOjE3OTMyMDM2ODAsInVzZXJfaWQiOiJadWt1TWZHWjdGTTZ3UnpxMlN3SnlKcFdmbXAxIiwic3ViIjoiWnVrdU1mR1o3Rk02d1J6cTJTd0p5SnBXZm1wMSIsImlhdCI6MTc5MzIwMzY4MCwiZXhwIjoxNzkzMjA3MjgwLCJlbWFpbCI6ImFybmF1bWlyZXRhZG1pbkBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZW1haWwiOlsiYXJuYXVtaXJldGFkbWluQGdtYWlsLmNvbSJdfSwic2lnbl9pbl9wcm92aWRlciI6InBhc3N3b3JkIn19.TvXh1J33v1kkCjXYa9FixY7yz8pkVM2aJEzYt_q10Skaqv6-hlT51k4NgS8kVzskbvVzXjPtCwX6TxmOiRsLlkwPGjUWjZ23p4wMZ4RTzBm340-t5cKuUtXRjO_UfqO4tBeFyGgiVrMVrN5UxIBc30G8Dz4ypy9pWmGcbqk5QrRBATEqeuGi758BiDseza2r0ZHb3HoQ_YBeGJ24gN9DNjjwGyxCBhSy1WDx3DbjRTd2Ieu91OcGEZeBXMhBYDp-jgdFbW3w1F3RtE5n-XyepDd8_R5n0YpWEkFnfX3455WFZ8WMDt4Dl6BYOsGu0oZBAoKxhOtVhMB_4Bozq3gOcA
+
