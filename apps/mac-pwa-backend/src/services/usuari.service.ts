@@ -4,8 +4,6 @@ import { UsuariRepository } from '../repositories/usuari.repository';
 import { firebaseAdmin } from '../config/firebase';
 import {
     GoogleLoginDTO,
-    LoginResponseDTO,
-    LoginUsuariDTO,
     OperacioUsuariResponseDTO,
     RegisterUsuariDTO,
     UpdatePerfilDTO,
@@ -32,22 +30,6 @@ export class UsuariService implements IUsuariService {
         };
     }
 
-    private mapToLoginResponseDTO(
-        idToken: string,
-        refreshToken: string | undefined,
-        expiresIn: string | undefined,
-        localId: string,
-        usuariId: string
-    ): LoginResponseDTO {
-        return {
-            idToken,
-            refreshToken,
-            expiresIn,
-            localId,
-            usuariId,
-        };
-    }
-
     private mapToOperacioUsuariResponseDTO(message: string, usuariId?: string): OperacioUsuariResponseDTO {
         return {
             message,
@@ -61,7 +43,7 @@ export class UsuariService implements IUsuariService {
             throw new Error('Ja existeix un usuari amb aquest correu electrònic.');
         }
 
-        // Crea un pre-registre. Google assignarà el firebaseUid en el primer accés.
+        // Crea un pre-registre, Google assignarà el firebaseUid en el primer accés.
         const usuariDB = await this.repository.create({
             firebaseUid: null,
             emailPrincipal: dto.emailPrincipal,
@@ -72,57 +54,6 @@ export class UsuariService implements IUsuariService {
         });
 
         return this.mapToUsuariResponseDTO(usuariDB);
-    }
-
-    async iniciarSessio(dto: LoginUsuariDTO): Promise<LoginResponseDTO> {
-        const apiKey = process.env.FIREBASE_WEB_API_KEY;
-
-        if (!apiKey) {
-            throw new Error('FIREBASE_WEB_API_KEY no està definida.');
-        }
-
-        const response = await fetch(
-            `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`,
-            {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email: dto.emailPrincipal,
-                    password: dto.password,
-                    returnSecureToken: true,
-                }),
-            },
-        );
-
-        const result = await response.json() as {
-            idToken?: string;
-            refreshToken?: string;
-            expiresIn?: string;
-            localId?: string;
-            error?: { message?: string };
-        };
-
-        if (!response.ok || !result.idToken) {
-            throw new Error(result.error?.message ?? 'No s\'ha pogut iniciar sessió.');
-        }
-
-        if (!result.localId) {
-            throw new Error('Firebase no ha retornat un identificador d\'usuari.');
-        }
-
-        const usuari = await this.repository.findByFirebaseUid(result.localId);
-
-        if (!usuari) {
-            throw new Error('L\'usuari autenticat no existeix a la base de dades.');
-        }
-
-        return this.mapToLoginResponseDTO(
-            result.idToken,
-            result.refreshToken,
-            result.expiresIn,
-            result.localId,
-            usuari.id,
-        );
     }
 
     async iniciarSessioGoogle(dto: GoogleLoginDTO): Promise<UsuariResponseDTO> {
@@ -186,29 +117,46 @@ export class UsuariService implements IUsuariService {
         return this.mapToUsuariResponseDTO(usuariDB);
     }
 
+    async obtenirTotsElsUsuaris(): Promise<UsuariResponseDTO[]> {
+        const adminUids = new Set<string>();
+        let pageToken: string | undefined;
+
+        do {
+            const page = await firebaseAdmin.auth().listUsers(1000, pageToken);
+            for (const firebaseUser of page.users) {
+                if (firebaseUser.customClaims?.admin === true) {
+                    adminUids.add(firebaseUser.uid);
+                }
+            }
+            pageToken = page.pageToken;
+        } while (pageToken);
+
+        const usuaris = await this.repository.findAll();
+        return usuaris
+            .filter((usuari) => !usuari.firebaseUid || !adminUids.has(usuari.firebaseUid))
+            .map((usuari) => this.mapToUsuariResponseDTO(usuari));
+    }
+
     async tancarSessio(firebaseUid: string): Promise<OperacioUsuariResponseDTO> {
         await firebaseAdmin.auth().revokeRefreshTokens(firebaseUid);
 
         return this.mapToOperacioUsuariResponseDTO('Sessió tancada correctament.');
     }
 
-    async eliminarUsuari(targetId: string, actorFirebaseUid: string, actorIsAdmin: boolean): Promise<OperacioUsuariResponseDTO> {
-        const actor = await this.repository.findByFirebaseUid(actorFirebaseUid);
+    async eliminarUsuari(targetId: string, actorIsAdmin: boolean): Promise<OperacioUsuariResponseDTO> {
         const target = await this.repository.findById(targetId);
 
-        if (!actor) {
-            throw new Error('L\'usuari autenticat no existeix.');
+        if (!actorIsAdmin) {
+            throw new Error('Només els administradors poden eliminar usuaris.');
         }
 
         if (!target) {
             throw new Error('L\'usuari que es vol eliminar no existeix.');
         }
 
-        if (actor.id !== target.id && !actorIsAdmin) {
-            throw new Error('Només pots eliminar el teu propi usuari.');
+        if (target.firebaseUid) {
+            await firebaseAdmin.auth().deleteUser(target.firebaseUid);
         }
-
-        await firebaseAdmin.auth().deleteUser(target.firebaseUid);
         await this.repository.deleteById(target.id);
 
         return this.mapToOperacioUsuariResponseDTO(

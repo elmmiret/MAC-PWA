@@ -2,6 +2,12 @@ import { Prisma, Usuari } from '@prisma/client';
 import { prisma } from '../config/prisma';
 
 export class UsuariRepository {
+    async findAll(): Promise<Usuari[]> {
+        return await prisma.usuari.findMany({
+            orderBy: { emailPrincipal: 'asc' }
+        });
+    }
+
     async findByFirebaseUid(firebaseUid: string): Promise<Usuari | null> {
         return await prisma.usuari.findUnique({
             where: { firebaseUid }

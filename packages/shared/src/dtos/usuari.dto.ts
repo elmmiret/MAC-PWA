@@ -5,21 +5,8 @@ export interface RegisterUsuariDTO {
     cognom2?: string;
 }
 
-export interface LoginUsuariDTO {
-    emailPrincipal: string;
-    password: string;
-}
-
 export interface GoogleLoginDTO {
     firebaseToken: string;
-}
-
-export interface LoginResponseDTO {
-    idToken: string;
-    refreshToken?: string;
-    expiresIn?: string;
-    localId: string;
-    usuariId: string;
 }
 
 export interface OperacioUsuariResponseDTO {

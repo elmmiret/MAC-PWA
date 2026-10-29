@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { UsuariService } from '../services/usuari.service';
 import { AuthenticatedRequest } from '../middlewares/auth.middleware';
-import { GoogleLoginDTO, LoginUsuariDTO, RegisterUsuariDTO } from 'shared';
+import { GoogleLoginDTO, RegisterUsuariDTO } from 'shared';
 
 export class AuthController {
     private service: UsuariService;
@@ -27,22 +27,6 @@ export class AuthController {
         });
         } catch (error: any) {
         res.status(400).json({ message: error.message });
-        }
-    }
-
-    async login(req: Request<{}, {}, LoginUsuariDTO>, res: Response): Promise<void> {
-        try {
-            const dto = req.body;
-
-            if (!dto.emailPrincipal || !dto.password) {
-                res.status(400).json({ message: 'Email i password són obligatoris.' });
-                return;
-            }
-
-            const token = await this.service.iniciarSessio(dto);
-            res.status(200).json(token);
-        } catch (error: any) {
-            res.status(401).json({ message: error.message });
         }
     }
 

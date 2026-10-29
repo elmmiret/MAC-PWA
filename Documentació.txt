@@ -13,25 +13,25 @@ COSES PER FER:
 - Fer endpoint per a /logout i /delete, on logout només ho podrà executar l'usuari per a sortir de la sessió i delete només l'usuari per al seu propi compte o l'admin
 
 - S'ha d'afegir la relació FAMILIARS a Usuari i també l'atribut DESCOMPTE a Pagaments (pot haber descomptes per numero de familiars al club, per altres motius, etc.).
-- Quan un Usuari es registra, cambiar el missatge output. Posa Usuari 'administrador', quan pot ser de qualsevol tipus. ---> DONE
-- Arreglar endpoint /perfil, per a fer l'onboarding un cop registrat (amb email i contrassenya o google).
-- Implementar oblit de contranssenya amb els dos mètodes ¿¿ (o només amb google)
-- Mirar de corregir la creació d'Usuaris ADMIN, ja que no pot ser que qualsevol es pugui crear un compte d'administrador només a partir d'un atribut de l'endpoint.
+- Arreglar endpoint /perfil (cambiarlo a /edit o algo aixi), per a que un administrador pugui editar el perfil d'un Usuari (potser es pot fer que l'Usuari pugui editar algun camp en concret pero no crec)
+- Implementar oblit de contranssenya amb Google.
+- DONE ---> Mirar de corregir la creació d'Usuaris ADMIN, ja que no pot ser que qualsevol es pugui crear un compte d'administrador només a partir d'un atribut de l'endpoint.
  ---Actualmente /register permite enviar "tipus": "ADMIN". Eso es un riesgo de seguridad, porque cualquier persona podría registrarse como administrador.
  ---Lo recomendable es que los registros públicos siempre sean NO_SOCI y que la creación de administradores se haga por un flujo protegido.
-- Fer FRONTEND per a registrarse i iniciar sessio amb els 2 métodes (email i contrassenya o google). Des d'on s'haurà de gestionar el pop up de Google. Fer servir patrò bLoc.
+- Fer FRONTEND per a registrar (administradors) i iniciar sessio (usuaris). Des d'on s'haurà de gestionar el pop up de Google. Fer servir patrò bLoc.
  ---El frontend debe iniciar sesión con Google mediante Firebase Client SDK y enviar el firebaseToken a /api/auth/google.
 
-- NOMES un ADMINISTRADOR podrà REGISTRAR nous Usuaris. (no cal que Categoria sigui obligatori a l'hora de crear l'Usuari, parlar-ho) ---> DONE (falta parlar-ho)
-- NO_SOCIs, es a dir, persones que visiten la web o webapp sense tenir un compte fet pel club, només podran accedir a les funcions bàsiques, sense necessitat de tenir un Usuari. ---> DONE
-- SOCIs seran els que tinguin un compte creat pel club, aixi que desapareix de TUsuari.
-    (Usuari haura de donar un compte de correu electrònic obligatoriament (i més dades si escau) per a poder registrar a l'Usuari, les demanaria el club) ---> DONE
-- ARREGLAR o ELIMINAR TUsuari, ja que amb aixo desapareix el NO_SOCI (com a molt tenir un indicador de si es atleta, entrenador, només soci, etc.) i el tipus ADMIN ha de desapareixer i
-    implementar-lo tindre del token que retorna Firebase (per a més seguretat). ---> DONE
+- DONE (parlar-ho) ---> NOMES un ADMINISTRADOR podrà REGISTRAR nous Usuaris. (no cal que Categoria sigui obligatori a l'hora de crear l'Usuari, parlar-ho)
+- DONE ---> NO_SOCIs, es a dir, persones que visiten la web o webapp sense tenir un compte fet pel club, només podran accedir a les funcions bàsiques, sense necessitat de tenir un Usuari.
+- DONE ---> SOCIs seran els que tinguin un compte creat pel club, aixi que desapareix de TUsuari.
+    (Usuari haura de donar un compte de correu electrònic obligatoriament (i més dades si escau) per a poder registrar a l'Usuari, les demanaria el club)
+- DONE ---> ARREGLAR o ELIMINAR TUsuari, ja que amb aixo desapareix el NO_SOCI (com a molt tenir un indicador de si es atleta, entrenador, només soci, etc.) i el tipus ADMIN ha de desapareixer i
+    implementar-lo tindre del token que retorna Firebase (per a més seguretat).
 - Eliminar, si es viable (una vegada implementat el front per al registre / login amb Google), l'inici de sessió amb email i contrassenya. Es farà ús exclusivament del registre / login amb Google.
-    (probar d'implementar la recuperació de la contrassenya, però si només es pot accedir amb Google, em sembla que no caldrà).
+    (probar d'implementar la recuperació de la contrassenya, però si només es pot accedir amb Google, em sembla que no caldrà). eliminar /register vamos, demanar al chat.
 - Implementar imatge de perfil, imatges de noticies, etc. amb Firebase Storage.
-- Comprovar que un Usuari normal no pot executar els endpoints d'admin.
+- DONE ---> Comprovar que un Usuari normal no pot executar els endpoints d'admin.
+- DONE ---> Que només un administrador pugui eliminar Usuaris, Usuaris mateixos no poden eliminar el seu propi compte.
 
 27 octubre:
 - Implementat endpoint per a registrarse a Firebase Auth i crear l'Usuari a PostgreSQL.
@@ -64,12 +64,15 @@ COSES PER FER:
 - Ara un Usuari administrador s'ha de crear directament sobre la base de dades, afegit custom claim <firebaseUid>
 - Es crea un arxiu temporal .sql per a crear Usuaris administradors a mà (es borra una vegada els Usuaris administradors estiguin tots creats)
 - No s'utilitza l'arxiu temporal, sino que amb 'psql s'executen les comendes directament sobre la base de dades (documentació a MAC-PWA_afegir_adminitradors.txt)
-- A partir del front temporal per a iniciar sessio amb Google i la creació d'Usuaris administradors (amb el custom claim {admin: true}), ja es poden executar endpoints admin sense l'atribut 'tipus' a Usuari
+- A partir del front temporal per a iniciar sessio amb Google i la creació d'Usuaris administradors (amb el custom claim {admin: true}), ja es poden executar endpoints admin sense l'atribut 'tipus' a Usuari.
+- El fluxe per a que un Usuari administrador registri un Usuari es:
+    - executar /register, amb el correu que l'usuari ha donat, per a crear el pre-registre del compte. (aqui encara no te firebaseUid assignat, no fins que no faci login)
+    - Quan l'usuari vulgui fer login amb el compte de Google que ha donat al pas anterior, el front primer retornarà el Token de Firebase, el cual te un 'uid' que identifica el compte de Google.
+    - Després, /google verifica aquest token.
+    - Es busca el pre-registre a partir del correu proporcionat anteriorment
+    - Es guarda 'uid' del token a Usuari.firebaseUid
+    - Es retorna el dto UsuariResponseDTO
+    - Ara, als seguents accessos, l'usuari entrarà directament amb Google i el backend trobarà el registre per firebaseUid.
 
-
-
-arnaumiretadmin@gmail.com - nsbsn-7201-ma)81:
-id: 7d3b4a89-ec5a-4b97-9efb-ceb0117a71f8
-firebaseUid:
-token:
-eyJhbGciOiJSUzI1NiIsImtpZCI6IjkwNGIwZjkxYmU2ZWIwODY3ZGFiYmFhYjU4N2RmYzJlMzNmMDBhMjQiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiQXJuYXUgTWlyZXQiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vbWFjLXB3YS02MzlkMiIsImF1ZCI6Im1hYy1wd2EtNjM5ZDIiLCJhdXRoX3RpbWUiOjE3OTMyMDM2ODAsInVzZXJfaWQiOiJadWt1TWZHWjdGTTZ3UnpxMlN3SnlKcFdmbXAxIiwic3ViIjoiWnVrdU1mR1o3Rk02d1J6cTJTd0p5SnBXZm1wMSIsImlhdCI6MTc5MzIwMzY4MCwiZXhwIjoxNzkzMjA3MjgwLCJlbWFpbCI6ImFybmF1bWlyZXRhZG1pbkBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZW1haWwiOlsiYXJuYXVtaXJldGFkbWluQGdtYWlsLmNvbSJdfSwic2lnbl9pbl9wcm92aWRlciI6InBhc3N3b3JkIn19.TvXh1J33v1kkCjXYa9FixY7yz8pkVM2aJEzYt_q10Skaqv6-hlT51k4NgS8kVzskbvVzXjPtCwX6TxmOiRsLlkwPGjUWjZ23p4wMZ4RTzBm340-t5cKuUtXRjO_UfqO4tBeFyGgiVrMVrN5UxIBc30G8Dz4ypy9pWmGcbqk5QrRBATEqeuGi758BiDseza2r0ZHb3HoQ_YBeGJ24gN9DNjjwGyxCBhSy1WDx3DbjRTd2Ieu91OcGEZeBXMhBYDp-jgdFbW3w1F3RtE5n-XyepDd8_R5n0YpWEkFnfX3455WFZ8WMDt4Dl6BYOsGu0oZBAoKxhOtVhMB_4Bozq3gOcA
+- Eliminar /login (login amb email i contrassenya). S'han d'eliminar LoginUsuariDTO, LoginResponseDTO; a usuari.service.ts mappejador a LoginResponseDTO, funció iniciarSessio; a usuari.controller.ts funció login; i la ruta /login a auth.routes.ts.
+- Afegit endpoint a usuari.routes.ts que retorna UsuariResponseDTO[] de tots els Usuaris de la base de dades, exloent els administradors. Es temporal, ja que aquest endpoint en un futur ha d'implementar filtres a partir dels atributs dels usuaris i paginació, per a implementar la carga sota demanda.

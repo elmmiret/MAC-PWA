@@ -72,26 +72,25 @@ export class UsuariController {
         }
     }
 
+    async getAll(req: AuthenticatedRequest, res: Response): Promise<void> {
+        try {
+            const usuaris = await this.service.obtenirTotsElsUsuaris();
+            res.status(200).json(usuaris);
+        } catch (error: any) {
+            res.status(500).json({ message: error.message });
+        }
+    }
+
     async delete(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
-            const firebaseUid = req.user?.uid;
             const { id } = req.params;
-
-            if (!firebaseUid) {
-                res.status(401).json({ message: 'Usuari no autenticat.' });
-                return;
-            }
 
             if (!id || Array.isArray(id)) {
                 res.status(400).json({ message: "L'identificador d'usuari és obligatori." });
                 return;
             }
 
-            const result = await this.service.eliminarUsuari(
-                id,
-                firebaseUid,
-                req.user?.admin === true,
-            );
+            const result = await this.service.eliminarUsuari(id, req.user?.admin === true);
             res.status(200).json(result);
         } catch (error: any) {
             res.status(400).json({ message: error.message });

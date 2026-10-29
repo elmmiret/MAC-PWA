@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { UsuariController } from '../controllers/usuari.controller';
-import { canDeleteUser, isAdmin, verifyFirebaseToken } from '../middlewares/auth.middleware';
+import { isAdmin, verifyFirebaseToken } from '../middlewares/auth.middleware';
 
 const router = Router();
 const usuariController = new UsuariController();
@@ -50,6 +50,22 @@ router.patch('/perfil', verifyFirebaseToken, (req, res) => usuariController.upda
 
 /**
  * @swagger
+ * /api/usuaris/allUsuaris:
+ *   get:
+ *     summary: Obté tots els usuaris no administradors
+ *     tags: [Usuaris]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Llista d'usuaris en format UsuariResponseDTO
+ *       403:
+ *         description: Es requereixen permisos d'administrador
+ */
+router.get('/allUsuaris', verifyFirebaseToken, isAdmin, (req, res) => usuariController.getAll(req, res));
+
+/**
+ * @swagger
  * /api/usuaris/{id}:
  *   get:
  *     summary: Obté un usuari pel seu ID intern de PostgreSQL
@@ -92,15 +108,13 @@ router.get('/:id', verifyFirebaseToken, isAdmin, (req, res) => usuariController.
  *       404:
  *         description: L'usuari no existeix
  */
-router.get('/firebase/:firebaseUid', verifyFirebaseToken, isAdmin, (req, res) => (
-    usuariController.getByFirebaseUid(req, res)
-));
+router.get('/firebase/:firebaseUid', verifyFirebaseToken, isAdmin, (req, res) => usuariController.getByFirebaseUid(req, res));
 
 /**
  * @swagger
  * /api/usuaris/{id}:
  *   delete:
- *     summary: Elimina el propi usuari o un usuari si l'actor és administrador
+ *     summary: Elimina un usuari. Només accessible per administradors
  *     tags: [Usuaris]
  *     security:
  *       - bearerAuth: []
@@ -117,7 +131,7 @@ router.get('/firebase/:firebaseUid', verifyFirebaseToken, isAdmin, (req, res) =>
  *       403:
  *         description: L'usuari no té permisos
  */
-router.delete('/:id', verifyFirebaseToken, canDeleteUser, (req, res) => usuariController.delete(req, res));
+router.delete('/:id', verifyFirebaseToken, isAdmin, (req, res) => usuariController.delete(req, res));
 
 
 export default router;

@@ -18,6 +18,8 @@ const authController = new AuthController();
  *   post:
  *     summary: Pre-registra un nou usuari a PostgreSQL
  *     tags: [Auth]
+ *     security:
+ *        - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -67,35 +69,6 @@ router.post('/register', verifyFirebaseToken, isAdmin, (req, res) => authControl
  *         description: Token de Google invàlid
  */
 router.post('/google', (req, res) => authController.google(req, res));
-
-/**
- * @swagger
- * /api/auth/login:
- *   post:
- *     summary: Inicia sessió i retorna un Firebase ID token
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - emailPrincipal
- *               - password
- *             properties:
- *               emailPrincipal:
- *                 type: string
- *               password:
- *                 type: string
- *                 format: password
- *     responses:
- *       200:
- *         description: Token obtingut correctament
- *       401:
- *         description: Credencials invàlides
- */
-router.post('/login', (req, res) => authController.login(req, res));
 
 /**
  * @swagger
