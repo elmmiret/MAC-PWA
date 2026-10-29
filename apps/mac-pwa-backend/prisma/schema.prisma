@@ -81,7 +81,6 @@ model Categoria {
 model Usuari {
   id                  String            @id @default(uuid())
   firebaseUid         String?           @unique   // S'assigna quan l'usuari inicia sessió amb Google
-  perfilCompletat     Boolean           @default(false)
   imatgePerfil        String?
   emailPrincipal      String            @unique
   emailSecundari      String?

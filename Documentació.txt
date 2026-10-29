@@ -32,6 +32,7 @@ COSES PER FER:
 - Implementar imatge de perfil, imatges de noticies, etc. amb Firebase Storage.
 - DONE ---> Comprovar que un Usuari normal no pot executar els endpoints d'admin.
 - DONE ---> Que només un administrador pugui eliminar Usuaris, Usuaris mateixos no poden eliminar el seu propi compte.
+- Implementar UsuariCompleteResponseDTO per a fer-lo servir a /update/:id i a /:id, així s'obté tota informació de l'Usuari. (potser es millor nomes tenir un DTO que retorni totes les dades i ja)
 
 27 octubre:
 - Implementat endpoint per a registrarse a Firebase Auth i crear l'Usuari a PostgreSQL.
@@ -74,5 +75,7 @@ COSES PER FER:
     - Es retorna el dto UsuariResponseDTO
     - Ara, als seguents accessos, l'usuari entrarà directament amb Google i el backend trobarà el registre per firebaseUid.
 
-- Eliminar /login (login amb email i contrassenya). S'han d'eliminar LoginUsuariDTO, LoginResponseDTO; a usuari.service.ts mappejador a LoginResponseDTO, funció iniciarSessio; a usuari.controller.ts funció login; i la ruta /login a auth.routes.ts.
+- Eliminat /login (login amb email i contrassenya). S'han d'eliminar LoginUsuariDTO, LoginResponseDTO; a usuari.service.ts mappejador a LoginResponseDTO, funció iniciarSessio; a usuari.controller.ts funció login; i la ruta /login a auth.routes.ts.
 - Afegit endpoint a usuari.routes.ts que retorna UsuariResponseDTO[] de tots els Usuaris de la base de dades, exloent els administradors. Es temporal, ja que aquest endpoint en un futur ha d'implementar filtres a partir dels atributs dels usuaris i paginació, per a implementar la carga sota demanda.
+- Implementat endpoint /update/:id per a que un administrador pugui editar qualsevol atribut d'un Usuari (de moment, només els atributs, no relacions). S'ha editat UpdatePerfilDTO per a que es puguin actualitzar tots els atributs.
+- S'ha eliminat l'atribut 'perfilCompletat' de Usuari, degut a que ja no hi ha onboarding.

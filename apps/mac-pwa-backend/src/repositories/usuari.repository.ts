@@ -46,19 +46,12 @@ export class UsuariRepository {
         });
     }
 
-    // Actualitzar perfil durant onboarding
-    // Afegir + atributs obligatoris, com la CATEGORIA
-    async updateProfile(userId: string, data: {
-        nom: string;
-        cognom1: string; 
-        cognom2: string;
-    }): Promise<Usuari> {
+    // Actualitzar perfil d'un Usuari
+    // AFEGIR 
+    async updateById(userId: string, data: Prisma.UsuariUpdateInput): Promise<Usuari> {
         return await prisma.usuari.update({
             where: { id: userId },
-            data: {
-                ...data,
-                perfilCompletat: true
-            }
+            data
         });
     }
 }

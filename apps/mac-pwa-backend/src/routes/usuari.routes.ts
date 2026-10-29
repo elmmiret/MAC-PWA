@@ -14,39 +14,32 @@ const usuariController = new UsuariController();
 
 /**
  * @swagger
- * /api/usuaris/perfil:
+ * /api/usuaris/update/{id}:
  *   patch:
- *     summary: Completa el perfil de l'usuari (Onboarding)
+ *     summary: Actualitza les dades d'un usuari
  *     tags: [Usuaris]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: UUID intern de l'usuari a PostgreSQL
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - nom
- *               - cognom1
- *             properties:
- *               nom:
- *                 type: string
- *               cognom1:
- *                 type: string
- *               cognom2:
- *                 type: string
- *           example:
- *             nom: "Joan"
- *             cognom1: "Garcia"
- *             cognom2: "Pérez"
+ *             $ref: '#/components/schemas/UpdateUsuariDTO'
  *     responses:
  *       200:
- *         description: Perfil completat correctament
- *       401:
- *         description: No autoritzat / Falta el token
+ *         description: Usuari actualitzat correctament
+ *       403:
+ *         description: Es requereixen permisos d'administrador
  */
-router.patch('/perfil', verifyFirebaseToken, (req, res) => usuariController.updatePerfil(req, res));
+router.patch('/update/:id', verifyFirebaseToken, isAdmin, (req, res) => usuariController.update(req, res));
 
 /**
  * @swagger

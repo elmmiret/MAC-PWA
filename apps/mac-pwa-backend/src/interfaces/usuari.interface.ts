@@ -9,7 +9,7 @@ import {
 export interface IUsuariService {
     registrarUsuari(dto: RegisterUsuariDTO): Promise<UsuariResponseDTO>;
     iniciarSessioGoogle(dto: GoogleLoginDTO): Promise<UsuariResponseDTO>;
-    completarPerfil(firebaseUid: string, dto: UpdatePerfilDTO): Promise<UsuariResponseDTO>;
+    actualitzarUsuari(id: string, dto: UpdatePerfilDTO): Promise<UsuariResponseDTO>;
     obtenirUsuariPerId(id: string): Promise<UsuariResponseDTO>;
     obtenirUsuariPerFirebaseId(firebaseUid: string): Promise<UsuariResponseDTO>;
     obtenirTotsElsUsuaris(): Promise<UsuariResponseDTO[]>;

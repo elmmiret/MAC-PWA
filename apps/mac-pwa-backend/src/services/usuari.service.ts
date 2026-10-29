@@ -1,4 +1,4 @@
-import { Usuari } from '@prisma/client';
+import { Prisma, TDocument, TSexe, Usuari } from '@prisma/client';
 import 'dotenv/config';
 import { UsuariRepository } from '../repositories/usuari.repository';
 import { firebaseAdmin } from '../config/firebase';
@@ -26,7 +26,6 @@ export class UsuariService implements IUsuariService {
             nom: usuari.nom,
             cognom1: usuari.cognom1,
             cognom2: usuari.cognom2,
-            perfilCompletat: usuari.perfilCompletat
         };
     }
 
@@ -49,8 +48,7 @@ export class UsuariService implements IUsuariService {
             emailPrincipal: dto.emailPrincipal,
             nom: dto.nom ?? null,
             cognom1: dto.cognom1 ?? null,
-            cognom2: dto.cognom2 || null,
-            perfilCompletat: false
+            cognom2: dto.cognom2 || null
         });
 
         return this.mapToUsuariResponseDTO(usuariDB);
@@ -86,17 +84,20 @@ export class UsuariService implements IUsuariService {
         return this.mapToUsuariResponseDTO(usuariDB);
     }
 
-    async completarPerfil(firebaseUid: string, dto: UpdatePerfilDTO): Promise<UsuariResponseDTO> {
-        const usuariExistent = await this.repository.findByFirebaseUid(firebaseUid);
+    async actualitzarUsuari(id: string, dto: UpdatePerfilDTO): Promise<UsuariResponseDTO> {
+        const usuariExistent = await this.repository.findById(id);
         if (!usuariExistent) {
             throw new Error("L'usuari no existeix a la base de dades.");
         }
 
-        const usuariActualitzat = await this.repository.updateProfile(usuariExistent.id, {
-            nom: dto.nom,
-            cognom1: dto.cognom1,
-            cognom2: dto.cognom2
-        });
+        const data: Prisma.UsuariUpdateInput = {
+            ...dto,
+            sexe: dto.sexe as TSexe | null | undefined,
+            tipusDocument: dto.tipusDocument as TDocument | null | undefined,
+            tipusDocumentTutor: dto.tipusDocumentTutor as TDocument | null | undefined,
+        };
+
+        const usuariActualitzat = await this.repository.updateById(id, data);
 
         return this.mapToUsuariResponseDTO(usuariActualitzat);
     }

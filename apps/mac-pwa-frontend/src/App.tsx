@@ -12,7 +12,6 @@ type UserResponse = {
   nom: string | null;
   cognom1: string | null;
   cognom2: string | null;
-  perfilCompletat: boolean;
 };
 
 function App() {
@@ -99,7 +98,6 @@ function App() {
               <div><dt>Email</dt><dd>{user.emailPrincipal}</dd></div>
               <div><dt>PostgreSQL Id</dt><dd className="id-value">{user.id}</dd></div>
               <div><dt>FirebaseUid</dt><dd className="id-value">{user.firebaseUid}</dd></div>
-              <div><dt>Perfil</dt><dd>{user.perfilCompletat ? 'Complet' : 'Pendent'}</dd></div>
             </dl>
             <button className="secondary-button" type="button" onClick={logout}>
               Tancar sessio

@@ -11,26 +11,25 @@ export class UsuariController {
     }
 
 
-    async updatePerfil(req: AuthenticatedRequest, res: Response): Promise<void> {
+    async update(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
-            // S'obté el UID de manera segura a través del token validat pel middleware
-            const firebaseUid = req.user?.uid;
-            const { nom, cognom1, cognom2 } = req.body as UpdatePerfilDTO;
+            const { id } = req.params;
+            const dto = req.body as UpdatePerfilDTO;
 
-            if (!firebaseUid) {
-                res.status(401).json({ message: 'Usuari no autenticat.' });
+            if (!id || Array.isArray(id)) {
+                res.status(400).json({ message: "L'identificador d'usuari és obligatori." });
                 return;
             }
 
-            if (!nom || !cognom1) {
-                res.status(400).json({ message: 'Els camps nom i primer cognom són obligatoris.' });
+            if (Object.keys(dto).length === 0) {
+                res.status(400).json({ message: 'Cal indicar almenys un camp per actualitzar.' });
                 return;
             }
 
-            const usuariDto = await this.service.completarPerfil(firebaseUid, { nom, cognom1, cognom2 });
+            const usuariDto = await this.service.actualitzarUsuari(id, dto);
             
             res.status(200).json({
-                message: 'Perfil completat correctament',
+                message: 'Usuari actualitzat correctament',
                 usuari: usuariDto
             });
         } catch (error: any) {
