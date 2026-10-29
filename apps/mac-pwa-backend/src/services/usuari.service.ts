@@ -8,7 +8,6 @@ import {
     LoginUsuariDTO,
     OperacioUsuariResponseDTO,
     RegisterUsuariDTO,
-    TUsuari,
     UpdatePerfilDTO,
     UsuariResponseDTO,
 } from 'shared';
@@ -29,7 +28,6 @@ export class UsuariService implements IUsuariService {
             nom: usuari.nom,
             cognom1: usuari.cognom1,
             cognom2: usuari.cognom2,
-            tipus: usuari.tipus as TUsuari,
             perfilCompletat: usuari.perfilCompletat
         };
     }
@@ -58,21 +56,18 @@ export class UsuariService implements IUsuariService {
     }
 
     async registrarUsuari(dto: RegisterUsuariDTO): Promise<UsuariResponseDTO> {
-        // Crear usuari a Firebase Auth
-        const firebaseUser = await firebaseAdmin.auth().createUser({
-            email: dto.emailPrincipal,
-            password: dto.password,
-            displayName: `${dto.nom} ${dto.cognom1}`
-        });
+        const existingUser = await this.repository.findByEmail(dto.emailPrincipal);
+        if (existingUser) {
+            throw new Error('Ja existeix un usuari amb aquest correu electrònic.');
+        }
 
-        // Guardar usuari a PostgreSQL amb el rol indicat (o NO_SOCI per defecte si no s'indica)
+        // Crea un pre-registre. Google assignarà el firebaseUid en el primer accés.
         const usuariDB = await this.repository.create({
-            firebaseUid: firebaseUser.uid,
+            firebaseUid: null,
             emailPrincipal: dto.emailPrincipal,
-            nom: dto.nom,
-            cognom1: dto.cognom1,
+            nom: dto.nom ?? null,
+            cognom1: dto.cognom1 ?? null,
             cognom2: dto.cognom2 || null,
-            tipus: (dto.tipus ?? TUsuari.NO_SOCI) as TUsuari,
             perfilCompletat: false
         });
 
@@ -142,20 +137,20 @@ export class UsuariService implements IUsuariService {
             throw new Error('El token de Google no conté un correu electrònic vàlid.');
         }
 
-        const existingUser = await this.repository.findByFirebaseUid(decodedToken.uid);
-        if (existingUser) {
-            return this.mapToUsuariResponseDTO(existingUser);
+        const existingByFirebaseUid = await this.repository.findByFirebaseUid(decodedToken.uid);
+        if (existingByFirebaseUid) {
+            return this.mapToUsuariResponseDTO(existingByFirebaseUid);
         }
 
-        const nameParts = (decodedToken.name ?? '').trim().split(/\s+/).filter(Boolean);
-        const usuariDB = await this.repository.create({
-            firebaseUid: decodedToken.uid,
-            emailPrincipal: decodedToken.email,
-            nom: nameParts[0] ?? null,
-            cognom1: nameParts.slice(1).join(' ') || null,
-            tipus: TUsuari.NO_SOCI,
-            perfilCompletat: false,
-        });
+        const preRegisteredUser = await this.repository.findByEmail(decodedToken.email);
+        if (!preRegisteredUser) {
+            throw new Error('Aquest correu no ha estat pre-registrat per un administrador.');
+        }
+
+        const usuariDB = await this.repository.updateFirebaseUid(
+            preRegisteredUser.id,
+            decodedToken.uid,
+        );
 
         return this.mapToUsuariResponseDTO(usuariDB);
     }
@@ -197,7 +192,7 @@ export class UsuariService implements IUsuariService {
         return this.mapToOperacioUsuariResponseDTO('Sessió tancada correctament.');
     }
 
-    async eliminarUsuari(targetId: string, actorFirebaseUid: string): Promise<OperacioUsuariResponseDTO> {
+    async eliminarUsuari(targetId: string, actorFirebaseUid: string, actorIsAdmin: boolean): Promise<OperacioUsuariResponseDTO> {
         const actor = await this.repository.findByFirebaseUid(actorFirebaseUid);
         const target = await this.repository.findById(targetId);
 
@@ -209,10 +204,7 @@ export class UsuariService implements IUsuariService {
             throw new Error('L\'usuari que es vol eliminar no existeix.');
         }
 
-        const isOwner = actor.id === target.id;
-        const isAdmin = actor.tipus === TUsuari.ADMIN;
-
-        if (!isOwner && !isAdmin) {
+        if (actor.id !== target.id && !actorIsAdmin) {
             throw new Error('Només pots eliminar el teu propi usuari.');
         }
 

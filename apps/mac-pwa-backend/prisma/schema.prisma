@@ -10,12 +10,6 @@ datasource db {
 // ENUMERACIONS
 // ============================================
 
-enum TUsuari {
-  ADMIN
-  SOCI
-  NO_SOCI
-}
-
 enum TDocument {
   DNI
   NIF
@@ -86,10 +80,9 @@ model Categoria {
 
 model Usuari {
   id                  String            @id @default(uuid())
-  firebaseUid         String            @unique   // ID únic que ve de Firebase Auth
+  firebaseUid         String?           @unique   // S'assigna quan l'usuari inicia sessió amb Google
   perfilCompletat     Boolean           @default(false)
   imatgePerfil        String?
-  tipus               TUsuari           @default(NO_SOCI)
   emailPrincipal      String            @unique
   emailSecundari      String?
   telefonPrincipal    String?

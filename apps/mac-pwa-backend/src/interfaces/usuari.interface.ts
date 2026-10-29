@@ -16,5 +16,5 @@ export interface IUsuariService {
     obtenirUsuariPerId(id: string): Promise<UsuariResponseDTO>;
     obtenirUsuariPerFirebaseId(firebaseUid: string): Promise<UsuariResponseDTO>;
     tancarSessio(firebaseUid: string): Promise<OperacioUsuariResponseDTO>;
-    eliminarUsuari(targetId: string, actorFirebaseUid: string): Promise<OperacioUsuariResponseDTO>;
+    eliminarUsuari(targetId: string, actorFirebaseUid: string, actorIsAdmin: boolean): Promise<OperacioUsuariResponseDTO>;
 }

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { AuthController } from '../controllers/auth.controller';
-import { verifyFirebaseToken } from '../middlewares/auth.middleware';
+import { isAdmin, verifyFirebaseToken } from '../middlewares/auth.middleware';
 
 const router = Router();
 const authController = new AuthController();
@@ -16,7 +16,7 @@ const authController = new AuthController();
  * @swagger
  * /api/auth/register:
  *   post:
- *     summary: Registra un nou usuari (o Administrador) a Firebase i PostgreSQL
+ *     summary: Pre-registra un nou usuari a PostgreSQL
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -26,13 +26,8 @@ const authController = new AuthController();
  *             type: object
  *             required:
  *               - emailPrincipal
- *               - password
- *               - nom
- *               - cognom1
  *             properties:
  *               emailPrincipal:
- *                 type: string
- *               password:
  *                 type: string
  *               nom:
  *                 type: string
@@ -40,23 +35,18 @@ const authController = new AuthController();
  *                 type: string
  *               cognom2:
  *                 type: string
- *               tipus:
- *                 type: string
- *                 enum: [ADMIN, SOCI, NO_SOCI]
  *           example:
  *             emailPrincipal: "pere@gmail.com"
- *             password: "PasswordSegur123"
  *             nom: "Pere"
  *             cognom1: "Martorell"
  *             cognom2: "Atlètic"
- *             tipus: "NO_SOCI"
  *     responses:
  *       201:
  *         description: Usuari registrat correctament
  *       400:
  *         description: Falten camps obligatoris o error en el registre
  */
-router.post('/register', (req, res) => authController.register(req, res));
+router.post('/register', verifyFirebaseToken, isAdmin, (req, res) => authController.register(req, res));
 
 /**
  * @swagger

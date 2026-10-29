@@ -1,10 +1,16 @@
-import { Usuari, TUsuari } from '@prisma/client';
+import { Prisma, Usuari } from '@prisma/client';
 import { prisma } from '../config/prisma';
 
 export class UsuariRepository {
     async findByFirebaseUid(firebaseUid: string): Promise<Usuari | null> {
         return await prisma.usuari.findUnique({
             where: { firebaseUid }
+        });
+    }
+
+    async findByEmail(emailPrincipal: string): Promise<Usuari | null> {
+        return await prisma.usuari.findUnique({
+            where: { emailPrincipal }
         });
     }
 
@@ -21,17 +27,16 @@ export class UsuariRepository {
     }
 
     // Crear usuaris
-    async create(data: {
-        firebaseUid: string;
-        emailPrincipal: string;
-        nom?: string | null;
-        cognom1?: string | null;
-        cognom2?: string | null;
-        tipus: TUsuari;
-        perfilCompletat: boolean;
-    }): Promise<Usuari> {
+    async create(data: Prisma.UsuariCreateInput): Promise<Usuari> {
         return await prisma.usuari.create({
             data
+        });
+    }
+
+    async updateFirebaseUid(id: string, firebaseUid: string): Promise<Usuari> {
+        return await prisma.usuari.update({
+            where: { id },
+            data: { firebaseUid }
         });
     }
 

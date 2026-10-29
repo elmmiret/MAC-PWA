@@ -87,7 +87,11 @@ export class UsuariController {
                 return;
             }
 
-            const result = await this.service.eliminarUsuari(id, firebaseUid);
+            const result = await this.service.eliminarUsuari(
+                id,
+                firebaseUid,
+                req.user?.admin === true,
+            );
             res.status(200).json(result);
         } catch (error: any) {
             res.status(400).json({ message: error.message });

@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './config/swagger.ts';
 import authRoutes from './routes/auth.routes.ts';
@@ -6,6 +7,7 @@ import usuariRoutes from './routes/usuari.routes.ts'
 import categoriaRoutes from './routes/categoria.routes.ts';
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 // Ruta de la interfície de Swagger

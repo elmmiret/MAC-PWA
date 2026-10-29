@@ -1,51 +1,34 @@
-import { Response, Request, NextFunction, RequestHandler } from 'express';
-import { TUsuari } from 'shared';
+import { Response, Request, NextFunction } from 'express';
 import { firebaseAdmin } from '../config/firebase';
 import { UsuariService } from '../services/usuari.service';
-
-/**
- * Middleware per comprovar si l'usuari té permisos d'Administrador.
- */
 
 export interface AuthenticatedRequest extends Request {
     user?: {
         uid: string;
         email?: string;
+        admin?: boolean;
     };
 }
 
 const usuariService = new UsuariService();
 
-const requireRole = (role: TUsuari, roleName: string): RequestHandler => {
-    return async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
-        try {
-            const firebaseUid = req.user?.uid;
+export const isAdmin = (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction,
+): void => {
+    if (req.user?.admin !== true) {
+        res.status(403).json({
+            message: 'Accés denegat. Es requereix el rol ADMIN.',
+        });
+        return;
+    }
 
-            if (!firebaseUid) {
-                res.status(401).json({ message: 'Usuari no autenticat.' });
-                return;
-            }
-
-            const usuari = await usuariService.obtenirUsuariPerFirebaseId(firebaseUid);
-
-            if (usuari.tipus !== role) {
-                res.status(403).json({
-                    message: `Accés denegat. Es requereix el rol ${roleName}.`,
-                });
-                return;
-            }
-
-            next();
-        } catch (error) {
-            res.status(500).json({ message: 'Error intern al validar els permisos.' });
-        }
-    };
+    next();
 };
 
-export const isAdmin = requireRole(TUsuari.ADMIN, 'ADMIN');
-export const isSoci = requireRole(TUsuari.SOCI, 'SOCI');
-
-export const canDeleteUser = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+export const canDeleteUser = async (req: AuthenticatedRequest, res: Response, next: NextFunction
+): Promise<void> => {
     try {
         const firebaseUid = req.user?.uid;
         const targetId = req.params.id;
@@ -60,18 +43,20 @@ export const canDeleteUser = async (req: AuthenticatedRequest, res: Response, ne
             return;
         }
 
-        const actor = await usuariService.obtenirUsuariPerFirebaseId(firebaseUid);
+        if (req.user?.admin === true) {
+            next();
+            return;
+        }
 
-        if (actor.tipus !== TUsuari.ADMIN && actor.id !== targetId) {
-            res.status(403).json({
-                message: 'Només pots eliminar el teu propi usuari.',
-            });
+        const actor = await usuariService.obtenirUsuariPerFirebaseId(firebaseUid);
+        if (actor.id !== targetId) {
+            res.status(403).json({ message: 'Només pots eliminar el teu propi usuari.' });
             return;
         }
 
         next();
     } catch (error) {
-        res.status(500).json({ message: 'Error intern al validar els permisos.' });
+        res.status(403).json({ message: 'No s\'ha pogut validar l\'usuari autenticat.' });
     }
 };
 
@@ -80,19 +65,17 @@ export const verifyFirebaseToken = async (req: AuthenticatedRequest, res: Respon
         const authHeader = req.headers.authorization;
 
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            res.status(401).json({ message: 'Accés no autoritzat. Falta el token d\'autenticació.'});
+            res.status(401).json({ message: 'Accés no autoritzat. Falta el token d\'autenticació.' });
             return;
         }
 
-        const token = authHeader.split('Bearer ')[1];
-
-        // Verificació del token amb Firebase Admin SDK
+        const token = authHeader.slice('Bearer '.length).trim();
         const decodedToken = await firebaseAdmin.auth().verifyIdToken(token, true);
 
-        // Adjuntar les dades de l'usuari a la request per utilitzar-les al controlador
         req.user = {
             uid: decodedToken.uid,
-            email: decodedToken.email
+            email: decodedToken.email,
+            admin: decodedToken.admin === true,
         };
 
         next();
