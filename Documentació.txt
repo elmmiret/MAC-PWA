@@ -24,7 +24,9 @@ COSES PER FER:
 - DONE ---> Comprovar que un Usuari normal no pot executar els endpoints d'admin.
 - DONE ---> Que només un administrador pugui eliminar Usuaris, Usuaris mateixos no poden eliminar el seu propi compte.
 - Implementar UsuariCompleteResponseDTO per a fer-lo servir a /update/:id i a /:id, així s'obté tota informació de l'Usuari. (potser es millor nomes tenir un DTO que retorni totes les dades i ja)
-- CRUD de Categoria, només executable per administradors.
+- DONE (revisar) ---> CRUD de Categoria, només executable per administradors.
+- Acabar de posar als DTO les relacions que falten (de tot en general: UsuariResponseDTO, CategriaResponseDTO, QuotaConfigResponseDTO, etc.)
+- Revisar els endpoints i DTOs de Categoria i QuotaConfig (coses a arreglar al dia 30 octubre)
 
 27 octubre:
 - Implementat endpoint per a registrarse a Firebase Auth i crear l'Usuari a PostgreSQL.
@@ -73,8 +75,25 @@ COSES PER FER:
 - S'ha eliminat l'atribut 'perfilCompletat' de Usuari, degut a que ja no hi ha onboarding.
 
 30 octubre:
-- Implementar endpoints CRUD per a Categoria
-- Implementar endpoints CRUD per a QuotaConfig
+- Implementats endpoints CRUD per a Categoria (s'han de repassar i acabar d'arreglar: atributs, funcionalitats, afegir endpoints si escau, dtos, etc.)
+    - A arreglar:
+        - atribut anyNaixement, donarli una volta. Potser millor que sigui un string del tipus "YYYY-YYYY" amb restriccions (com a QuotaConfig)
+        - mirar de cambiar el tipus de l'atribut horaEntrada i horaSortida (que només representi l'hora), tant per crear com per editar.
+        - Que retorni només els ids dels Usuaris, no cal retornar tota la informació
+        - Que retorni només els ids de les QuotaConfigs, no cal retornar tota la informació
+        - Igual per als rankings
+        - Fer un endpoint per a obtenir tots els Usuaris assignats a una Categoria, get /:id/usuaris (aplicar paginació)
+        - Al setejar Usuaris a una Categoria, es sobreescriu el que tenien abans els Usuaris, es a dir, si estaven tots a SUB_8, ara passaran a ser tots SUB_10, sense haber fet unset. (es pot borrar /unset)
+
+- Implementats endpoints CRUD per a QuotaConfig (s'han de repassar i acabar d'arreglar: mateix).
+    - A arrelgar:
+        - Endpoints getter d'una QuotaConfig han de retorna el CategoriaResponseDTO, no el seu id.
+        - Al editar una QuotaConfig per a afegir temporadesAplicada, es pot posar al segon any 2028 (com a molt, el primer any ha de ser l'actual i el segon el que ve, no més).
+        - Fer endpoint /deactivate per a deixar una Categoria sense QuotaConfig activada.
+        - Donarli una volta a l'endpoint edit (es pot deixar per al nom potser), potser millor fer un endpoint que a partir de l'id / nom d'una QuotaConfig, se li puguin afegir temporadesAplicades, amb les restriccions.
+        - Potser aplicar paginació a al get quotaConfigs/byType, a un futur get allQuotaConfigs
+        - Al fer delete de QuotesConfig, si una d'elles estaba activa però sense pagaments encara relacionats, que retorni un missatge avisant de que s'ha eliminat una QuotaConfig activa però sense pagaments.
+
 
 
 

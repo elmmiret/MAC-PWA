@@ -27,7 +27,7 @@ router.post('/create', ...adminOnly, (req, res) => controller.create(req, res));
  * @swagger
  * /api/quotaConfigs/delete:
  *   delete:
- *     summary: Elimina varias QuotaConfig sin pagaments relacionados
+ *     summary: Elimina varies QuotaConfig sense pagaments relacionats
  *     tags: [QuotaConfig]
  *     security: [{ bearerAuth: [] }]
  *     requestBody:
