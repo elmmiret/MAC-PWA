@@ -1,12 +1,3 @@
-PER A QUE A L'ONBOARDING ES DEMANIN MES COSES
-1 - Actualitzar prisma.schema per afegir nous atributs (si cal) i executar la migració
-2 - Actualitzar UpdatePerfilDTO (tambe UsuariResponseDTO si s'han afegit nous atributs)
-3 - Actualitzar el usuari.repository.ts (afegir els nous atributs a la funció updateProfile, al data que entra com a parametre)
-4 - Actualitzar el usuari.service.ts (funció completarPerfil ha de contemplar els nous atributs i mètode privat mapToDto ha de mapejar els nous atributs cap al UsuariResponseDTO)
-5 - Actualitzar el usuari.controller.ts (a la funció updatePerfil, extreure els nous atributs de req.body i validar si son obligatoris segons criteri propi)
-6 - Actualitzar el frontend
-
-
 COSES PER FER:
 - Arreglar les interficies per a que estiguin implementades als serveis
 - Fer endpoint per obtenir usuari a partir del firebaseId (funcio feta, falta endpoint)
@@ -33,6 +24,7 @@ COSES PER FER:
 - DONE ---> Comprovar que un Usuari normal no pot executar els endpoints d'admin.
 - DONE ---> Que només un administrador pugui eliminar Usuaris, Usuaris mateixos no poden eliminar el seu propi compte.
 - Implementar UsuariCompleteResponseDTO per a fer-lo servir a /update/:id i a /:id, així s'obté tota informació de l'Usuari. (potser es millor nomes tenir un DTO que retorni totes les dades i ja)
+- CRUD de Categoria, només executable per administradors.
 
 27 octubre:
 - Implementat endpoint per a registrarse a Firebase Auth i crear l'Usuari a PostgreSQL.
@@ -79,3 +71,13 @@ COSES PER FER:
 - Afegit endpoint a usuari.routes.ts que retorna UsuariResponseDTO[] de tots els Usuaris de la base de dades, exloent els administradors. Es temporal, ja que aquest endpoint en un futur ha d'implementar filtres a partir dels atributs dels usuaris i paginació, per a implementar la carga sota demanda.
 - Implementat endpoint /update/:id per a que un administrador pugui editar qualsevol atribut d'un Usuari (de moment, només els atributs, no relacions). S'ha editat UpdatePerfilDTO per a que es puguin actualitzar tots els atributs.
 - S'ha eliminat l'atribut 'perfilCompletat' de Usuari, degut a que ja no hi ha onboarding.
+
+30 octubre:
+- Implementar endpoints CRUD per a Categoria
+- Implementar endpoints CRUD per a QuotaConfig
+
+
+
+
+
+

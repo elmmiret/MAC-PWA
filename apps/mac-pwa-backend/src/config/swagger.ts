@@ -63,6 +63,33 @@ const options: swaggerJSDoc.Options = {
                         iban: { type: 'string', nullable: true },
                     },
                 },
+                CreateQuotaConfigDTO: {
+                    type: 'object',
+                    required: ['nom', 'tipus', 'preuBase', 'categoriaId'],
+                    properties: {
+                        nom: { type: 'string' },
+                        tipus: { type: 'string', enum: ['LLICENCIA', 'ACTIVITAT', 'COMPETICIO', 'SOCI'] },
+                        preuBase: { type: 'number', format: 'float' },
+                        categoriaId: { type: 'string' },
+                    },
+                },
+                DeleteQuotaConfigsDTO: {
+                    type: 'object',
+                    required: ['ids'],
+                    properties: {
+                        ids: { type: 'array', items: { type: 'string' } },
+                    },
+                },
+                UpdateQuotaConfigDTO: {
+                    type: 'object',
+                    properties: {
+                        nom: { type: 'string' },
+                        temporadesAplicada: {
+                            type: 'array',
+                            items: { type: 'string', pattern: '^\\d{4}-\\d{4}$' },
+                        },
+                    },
+                },
             },
         },
     },

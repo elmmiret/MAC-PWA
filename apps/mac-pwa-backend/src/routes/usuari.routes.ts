@@ -4,6 +4,7 @@ import { isAdmin, verifyFirebaseToken } from '../middlewares/auth.middleware';
 
 const router = Router();
 const usuariController = new UsuariController();
+const adminOnly = [verifyFirebaseToken, isAdmin];
 
 /**
  * @swagger
@@ -39,7 +40,7 @@ const usuariController = new UsuariController();
  *       403:
  *         description: Es requereixen permisos d'administrador
  */
-router.patch('/update/:id', verifyFirebaseToken, isAdmin, (req, res) => usuariController.update(req, res));
+router.patch('/update/:id', ...adminOnly, (req, res) => usuariController.update(req, res));
 
 /**
  * @swagger
@@ -55,7 +56,7 @@ router.patch('/update/:id', verifyFirebaseToken, isAdmin, (req, res) => usuariCo
  *       403:
  *         description: Es requereixen permisos d'administrador
  */
-router.get('/allUsuaris', verifyFirebaseToken, isAdmin, (req, res) => usuariController.getAll(req, res));
+router.get('/allUsuaris', ...adminOnly, (req, res) => usuariController.getAll(req, res));
 
 /**
  * @swagger
@@ -78,7 +79,7 @@ router.get('/allUsuaris', verifyFirebaseToken, isAdmin, (req, res) => usuariCont
  *       404:
  *         description: L'usuari no existeix
  */
-router.get('/:id', verifyFirebaseToken, isAdmin, (req, res) => usuariController.getById(req, res));
+router.get('/:id',  ...adminOnly, (req, res) => usuariController.getById(req, res));
 
 /**
  * @swagger
@@ -101,7 +102,7 @@ router.get('/:id', verifyFirebaseToken, isAdmin, (req, res) => usuariController.
  *       404:
  *         description: L'usuari no existeix
  */
-router.get('/firebase/:firebaseUid', verifyFirebaseToken, isAdmin, (req, res) => usuariController.getByFirebaseUid(req, res));
+router.get('/firebase/:firebaseUid',  ...adminOnly, (req, res) => usuariController.getByFirebaseUid(req, res));
 
 /**
  * @swagger
@@ -124,7 +125,7 @@ router.get('/firebase/:firebaseUid', verifyFirebaseToken, isAdmin, (req, res) =>
  *       403:
  *         description: L'usuari no té permisos
  */
-router.delete('/:id', verifyFirebaseToken, isAdmin, (req, res) => usuariController.delete(req, res));
+router.delete('/:id',  ...adminOnly, (req, res) => usuariController.delete(req, res));
 
 
 export default router;

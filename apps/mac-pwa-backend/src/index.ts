@@ -5,6 +5,7 @@ import { swaggerSpec } from './config/swagger.ts';
 import authRoutes from './routes/auth.routes.ts';
 import usuariRoutes from './routes/usuari.routes.ts'
 import categoriaRoutes from './routes/categoria.routes.ts';
+import quotaConfigRoutes from './routes/quotaConfig.routes.ts';
 
 const app = express();
 app.use(cors());
@@ -15,6 +16,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Definició de les rutes de l'API
 app.use('/api/categories', categoriaRoutes);
+app.use('/api/quotaConfigs', quotaConfigRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/usuaris', usuariRoutes);
 

@@ -1,10 +1,16 @@
-import { Categoria, TCategoria, DiesSetmana } from '@prisma/client';
+import {
+    CategoriaResponseDTO,
+    CreateCategoriaDTO,
+    SetCategoriaDTO,
+    UpdateCategoriaDTO,
+} from 'shared';
 
 export interface ICategoriaService {
-    getAll(): Promise<Categoria[]>;
-    getById(id: string): Promise<Categoria | null>;
-    getByTipus(tipus: TCategoria): Promise<Categoria[]>;
-    //createCategoria(data: CreateCategoriaDTO): Promise<Categoria>;
-    //updateCategoria(data: UpdateCategoriaDTO): Promise<Categoria>;
-    deleteCategories(id: string[]): Promise<void>;
+    create(dto: CreateCategoriaDTO): Promise<CategoriaResponseDTO>;
+    getById(id: string): Promise<CategoriaResponseDTO>;
+    getByType(type: string): Promise<CategoriaResponseDTO>;
+    update(id: string, dto: UpdateCategoriaDTO): Promise<CategoriaResponseDTO>;
+    setUsers(id: string, dto: SetCategoriaDTO): Promise<CategoriaResponseDTO>;
+    unsetUsers(id: string, dto: SetCategoriaDTO): Promise<CategoriaResponseDTO>;
+    delete(id: string): Promise<void>;
 }

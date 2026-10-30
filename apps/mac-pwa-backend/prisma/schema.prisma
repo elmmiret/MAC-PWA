@@ -122,7 +122,7 @@ model Usuari {
 model QuotaConfig {
   id                  String          @id @default(uuid())
   tipus               TQuota
-  nom                 String
+  nom                 String          @unique
   preuBase            Float
   temporadesAplicada  String[]
   activa              Boolean         @default(false)
