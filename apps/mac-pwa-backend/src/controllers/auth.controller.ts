@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { UsuariService } from '../services/usuari.service';
 import { AuthenticatedRequest } from '../middlewares/auth.middleware';
-import { GoogleLoginDTO, LoginUsuariDTO, RegisterUsuariDTO } from 'shared';
+import { GoogleLoginDTO, RegisterUsuariDTO } from 'shared';
 
 export class AuthController {
     private service: UsuariService;
@@ -10,39 +10,23 @@ export class AuthController {
         this.service = new UsuariService();
     }
 
-    async register(req: Request<{}, {}, RegisterUsuariDTO>, res: Response): Promise<void> {
+    async register(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
-        const dto = req.body;
+        const dto = req.body as RegisterUsuariDTO;
 
-        if (!dto.emailPrincipal || !dto.password || !dto.nom || !dto.cognom1) {
-            res.status(400).json({ message: 'Falten camps obligatoris (email, password, nom, cognom1).' });
+        if (!dto.emailPrincipal) {
+            res.status(400).json({ message: 'El correu electrònic és obligatori.' });
             return;
         }
 
         const usuariDto = await this.service.registrarUsuari(dto);
         
         res.status(201).json({
-            message: 'Usuari registrat correctament a Firebase i PostgreSQL',
+            message: 'Pre-registre creat correctament a PostgreSQL. L\'usuari podrà accedir amb Google.',
             usuari: usuariDto
         });
         } catch (error: any) {
         res.status(400).json({ message: error.message });
-        }
-    }
-
-    async login(req: Request<{}, {}, LoginUsuariDTO>, res: Response): Promise<void> {
-        try {
-            const dto = req.body;
-
-            if (!dto.emailPrincipal || !dto.password) {
-                res.status(400).json({ message: 'Email i password són obligatoris.' });
-                return;
-            }
-
-            const token = await this.service.iniciarSessio(dto);
-            res.status(200).json(token);
-        } catch (error: any) {
-            res.status(401).json({ message: error.message });
         }
     }
 

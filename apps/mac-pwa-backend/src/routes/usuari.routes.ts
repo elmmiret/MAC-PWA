@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import { UsuariController } from '../controllers/usuari.controller';
-import { canDeleteUser, isAdmin, verifyFirebaseToken } from '../middlewares/auth.middleware';
+import { isAdmin, verifyFirebaseToken } from '../middlewares/auth.middleware';
 
 const router = Router();
 const usuariController = new UsuariController();
+const adminOnly = [verifyFirebaseToken, isAdmin];
 
 /**
  * @swagger
@@ -14,39 +15,48 @@ const usuariController = new UsuariController();
 
 /**
  * @swagger
- * /api/usuaris/perfil:
+ * /api/usuaris/update/{id}:
  *   patch:
- *     summary: Completa el perfil de l'usuari (Onboarding)
+ *     summary: Actualitza les dades d'un usuari
  *     tags: [Usuaris]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: UUID intern de l'usuari a PostgreSQL
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - nom
- *               - cognom1
- *             properties:
- *               nom:
- *                 type: string
- *               cognom1:
- *                 type: string
- *               cognom2:
- *                 type: string
- *           example:
- *             nom: "Joan"
- *             cognom1: "Garcia"
- *             cognom2: "Pérez"
+ *             $ref: '#/components/schemas/UpdateUsuariDTO'
  *     responses:
  *       200:
- *         description: Perfil completat correctament
- *       401:
- *         description: No autoritzat / Falta el token
+ *         description: Usuari actualitzat correctament
+ *       403:
+ *         description: Es requereixen permisos d'administrador
  */
-router.patch('/perfil', verifyFirebaseToken, (req, res) => usuariController.updatePerfil(req, res));
+router.patch('/update/:id', ...adminOnly, (req, res) => usuariController.update(req, res));
+
+/**
+ * @swagger
+ * /api/usuaris/allUsuaris:
+ *   get:
+ *     summary: Obté tots els usuaris no administradors
+ *     tags: [Usuaris]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Llista d'usuaris en format UsuariResponseDTO
+ *       403:
+ *         description: Es requereixen permisos d'administrador
+ */
+router.get('/allUsuaris', ...adminOnly, (req, res) => usuariController.getAll(req, res));
 
 /**
  * @swagger
@@ -69,7 +79,7 @@ router.patch('/perfil', verifyFirebaseToken, (req, res) => usuariController.upda
  *       404:
  *         description: L'usuari no existeix
  */
-router.get('/:id', verifyFirebaseToken, isAdmin, (req, res) => usuariController.getById(req, res));
+router.get('/:id',  ...adminOnly, (req, res) => usuariController.getById(req, res));
 
 /**
  * @swagger
@@ -92,15 +102,13 @@ router.get('/:id', verifyFirebaseToken, isAdmin, (req, res) => usuariController.
  *       404:
  *         description: L'usuari no existeix
  */
-router.get('/firebase/:firebaseUid', verifyFirebaseToken, isAdmin, (req, res) => (
-    usuariController.getByFirebaseUid(req, res)
-));
+router.get('/firebase/:firebaseUid',  ...adminOnly, (req, res) => usuariController.getByFirebaseUid(req, res));
 
 /**
  * @swagger
  * /api/usuaris/{id}:
  *   delete:
- *     summary: Elimina el propi usuari o un usuari si l'actor és administrador
+ *     summary: Elimina un usuari. Només accessible per administradors
  *     tags: [Usuaris]
  *     security:
  *       - bearerAuth: []
@@ -117,7 +125,7 @@ router.get('/firebase/:firebaseUid', verifyFirebaseToken, isAdmin, (req, res) =>
  *       403:
  *         description: L'usuari no té permisos
  */
-router.delete('/:id', verifyFirebaseToken, canDeleteUser, (req, res) => usuariController.delete(req, res));
+router.delete('/:id',  ...adminOnly, (req, res) => usuariController.delete(req, res));
 
 
 export default router;

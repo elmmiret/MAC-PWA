@@ -11,26 +11,25 @@ export class UsuariController {
     }
 
 
-    async updatePerfil(req: AuthenticatedRequest, res: Response): Promise<void> {
+    async update(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
-            // S'obté el UID de manera segura a través del token validat pel middleware
-            const firebaseUid = req.user?.uid;
-            const { nom, cognom1, cognom2 } = req.body as UpdatePerfilDTO;
+            const { id } = req.params;
+            const dto = req.body as UpdatePerfilDTO;
 
-            if (!firebaseUid) {
-                res.status(401).json({ message: 'Usuari no autenticat.' });
+            if (!id || Array.isArray(id)) {
+                res.status(400).json({ message: "L'identificador d'usuari és obligatori." });
                 return;
             }
 
-            if (!nom || !cognom1) {
-                res.status(400).json({ message: 'Els camps nom i primer cognom són obligatoris.' });
+            if (Object.keys(dto).length === 0) {
+                res.status(400).json({ message: 'Cal indicar almenys un camp per actualitzar.' });
                 return;
             }
 
-            const usuariDto = await this.service.completarPerfil(firebaseUid, { nom, cognom1, cognom2 });
+            const usuariDto = await this.service.actualitzarUsuari(id, dto);
             
             res.status(200).json({
-                message: 'Perfil completat correctament',
+                message: 'Usuari actualitzat correctament',
                 usuari: usuariDto
             });
         } catch (error: any) {
@@ -72,22 +71,25 @@ export class UsuariController {
         }
     }
 
+    async getAll(req: AuthenticatedRequest, res: Response): Promise<void> {
+        try {
+            const usuaris = await this.service.obtenirTotsElsUsuaris();
+            res.status(200).json(usuaris);
+        } catch (error: any) {
+            res.status(500).json({ message: error.message });
+        }
+    }
+
     async delete(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
-            const firebaseUid = req.user?.uid;
             const { id } = req.params;
-
-            if (!firebaseUid) {
-                res.status(401).json({ message: 'Usuari no autenticat.' });
-                return;
-            }
 
             if (!id || Array.isArray(id)) {
                 res.status(400).json({ message: "L'identificador d'usuari és obligatori." });
                 return;
             }
 
-            const result = await this.service.eliminarUsuari(id, firebaseUid);
+            const result = await this.service.eliminarUsuari(id, req.user?.admin === true);
             res.status(200).json(result);
         } catch (error: any) {
             res.status(400).json({ message: error.message });

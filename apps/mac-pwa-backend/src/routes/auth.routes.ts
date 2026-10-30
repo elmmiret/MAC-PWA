@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { AuthController } from '../controllers/auth.controller';
-import { verifyFirebaseToken } from '../middlewares/auth.middleware';
+import { isAdmin, verifyFirebaseToken } from '../middlewares/auth.middleware';
 
 const router = Router();
 const authController = new AuthController();
@@ -16,8 +16,10 @@ const authController = new AuthController();
  * @swagger
  * /api/auth/register:
  *   post:
- *     summary: Registra un nou usuari (o Administrador) a Firebase i PostgreSQL
+ *     summary: Pre-registra un nou usuari a PostgreSQL
  *     tags: [Auth]
+ *     security:
+ *        - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -26,13 +28,8 @@ const authController = new AuthController();
  *             type: object
  *             required:
  *               - emailPrincipal
- *               - password
- *               - nom
- *               - cognom1
  *             properties:
  *               emailPrincipal:
- *                 type: string
- *               password:
  *                 type: string
  *               nom:
  *                 type: string
@@ -40,23 +37,18 @@ const authController = new AuthController();
  *                 type: string
  *               cognom2:
  *                 type: string
- *               tipus:
- *                 type: string
- *                 enum: [ADMIN, SOCI, NO_SOCI]
  *           example:
  *             emailPrincipal: "pere@gmail.com"
- *             password: "PasswordSegur123"
  *             nom: "Pere"
  *             cognom1: "Martorell"
  *             cognom2: "Atlètic"
- *             tipus: "NO_SOCI"
  *     responses:
  *       201:
  *         description: Usuari registrat correctament
  *       400:
  *         description: Falten camps obligatoris o error en el registre
  */
-router.post('/register', (req, res) => authController.register(req, res));
+router.post('/register', verifyFirebaseToken, isAdmin, (req, res) => authController.register(req, res));
 
 /**
  * @swagger
@@ -77,35 +69,6 @@ router.post('/register', (req, res) => authController.register(req, res));
  *         description: Token de Google invàlid
  */
 router.post('/google', (req, res) => authController.google(req, res));
-
-/**
- * @swagger
- * /api/auth/login:
- *   post:
- *     summary: Inicia sessió i retorna un Firebase ID token
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - emailPrincipal
- *               - password
- *             properties:
- *               emailPrincipal:
- *                 type: string
- *               password:
- *                 type: string
- *                 format: password
- *     responses:
- *       200:
- *         description: Token obtingut correctament
- *       401:
- *         description: Credencials invàlides
- */
-router.post('/login', (req, res) => authController.login(req, res));
 
 /**
  * @swagger

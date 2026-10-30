@@ -1,71 +1,70 @@
-import { Categoria, TCategoria, DiesSetmana} from "@prisma/client";
+import { Prisma, TCategoria } from '@prisma/client';
 import { prisma } from '../config/prisma';
-// import del dels DTOs
+
+const categoryInclude = {
+    usuaris: true,
+    rankings: true,
+    quotaConfigs: true,
+} satisfies Prisma.CategoriaInclude;
+
+export type CategoriaWithRelations = Prisma.CategoriaGetPayload<{
+    include: typeof categoryInclude;
+}>;
 
 export class CategoriaRepository {
+    async create(data: Prisma.CategoriaCreateInput): Promise<CategoriaWithRelations> {
+        return prisma.categoria.create({ data, include: categoryInclude });
+    }
 
-  /**
-   * Finds all categories.
-   * @returns A promise resolving to an array of all categories.
-   */
-  async findAll(): Promise<Categoria[]> {
-    return await prisma.categoria.findMany({
-      include: {
-        usuaris: true,
-        rankings: true,
-        quotaConfigs: true
-      },
-      orderBy: { tipus: "asc" },
-    });
-  }
+    async findById(id: string): Promise<CategoriaWithRelations | null> {
+        return prisma.categoria.findUnique({
+            where: { id },
+            include: categoryInclude,
+        });
+    }
 
-  async findById(id: string): Promise<Categoria | null> {
-    return await prisma.categoria.findUnique({
-      where: { id },
-      include: {
-        usuaris: true,
-        rankings: true,
-        quotaConfigs: true
-      },
-    });
-  }
+    async findByType(tipus: TCategoria): Promise<CategoriaWithRelations | null> {
+        return prisma.categoria.findUnique({
+            where: { tipus },
+            include: categoryInclude,
+        });
+    }
 
-  async findByTipus(tipus: TCategoria): Promise<Categoria[]> {
-    return await prisma.categoria.findMany({
-      where: { tipus },
-      include: {
-        usuaris: true,
-        rankings: true,
-        quotaConfigs: true
-      },
-      orderBy: { id: "asc" },
-    });
-  }
-  
+    async update(id: string, data: Prisma.CategoriaUpdateInput): Promise<CategoriaWithRelations> {
+        return prisma.categoria.update({
+            where: { id },
+            data,
+            include: categoryInclude,
+        });
+    }
 
-  // async create(data: CrearCategoriaData): Promise<Categoria> {
-  //   return await prisma.categoria.create({ data });
-  // }
+    async findUsersByIds(ids: string[]): Promise<string[]> {
+        const users = await prisma.usuari.findMany({
+            where: { id: { in: ids } },
+            select: { id: true },
+        });
 
-  // async update(
-  //   id: string,
-  //   data: ActualizarCategoriaData,
-  // ): Promise<Categoria> {
-  //   return prisma.categoria.update({
-  //     where: { id },
-  //     data,
-  //   });
-  // }
+        return users.map(({ id }) => id);
+    }
 
-  async deleteCategoria(id: string): Promise<void> {
-    await prisma.categoria.delete({
-      where: { id },
-    });
-  }
+    async setUsers(categoryId: string, userIds: string[]): Promise<void> {
+        await prisma.usuari.updateMany({
+            where: { id: { in: userIds } },
+            data: { categoriaId: categoryId },
+        });
+    }
 
-  async deleteCategories(ids: string[]): Promise<void> {
-    await prisma.categoria.deleteMany({
-      where: { id: { in: ids } },
-    });
-  }
+    async unsetUsers(categoryId: string, userIds: string[]): Promise<void> {
+        await prisma.usuari.updateMany({
+            where: {
+                id: { in: userIds },
+                categoriaId: categoryId,
+            },
+            data: { categoriaId: null },
+        });
+    }
+
+    async delete(id: string): Promise<void> {
+        await prisma.categoria.delete({ where: { id } });
+    }
 }

@@ -1,9 +1,17 @@
-import { QuotaConfig, TQuota} from "@prisma/client";
+import {
+    CreateQuotaConfigDTO,
+    DeleteQuotaConfigsDTO,
+    QuotaConfigResponseDTO,
+    UpdateQuotaConfigDTO,
+} from 'shared';
 
 export interface IQuotaConfigService {
-    getById(id: string): Promise<QuotaConfig | null>;
-    getByTipus(tipus: TQuota): Promise<QuotaConfig[]>;
-    //createQuotaConfig(data: CreateQuotaConfigDTO): Promise<QuotaConfig>;
-    //updateQuotaConfig(data: UpdateQuotaConfigDTO): Promise<QuotaConfig>;
-    deleteQuotaConfigs(id: string[]): Promise<void>;
+    create(dto: CreateQuotaConfigDTO): Promise<QuotaConfigResponseDTO>;
+    deleteMany(dto: DeleteQuotaConfigsDTO): Promise<void>;
+    update(id: string, dto: UpdateQuotaConfigDTO): Promise<QuotaConfigResponseDTO>;
+    activate(id: string): Promise<QuotaConfigResponseDTO>;
+    getById(id: string): Promise<QuotaConfigResponseDTO>;
+    getByName(nom: string): Promise<QuotaConfigResponseDTO>;
+    getByType(tipus: string): Promise<QuotaConfigResponseDTO[]>;
+    getByCategory(categoriaId: string): Promise<QuotaConfigResponseDTO[]>;
 }
