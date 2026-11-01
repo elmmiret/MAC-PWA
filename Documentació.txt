@@ -1,4 +1,5 @@
-COSES PER FER:
+-------------------------------------------- COSES PER FER: ------------------------------------------------
+
 - DONE ---> Arreglar les interficies per a que estiguin implementades als serveis
 - DONE ---> Fer endpoint per obtenir usuari a partir del firebaseId (funcio feta, falta endpoint)
 - DONE ---> Fer endpoint per a /logout i /delete, on logout només ho podrà executar l'usuari per a sortir de la sessió i delete només l'admin
@@ -35,6 +36,11 @@ COSES PER FER:
 - Quan es tinguin els PAGAMENTS, si un Usuari es entrenador -30% al preu de la quota, si te usuariFamiliar -10% al preu de la quota.
 - Afegir a PAGAMENT un camp de descompte (que sigui un enter entre 0-100), per a saber quin percentatge de descompte se li aplica al pagament. El preu del PAGAMENT ja te el descompte aplicat. Es pot veure el preu original de la quota a la QUOTACONFIG assignada.
 - Si l'USUARI del PAGAMENT d'una quota tipus SOCI es menor (estrictament) de 18 anys
+
+- Aplicar PAGINACIÓ als endpoints que poden retornar moltes dades
+- Aplicar FILTRES als endpoints podrien acceptalos, com a getAllUsuaris, getAllPagamentsFromUser, etc.
+
+--------------------------------------------------------------------------------------------------------------------
 
 27 octubre:
 - Implementat endpoint per a registrarse a Firebase Auth i crear l'Usuari a PostgreSQL.
@@ -108,7 +114,7 @@ COSES PER FER:
 - Afegits mapejadors a serveis (usuari, categoria, quotaConfig) per a convertir els DTO a tipus de Prisma (per a crear, actualitzar, registrar, etc). El DTO es el contracte d'entrada HTTP i el tipus Prisma valida que l'objecte enviat al repositori coincideixi amb l'esquema de persistència. Això manté la separació entre el model de base de dades i l'API pública.
 - Afegit endpoint get /byType/:type/usuaris a categoria.routes.ts per a obtenir tots els usuaris d'una Categoria (identificada pel seu tipus)
 - Afegit a /apps/mac-pwa-backend/src/utils arxiu route-params.ts per a tenir la utilitat compartida en tots els controladors per a obtenir els paràmetres de ruta
-
+- Arreglats endpoints CRUD de Categoria (coses del 30 d'octubre)
 
 
 
