@@ -16,10 +16,23 @@ export class CategoriaService implements ICategoriaService {
         this.repository = new CategoriaRepository();
     }
 
-    // Prisma retorna Date i enums propis de l'esquema; les respostes HTTP utilitzen
-    // strings ISO i DTOs estables per no exposar models de persistència.
-    private toIso(value: Date | null): string | null {
-        return value?.toISOString() ?? null;
+    // Converteix un valor Date a una cadena de temps en format HH:mm:ss,
+    // o retorna null si el valor és null.
+    private toTime(value: Date | null): string | null {
+        return value?.toISOString().slice(11, 19) ?? null;
+    }
+
+    private parseTime(value: string | null | undefined): Date | null {
+        if (value === null || value === undefined) return null;
+        // Valida el format de temps abans de convertir-lo a Date. El format esperat és HH:mm:ss.
+        if (!/^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/.test(value)) {
+            throw new Error(`Hora invàlida: ${value}. Format esperat: HH:mm:ss.`);
+        }
+
+        const [hours, minutes, rawSeconds] = value.split(':');
+        const seconds = rawSeconds === undefined ? 0 : Number(rawSeconds);
+        // Converteix la cadena de temps a un objecte Date amb hora UTC, evitant problemes de zona horària.
+        return new Date(Date.UTC(1970, 0, 1, Number(hours), Number(minutes), seconds));
     }
 
     // Redueix un usuari relacionat a la representació pública permesa dins
@@ -35,37 +48,20 @@ export class CategoriaService implements ICategoriaService {
         };
     }
 
-    // Convierte una categoría Prisma completa, incluidas sus relaciones, al DTO
-    // que consumen los controladores y el frontend.
+    // Converteix el model Prisma amb relacions en un DTO HTTP, serialitzant dates i
+    // adaptant enums i relacions a identificadors.
     private mapToDTO(category: CategoriaWithRelations): CategoriaResponseDTO {
         return {
             id: category.id,
             tipus: category.tipus,
             anyNaixement: category.anyNaixement,
             diesActivitat: category.diesActivitat,
-            horaEntrada: this.toIso(category.horaEntrada),
-            horaSortida: this.toIso(category.horaSortida),
+            horaEntrada: this.toTime(category.horaEntrada),
+            horaSortida: this.toTime(category.horaSortida),
             detalls: category.detalls,
-            usuaris: category.usuaris.map((user) => this.mapUserToDTO(user)),
-            rankings: category.rankings.map((ranking) => ({
-                id: ranking.id,
-                nom: ranking.nom,
-                sexe: ranking.sexe,
-                provaId: ranking.provaId,
-                createdAt: ranking.createdAt.toISOString(),
-                updatedAt: ranking.updatedAt.toISOString(),
-            })),
-            quotaConfigs: category.quotaConfigs.map((quota) => ({
-                id: quota.id,
-                tipus: quota.tipus,
-                nom: quota.nom,
-                preuBase: quota.preuBase,
-                temporadesAplicada: quota.temporadesAplicada,
-                activa: quota.activa,
-                categoriaId: quota.categoriaId,
-                createdAt: quota.createdAt.toISOString(),
-                updatedAt: quota.updatedAt.toISOString(),
-            })),
+            usuaris: category.usuaris.map((user) => user.id),
+            rankings: category.rankings.map((ranking) => ranking.id),
+            quotaConfigs: category.quotaConfigs.map((quota) => quota.id),
             createdAt: category.createdAt.toISOString(),
             updatedAt: category.updatedAt.toISOString(),
         };
@@ -78,8 +74,8 @@ export class CategoriaService implements ICategoriaService {
             tipus: dto.tipus as TCategoria,
             anyNaixement: dto.anyNaixement,
             diesActivitat: dto.diesActivitat as DiesSetmana[],
-            horaEntrada: dto.horaEntrada ? new Date(dto.horaEntrada) : null,
-            horaSortida: dto.horaSortida ? new Date(dto.horaSortida) : null,
+            horaEntrada: this.parseTime(dto.horaEntrada),
+            horaSortida: this.parseTime(dto.horaSortida),
             detalls: dto.detalls ?? null,
         };
     }
@@ -92,8 +88,8 @@ export class CategoriaService implements ICategoriaService {
         if (dto.tipus !== undefined) data.tipus = dto.tipus as TCategoria;
         if (dto.anyNaixement !== undefined) data.anyNaixement = dto.anyNaixement;
         if (dto.diesActivitat !== undefined) data.diesActivitat = dto.diesActivitat as DiesSetmana[];
-        if (dto.horaEntrada !== undefined) data.horaEntrada = dto.horaEntrada ? new Date(dto.horaEntrada) : null;
-        if (dto.horaSortida !== undefined) data.horaSortida = dto.horaSortida ? new Date(dto.horaSortida) : null;
+        if (dto.horaEntrada !== undefined) data.horaEntrada = this.parseTime(dto.horaEntrada);
+        if (dto.horaSortida !== undefined) data.horaSortida = this.parseTime(dto.horaSortida);
         if (dto.detalls !== undefined) data.detalls = dto.detalls;
 
         return data;
@@ -113,6 +109,12 @@ export class CategoriaService implements ICategoriaService {
         const category = await this.repository.findByType(type as TCategoria);
         if (!category) throw new Error('Categoria no trobada.');
         return this.mapToDTO(category);
+    }
+
+    async getUsersByType(type: string): Promise<UsuariResponseDTO[]> {
+        const category = await this.getByType(type);
+        return (await this.repository.findUsersByCategoryType(category.tipus as TCategoria))
+            .map((user) => this.mapUserToDTO(user));
     }
 
     async update(id: string, dto: UpdateCategoriaDTO): Promise<CategoriaResponseDTO> {

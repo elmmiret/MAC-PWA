@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { AuthenticatedRequest } from '../middlewares/auth.middleware';
 import { UsuariService } from '../services/usuari.service';
 import { UpdatePerfilDTO } from 'shared';
+import { getRouteParam } from '../utils/route-params';
 
 export class UsuariController {
     private service: UsuariService;
@@ -13,10 +14,10 @@ export class UsuariController {
 
     async update(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
-            const { id } = req.params;
+            const id = getRouteParam(req.params.id);
             const dto = req.body as UpdatePerfilDTO;
 
-            if (!id || Array.isArray(id)) {
+            if (!id) {
                 res.status(400).json({ message: "L'identificador d'usuari és obligatori." });
                 return;
             }
@@ -39,9 +40,7 @@ export class UsuariController {
 
     async getById(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
-            const { id } = req.params;
-
-            const userId = Array.isArray(id) ? id[0] : id;
+            const userId = getRouteParam(req.params.id);
 
             if (!userId) {
                 res.status(400).json({ message: "L'identificador d'usuari és obligatori." });
@@ -57,9 +56,9 @@ export class UsuariController {
 
     async getByFirebaseUid(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
-            const { firebaseUid } = req.params;
+            const firebaseUid = getRouteParam(req.params.firebaseUid);
 
-            if (!firebaseUid || Array.isArray(firebaseUid)) {
+            if (!firebaseUid) {
                 res.status(400).json({ message: 'El firebaseUid és obligatori.' });
                 return;
             }
@@ -82,9 +81,9 @@ export class UsuariController {
 
     async delete(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
-            const { id } = req.params;
+            const id = getRouteParam(req.params.id);
 
-            if (!id || Array.isArray(id)) {
+            if (!id) {
                 res.status(400).json({ message: "L'identificador d'usuari és obligatori." });
                 return;
             }

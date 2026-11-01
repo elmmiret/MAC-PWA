@@ -76,14 +76,12 @@ COSES PER FER:
 
 30 octubre:
 - Implementats endpoints CRUD per a Categoria (s'han de repassar i acabar d'arreglar: atributs, funcionalitats, afegir endpoints si escau, dtos, etc.)
-    - A arreglar:
-        - atribut anyNaixement, donarli una volta. Potser millor que sigui un string del tipus "YYYY-YYYY" amb restriccions (com a QuotaConfig)
-        - mirar de cambiar el tipus de l'atribut horaEntrada i horaSortida (que només representi l'hora), tant per crear com per editar.
-        - Que retorni només els ids dels Usuaris, no cal retornar tota la informació
-        - Que retorni només els ids de les QuotaConfigs, no cal retornar tota la informació
-        - Igual per als rankings
-        - Fer un endpoint per a obtenir tots els Usuaris assignats a una Categoria, get /:id/usuaris (aplicar paginació)
-        - Al setejar Usuaris a una Categoria, es sobreescriu el que tenien abans els Usuaris, es a dir, si estaven tots a SUB_8, ara passaran a ser tots SUB_10, sense haber fet unset. (es pot borrar /unset)
+    - A arreglar en els endpoints CRUD de Categoria:
+        - cambiar el tipus de l'atribut horaEntrada i horaSortida (que només representi l'hora), tant per crear com per editar (també tot el que aquest canvi afecti).
+        - els getters d'una Categoria, que retornin només els ids dels Usuaris, no cal retornar tota la informació
+        - els getters d'una Categoria, que retornin només els ids de les QuotaConfigs, no cal retornar tota la informació
+        - Fer un endpoint per a obtenir tots els Usuaris assignats a una Categoria, get /:id/usuaris (amb la seva informació, no només l'id)
+        - Al setejar Usuaris a una Categoria, es sobreescriu el que tenien abans els Usuaris, es a dir, si estaven tots a SUB_8, ara passaran a ser tots SUB_10, sense haber fet unset. (es pot borrar /unset) (NO APLICAR)
 
 - Implementats endpoints CRUD per a QuotaConfig (s'han de repassar i acabar d'arreglar: mateix).
     - A arrelgar:
@@ -97,9 +95,10 @@ COSES PER FER:
 
 1 novembre:
 - Comentats mapejadors per a saber quin es el seu funcionament.
-- Actualització d'algunes funcions de serveis (ex: quotaConfig.update(), usuari.registrarUsuari(), usuari.actualitzarUsuari(), etc.) per a fer explícit els tipus de Prisma.
+- Actualització d'algunes funcions de serveis (ex: quotaConfig.update(), usuari.registrarUsuari(), usuari.actualitzarUsuari(), etc.) per a fer explícit els tipus de Prisma. (desapareix amb el seguent pas, però queda explícit igualment).
 - Afegits mapejadors a serveis (usuari, categoria, quotaConfig) per a convertir els DTO a tipus de Prisma (per a crear, actualitzar, registrar, etc). El DTO es el contracte d'entrada HTTP i el tipus Prisma valida que l'objecte enviat al repositori coincideixi amb l'esquema de persistència. Això manté la separació entre el model de base de dades i l'API pública.
--
+- Afegit endpoint get /byType/:type/usuaris a categoria.routes.ts per a obtenir tots els usuaris d'una Categoria (identificada pel seu tipus)
+- Afegit a /apps/mac-pwa-backend/src/utils arxiu route-params.ts per a tenir la utilitat compartida en tots els controladors per a obtenir els paràmetres de ruta
 
 
 

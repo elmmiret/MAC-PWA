@@ -1,16 +1,13 @@
 import { Request, Response } from 'express';
 import { CreateCategoriaDTO, SetCategoriaDTO, UpdateCategoriaDTO } from 'shared';
 import { CategoriaService } from '../services/categoria.service.ts';
+import { getRouteParam } from '../utils/route-params';
 
 export class CategoriaController {
     private service: CategoriaService;
 
     constructor() {
         this.service = new CategoriaService();
-    }
-
-    private getParam(value: string | string[]): string {
-        return Array.isArray(value) ? value[0] : value;
     }
 
     async create(req: Request, res: Response): Promise<void> {
@@ -24,7 +21,7 @@ export class CategoriaController {
 
     async getById(req: Request, res: Response): Promise<void> {
         try {
-            const result = await this.service.getById(this.getParam(req.params.id));
+            const result = await this.service.getById(getRouteParam(req.params.id));
             res.status(200).json(result);
         } catch (error: any) {
             res.status(404).json({ message: error.message });
@@ -33,8 +30,16 @@ export class CategoriaController {
 
     async getByType(req: Request, res: Response): Promise<void> {
         try {
-            const result = await this.service.getByType(this.getParam(req.params.type));
+            const result = await this.service.getByType(getRouteParam(req.params.type));
             res.status(200).json(result);
+        } catch (error: any) {
+            res.status(404).json({ message: error.message });
+        }
+    }
+
+    async getUsersByType(req: Request, res: Response): Promise<void> {
+        try {
+            res.status(200).json(await this.service.getUsersByType(getRouteParam(req.params.type)));
         } catch (error: any) {
             res.status(404).json({ message: error.message });
         }
@@ -43,7 +48,7 @@ export class CategoriaController {
     async update(req: Request, res: Response): Promise<void> {
         try {
             const result = await this.service.update(
-                this.getParam(req.params.id),
+                getRouteParam(req.params.id),
                 req.body as UpdateCategoriaDTO,
             );
             res.status(200).json(result);
@@ -55,7 +60,7 @@ export class CategoriaController {
     async setUsers(req: Request, res: Response): Promise<void> {
         try {
             const result = await this.service.setUsers(
-                this.getParam(req.params.id),
+                getRouteParam(req.params.id),
                 req.body as SetCategoriaDTO,
             );
             res.status(200).json(result);
@@ -67,7 +72,7 @@ export class CategoriaController {
     async unsetUsers(req: Request, res: Response): Promise<void> {
         try {
             const result = await this.service.unsetUsers(
-                this.getParam(req.params.id),
+                getRouteParam(req.params.id),
                 req.body as SetCategoriaDTO,
             );
             res.status(200).json(result);
@@ -78,7 +83,7 @@ export class CategoriaController {
 
     async delete(req: Request, res: Response): Promise<void> {
         try {
-            await this.service.delete(this.getParam(req.params.id));
+            await this.service.delete(getRouteParam(req.params.id));
             res.status(204).send();
         } catch (error: any) {
             res.status(400).json({ message: error.message });

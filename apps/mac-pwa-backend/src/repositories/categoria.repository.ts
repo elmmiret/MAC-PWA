@@ -1,4 +1,4 @@
-import { Prisma, TCategoria } from '@prisma/client';
+import { Prisma, TCategoria, Usuari } from '@prisma/client';
 import { prisma } from '../config/prisma';
 
 const categoryInclude = {
@@ -38,6 +38,7 @@ export class CategoriaRepository {
         });
     }
 
+    // Retorna els usuaris associats a una categoria concreta, ordenats per email principal.
     async findUsersByIds(ids: string[]): Promise<string[]> {
         const users = await prisma.usuari.findMany({
             where: { id: { in: ids } },
@@ -45,6 +46,22 @@ export class CategoriaRepository {
         });
 
         return users.map(({ id }) => id);
+    }
+
+    // Retorna els usuaris associats a una categoria concreta, ordenats per email principal.
+    async findUsersByCategory(categoriaId: string): Promise<Usuari[]> {
+        return prisma.usuari.findMany({
+            where: { categoriaId },
+            orderBy: { emailPrincipal: 'asc' },
+        });
+    }
+
+    // Retorna els usuaris associats a una categoria concreta, ordenats per email principal.
+    async findUsersByCategoryType(tipus: TCategoria): Promise<Usuari[]> {
+        return prisma.usuari.findMany({
+            where: { categoria: { tipus } },
+            orderBy: { emailPrincipal: 'asc' },
+        });
     }
 
     async setUsers(categoryId: string, userIds: string[]): Promise<void> {

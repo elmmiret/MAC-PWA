@@ -147,6 +147,24 @@ router.get('/:categoriaId/quotaConfigs', ...adminOnly, (req, res) => quotaConfig
 
 /**
  * @swagger
+ * /api/categories/byType/{type}/usuaris:
+ *   get:
+ *     summary: Obté els usuaris assignats a una categoria
+ *     tags: [Categories]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: type
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200: { description: Llista d'usuaris en format UsuariResponseDTO }
+ *       404: { description: Categoria no trobada }
+ */
+router.get('/byType/:type/usuaris', ...adminOnly, (req, res) => controller.getUsersByType(req, res));
+
+/**
+ * @swagger
  * /api/categories/{id}:
  *   delete:
  *     summary: Elimina una categoria
