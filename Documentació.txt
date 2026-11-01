@@ -95,7 +95,11 @@ COSES PER FER:
         - Al fer delete de QuotesConfig, si una d'elles estaba activa però sense pagaments encara relacionats, que retorni un missatge avisant de que s'ha eliminat una QuotaConfig activa però sense pagaments.
 
 
-
+1 novembre:
+- Comentats mapejadors per a saber quin es el seu funcionament.
+- Actualització d'algunes funcions de serveis (ex: quotaConfig.update(), usuari.registrarUsuari(), usuari.actualitzarUsuari(), etc.) per a fer explícit els tipus de Prisma.
+- Afegits mapejadors a serveis (usuari, categoria, quotaConfig) per a convertir els DTO a tipus de Prisma (per a crear, actualitzar, registrar, etc). El DTO es el contracte d'entrada HTTP i el tipus Prisma valida que l'objecte enviat al repositori coincideixi amb l'esquema de persistència. Això manté la separació entre el model de base de dades i l'API pública.
+-
 
 
 

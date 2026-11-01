@@ -16,10 +16,14 @@ export class CategoriaService implements ICategoriaService {
         this.repository = new CategoriaRepository();
     }
 
+    // Prisma retorna Date i enums propis de l'esquema; les respostes HTTP utilitzen
+    // strings ISO i DTOs estables per no exposar models de persistència.
     private toIso(value: Date | null): string | null {
         return value?.toISOString() ?? null;
     }
 
+    // Redueix un usuari relacionat a la representació pública permesa dins
+    // de la resposta d'una categoria.
     private mapUserToDTO(user: CategoriaWithRelations['usuaris'][number]): UsuariResponseDTO {
         return {
             id: user.id,
@@ -31,6 +35,8 @@ export class CategoriaService implements ICategoriaService {
         };
     }
 
+    // Convierte una categoría Prisma completa, incluidas sus relaciones, al DTO
+    // que consumen los controladores y el frontend.
     private mapToDTO(category: CategoriaWithRelations): CategoriaResponseDTO {
         return {
             id: category.id,
@@ -65,7 +71,9 @@ export class CategoriaService implements ICategoriaService {
         };
     }
 
-    private mapCreateData(dto: CreateCategoriaDTO): Prisma.CategoriaCreateInput {
+    // Converteix el DTO rebut per HTTP en l'input Prisma de creació. 
+    // Aquí s'adapten especialment enums, dates i valors nuls.
+    private mapCreateDTOToPrisma(dto: CreateCategoriaDTO): Prisma.CategoriaCreateInput {
         return {
             tipus: dto.tipus as TCategoria,
             anyNaixement: dto.anyNaixement,
@@ -76,7 +84,9 @@ export class CategoriaService implements ICategoriaService {
         };
     }
 
-    private mapUpdateData(dto: UpdateCategoriaDTO): Prisma.CategoriaUpdateInput {
+    // Construeix un input Prisma parcial per a que el PATCH només modifiqui els camps
+    // enviats i no sobreescrigui accidentalment la resta de la categoria.
+    private mapUpdateDTOToPrisma(dto: UpdateCategoriaDTO): Prisma.CategoriaUpdateInput {
         const data: Prisma.CategoriaUpdateInput = {};
 
         if (dto.tipus !== undefined) data.tipus = dto.tipus as TCategoria;
@@ -90,7 +100,7 @@ export class CategoriaService implements ICategoriaService {
     }
 
     async create(dto: CreateCategoriaDTO): Promise<CategoriaResponseDTO> {
-        return this.mapToDTO(await this.repository.create(this.mapCreateData(dto)));
+        return this.mapToDTO(await this.repository.create(this.mapCreateDTOToPrisma(dto)));
     }
 
     async getById(id: string): Promise<CategoriaResponseDTO> {
@@ -107,7 +117,7 @@ export class CategoriaService implements ICategoriaService {
 
     async update(id: string, dto: UpdateCategoriaDTO): Promise<CategoriaResponseDTO> {
         await this.getById(id);
-        return this.mapToDTO(await this.repository.update(id, this.mapUpdateData(dto)));
+        return this.mapToDTO(await this.repository.update(id, this.mapUpdateDTOToPrisma(dto)));
     }
 
     private async updateUsers(id: string, userIds: string[], set: boolean): Promise<CategoriaResponseDTO> {

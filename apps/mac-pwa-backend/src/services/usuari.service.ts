@@ -18,6 +18,8 @@ export class UsuariService implements IUsuariService {
         this.repository = new UsuariRepository();
     }
 
+    // Exposa només els camps permesos per l'API i evita retornar directament
+    // el model Prisma, que pot contenir informació sensible o interna de la base de dades.
     private mapToUsuariResponseDTO(usuari: Usuari): UsuariResponseDTO {
         return {
             id: usuari.id,
@@ -29,10 +31,35 @@ export class UsuariService implements IUsuariService {
         };
     }
 
+    // Normalitza les respostes de les operacions que no retornen un usuari complet,
+    // com tancar sessió o eliminar un usuari.
     private mapToOperacioUsuariResponseDTO(message: string, usuariId?: string): OperacioUsuariResponseDTO {
         return {
             message,
             usuariId,
+        };
+    }
+
+    // Converteix el DTO de pre-registre en l'input Prisma que pot persistir
+    // el repositori, mantenint separats API i model de base de dades.
+    private mapRegisterDTOToPrisma(dto: RegisterUsuariDTO): Prisma.UsuariCreateInput {
+        return {
+            firebaseUid: null,
+            emailPrincipal: dto.emailPrincipal,
+            nom: dto.nom ?? null,
+            cognom1: dto.cognom1 ?? null,
+            cognom2: dto.cognom2 ?? null,
+        };
+    }
+
+    // Converteix el DTO parcial d'actualització en l'input Prisma equivalent
+    // i adapta els enums compartits als enums generats per Prisma.
+    private mapUpdateDTOToPrisma(dto: UpdatePerfilDTO): Prisma.UsuariUpdateInput {
+        return {
+            ...dto,
+            sexe: dto.sexe as TSexe | null | undefined,
+            tipusDocument: dto.tipusDocument as TDocument | null | undefined,
+            tipusDocumentTutor: dto.tipusDocumentTutor as TDocument | null | undefined,
         };
     }
 
@@ -43,13 +70,7 @@ export class UsuariService implements IUsuariService {
         }
 
         // Crea un pre-registre, Google assignarà el firebaseUid en el primer accés.
-        const usuariDB = await this.repository.create({
-            firebaseUid: null,
-            emailPrincipal: dto.emailPrincipal,
-            nom: dto.nom ?? null,
-            cognom1: dto.cognom1 ?? null,
-            cognom2: dto.cognom2 || null
-        });
+        const usuariDB = await this.repository.create(this.mapRegisterDTOToPrisma(dto));
 
         return this.mapToUsuariResponseDTO(usuariDB);
     }
@@ -90,14 +111,10 @@ export class UsuariService implements IUsuariService {
             throw new Error("L'usuari no existeix a la base de dades.");
         }
 
-        const data: Prisma.UsuariUpdateInput = {
-            ...dto,
-            sexe: dto.sexe as TSexe | null | undefined,
-            tipusDocument: dto.tipusDocument as TDocument | null | undefined,
-            tipusDocumentTutor: dto.tipusDocumentTutor as TDocument | null | undefined,
-        };
-
-        const usuariActualitzat = await this.repository.updateById(id, data);
+        const usuariActualitzat = await this.repository.updateById(
+            id,
+            this.mapUpdateDTOToPrisma(dto),
+        );
 
         return this.mapToUsuariResponseDTO(usuariActualitzat);
     }

@@ -15,6 +15,8 @@ export class QuotaConfigService implements IQuotaConfigService {
         this.repository = new QuotaConfigRepository();
     }
 
+    // Converteix el model Prisma en un DTO HTTP i serialitza les dates com ISO.
+    // El DTO evita exposar directament l'estructura interna de Prisma.
     private mapToDTO(config: Prisma.QuotaConfigGetPayload<object>): QuotaConfigResponseDTO {
         return {
             id: config.id,
@@ -29,6 +31,8 @@ export class QuotaConfigService implements IQuotaConfigService {
         };
     }
 
+    // Valida el format de les temporades abans de persistir-les. Aquesta regla
+    // pertany al domini i no a Prisma, per això es manté al servei.
     private validateSeasons(seasons: string[]): void {
         const currentYear = new Date().getFullYear();
         const unique = new Set(seasons);
@@ -55,11 +59,36 @@ export class QuotaConfigService implements IQuotaConfigService {
         }
     }
 
+    // Converteix l'string rebut per l'API en l'enum generat per Prisma i 
+    // centralitza la validació dels quatre tipus permesos.
     private parseType(value: string): TQuota {
         if (!Object.values(TQuota).includes(value as TQuota)) {
             throw new Error(`Tipus de quota invàlid: ${value}.`);
         }
         return value as TQuota;
+    }
+
+    // Converteix el DTO de creació en l'input Prisma, incloent la relació
+    // amb la categoria seleccionada.
+    private mapCreateDTOToPrisma(dto: CreateQuotaConfigDTO): Prisma.QuotaConfigCreateInput {
+        return {
+            nom: dto.nom,
+            tipus: this.parseType(dto.tipus),
+            preuBase: dto.preuBase,
+            temporadesAplicada: [],
+            categoria: { connect: { id: dto.categoriaId } },
+        };
+    }
+
+    // Converteix només els camps permesos per l'endpoint PATCH en un input Prisma parcial,
+    // evitant actualitzar relacions o camps protegits.
+    private mapUpdateDTOToPrisma(dto: UpdateQuotaConfigDTO): Prisma.QuotaConfigUpdateInput {
+        return {
+            ...(dto.nom === undefined ? {} : { nom: dto.nom }),
+            ...(dto.temporadesAplicada === undefined
+                ? {}
+                : { temporadesAplicada: dto.temporadesAplicada }),
+        };
     }
 
     async create(dto: CreateQuotaConfigDTO): Promise<QuotaConfigResponseDTO> {
@@ -73,13 +102,7 @@ export class QuotaConfigService implements IQuotaConfigService {
             throw new Error('La categoria no existeix.');
         }
 
-        const config = await this.repository.create({
-            nom: dto.nom,
-            tipus: this.parseType(dto.tipus),
-            preuBase: dto.preuBase,
-            temporadesAplicada: [],
-            categoria: { connect: { id: dto.categoriaId } },
-        });
+        const config = await this.repository.create(this.mapCreateDTOToPrisma(dto));
 
         return this.mapToDTO(config);
     }
@@ -101,10 +124,7 @@ export class QuotaConfigService implements IQuotaConfigService {
             this.validateSeasons(dto.temporadesAplicada);
         }
 
-        const config = await this.repository.update(id, {
-            ...(dto.nom === undefined ? {} : { nom: dto.nom }),
-            ...(dto.temporadesAplicada === undefined ? {} : { temporadesAplicada: dto.temporadesAplicada }),
-        });
+        const config = await this.repository.update(id, this.mapUpdateDTOToPrisma(dto));
         return this.mapToDTO(config);
     }
 
