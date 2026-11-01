@@ -1,7 +1,7 @@
 COSES PER FER:
-- Arreglar les interficies per a que estiguin implementades als serveis
-- Fer endpoint per obtenir usuari a partir del firebaseId (funcio feta, falta endpoint)
-- Fer endpoint per a /logout i /delete, on logout només ho podrà executar l'usuari per a sortir de la sessió i delete només l'usuari per al seu propi compte o l'admin
+- DONE ---> Arreglar les interficies per a que estiguin implementades als serveis
+- DONE ---> Fer endpoint per obtenir usuari a partir del firebaseId (funcio feta, falta endpoint)
+- DONE ---> Fer endpoint per a /logout i /delete, on logout només ho podrà executar l'usuari per a sortir de la sessió i delete només l'admin
 
 - S'ha d'afegir la relació FAMILIARS a Usuari i també l'atribut DESCOMPTE a Pagaments (pot haber descomptes per numero de familiars al club, per altres motius, etc.).
 - Arreglar endpoint /perfil (cambiarlo a /edit o algo aixi), per a que un administrador pugui editar el perfil d'un Usuari (potser es pot fer que l'Usuari pugui editar algun camp en concret pero no crec)
@@ -27,6 +27,14 @@ COSES PER FER:
 - DONE (revisar) ---> CRUD de Categoria, només executable per administradors.
 - Acabar de posar als DTO les relacions que falten (de tot en general: UsuariResponseDTO, CategriaResponseDTO, QuotaConfigResponseDTO, etc.)
 - Revisar els endpoints i DTOs de Categoria i QuotaConfig (coses a arreglar al dia 30 octubre)
+
+- Afegir atributs a USUARI de si es entrenador o no (boolean) i usuari ja a la base de dades que es el seu familiar (string | null). Aquests descomptes influiran en els pagaments, ja que proporcionaran descomptes %.
+- Al CREAR una CATEGORIA entre SUB_8 - SUB_23, atribut AnyNaixement es generi automaticament a partir de l'any actual.
+- Fer un endpoint per a ACTUALITZAR AnyNaixement de les CATEGORIES entre SUB-8 - SUB_23. Que al executarlo, s'actualitzin amb l'any actual com a referència.
+- Fer un endpoint per a ASSIGNAR automaticament els Usuaris a la seva CATEGORIA corresponent, a partir de la seva data de naixement i AnyNaixement de les CATEGORIES.
+- Quan es tinguin els PAGAMENTS, si un Usuari es entrenador -30% al preu de la quota, si te usuariFamiliar -10% al preu de la quota.
+- Afegir a PAGAMENT un camp de descompte (que sigui un enter entre 0-100), per a saber quin percentatge de descompte se li aplica al pagament. El preu del PAGAMENT ja te el descompte aplicat. Es pot veure el preu original de la quota a la QUOTACONFIG assignada.
+- Si l'USUARI del PAGAMENT d'una quota tipus SOCI es menor (estrictament) de 18 anys
 
 27 octubre:
 - Implementat endpoint per a registrarse a Firebase Auth i crear l'Usuari a PostgreSQL.
@@ -82,15 +90,16 @@ COSES PER FER:
         - els getters d'una Categoria, que retornin només els ids de les QuotaConfigs, no cal retornar tota la informació
         - Fer un endpoint per a obtenir tots els Usuaris assignats a una Categoria, get /:id/usuaris (amb la seva informació, no només l'id)
         - Al setejar Usuaris a una Categoria, es sobreescriu el que tenien abans els Usuaris, es a dir, si estaven tots a SUB_8, ara passaran a ser tots SUB_10, sense haber fet unset. (es pot borrar /unset) (NO APLICAR)
+        -----> FET
 
 - Implementats endpoints CRUD per a QuotaConfig (s'han de repassar i acabar d'arreglar: mateix).
     - A arrelgar:
         - Endpoints getter d'una QuotaConfig han de retorna el CategoriaResponseDTO, no el seu id.
         - Al editar una QuotaConfig per a afegir temporadesAplicada, es pot posar al segon any 2028 (com a molt, el primer any ha de ser l'actual i el segon el que ve, no més).
         - Fer endpoint /deactivate per a deixar una Categoria sense QuotaConfig activada.
-        - Donarli una volta a l'endpoint edit (es pot deixar per al nom potser), potser millor fer un endpoint que a partir de l'id / nom d'una QuotaConfig, se li puguin afegir temporadesAplicades, amb les restriccions.
+        - Donarli una volta a l'endpoint edit (es pot deixar per al nom potser), potser millor fer un endpoint que a partir de l'id d'una QuotaConfig, se li puguin afegir temporadesAplicades (temporadesAplicades ha de mantenir les restriccions que te a l'endpoint d'edit).
         - Potser aplicar paginació a al get quotaConfigs/byType, a un futur get allQuotaConfigs
-        - Al fer delete de QuotesConfig, si una d'elles estaba activa però sense pagaments encara relacionats, que retorni un missatge avisant de que s'ha eliminat una QuotaConfig activa però sense pagaments.
+        - Al fer delete de QuotesConfig, si una d'elles estaba activa (activa is true) però sense pagaments encara relacionats, que retorni un missatge avisant de que s'ha eliminat una QuotaConfig activa però sense pagaments.
 
 
 1 novembre:
