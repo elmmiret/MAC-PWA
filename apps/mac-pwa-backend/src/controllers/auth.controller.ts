@@ -1,7 +1,7 @@
-import { Request, Response } from 'express';
-import { UsuariService } from '../services/usuari.service';
-import { AuthenticatedRequest } from '../middlewares/auth.middleware';
-import { GoogleLoginDTO, RegisterUsuariDTO } from 'shared';
+import type { Request, Response } from 'express';
+import { UsuariService } from '../services/usuari.service.js';
+import type { AuthenticatedRequest } from '../middlewares/auth.middleware.js';
+import type { GoogleLoginDTO, RegisterUsuariDTO } from 'shared';
 
 export class AuthController {
     private service: UsuariService;

@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { CategoriaController } from '../controllers/categoria.controller.ts';
-import { QuotaConfigController } from '../controllers/quotaConfig.controller.ts';
-import { isAdmin, verifyFirebaseToken } from '../middlewares/auth.middleware.ts';
+import { CategoriaController } from '../controllers/categoria.controller.js';
+import { QuotaConfigController } from '../controllers/quotaConfig.controller.js';
+import { isAdmin, verifyFirebaseToken } from '../middlewares/auth.middleware.js';
 
 const router = Router();
 const controller = new CategoriaController();

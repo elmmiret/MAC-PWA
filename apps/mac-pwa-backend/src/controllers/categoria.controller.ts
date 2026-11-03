@@ -1,7 +1,7 @@
-import { Request, Response } from 'express';
-import { CreateCategoriaDTO, SetCategoriaDTO, UpdateCategoriaDTO } from 'shared';
-import { CategoriaService } from '../services/categoria.service.ts';
-import { getRouteParam } from '../utils/route-params';
+import type { Request, Response } from 'express';
+import type { CreateCategoriaDTO, SetCategoriaDTO, UpdateCategoriaDTO } from 'shared';
+import { CategoriaService } from '../services/categoria.service.js';
+import { getRouteParam } from '../utils/route-params.js';
 
 export class CategoriaController {
     private service: CategoriaService;

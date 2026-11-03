@@ -1,11 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
-import { swaggerSpec } from './config/swagger.ts';
-import authRoutes from './routes/auth.routes.ts';
-import usuariRoutes from './routes/usuari.routes.ts'
-import categoriaRoutes from './routes/categoria.routes.ts';
-import quotaConfigRoutes from './routes/quotaConfig.routes.ts';
+import { swaggerSpec } from './config/swagger.js';
+import authRoutes from './routes/auth.routes.js';
+import usuariRoutes from './routes/usuari.routes.js'
+import categoriaRoutes from './routes/categoria.routes.js';
+import quotaConfigRoutes from './routes/quotaConfig.routes.js';
 
 const app = express();
 app.use(cors());

@@ -1,12 +1,14 @@
 import { Prisma, TQuota } from '@prisma/client';
-import {
+import type {
     CreateQuotaConfigDTO,
     DeleteQuotaConfigsDTO,
+    AddTemporadesQuotaConfigDTO,
+    CategoriaResponseDTO,
     QuotaConfigResponseDTO,
     UpdateQuotaConfigDTO,
 } from 'shared';
-import { IQuotaConfigService } from '../interfaces/quotaConfig.interface';
-import { QuotaConfigRepository } from '../repositories/quotaConfig.repository';
+import type { IQuotaConfigService } from '../interfaces/quotaConfig.interface.js';
+import { QuotaConfigRepository, type QuotaConfigWithCategory } from '../repositories/quotaConfig.repository.js';
 
 export class QuotaConfigService implements IQuotaConfigService {
     private repository: QuotaConfigRepository;
@@ -17,7 +19,24 @@ export class QuotaConfigService implements IQuotaConfigService {
 
     // Converteix el model Prisma en un DTO HTTP i serialitza les dates com ISO.
     // El DTO evita exposar directament l'estructura interna de Prisma.
-    private mapToDTO(config: Prisma.QuotaConfigGetPayload<object>): QuotaConfigResponseDTO {
+    private mapCategoriaToDTO(category: QuotaConfigWithCategory['categoria']): CategoriaResponseDTO {
+        return {
+            id: category.id,
+            tipus: category.tipus,
+            anyNaixement: category.anyNaixement,
+            diesActivitat: category.diesActivitat,
+            horaEntrada: category.horaEntrada?.toISOString().slice(11, 19) ?? null,
+            horaSortida: category.horaSortida?.toISOString().slice(11, 19) ?? null,
+            detalls: category.detalls,
+            usuaris: category.usuaris.map((user) => user.id),
+            rankings: category.rankings.map((ranking) => ranking.id),
+            quotaConfigs: category.quotaConfigs.map((quota) => quota.id),
+            createdAt: category.createdAt.toISOString(),
+            updatedAt: category.updatedAt.toISOString(),
+        };
+    }
+
+    private mapToDTO(config: QuotaConfigWithCategory): QuotaConfigResponseDTO {
         return {
             id: config.id,
             tipus: config.tipus,
@@ -25,7 +44,7 @@ export class QuotaConfigService implements IQuotaConfigService {
             preuBase: config.preuBase,
             temporadesAplicada: config.temporadesAplicada,
             activa: config.activa,
-            categoriaId: config.categoriaId,
+            categoria: this.mapCategoriaToDTO(config.categoria),
             createdAt: config.createdAt.toISOString(),
             updatedAt: config.updatedAt.toISOString(),
         };
@@ -53,8 +72,8 @@ export class QuotaConfigService implements IQuotaConfigService {
                 throw new Error(`La temporada ${season} ha de tenir exactament un any de diferència.`);
             }
 
-            if (end <= currentYear) {
-                throw new Error(`El final de la temporada ${season} ha de ser posterior a l'any actual.`);
+            if (start > currentYear || end > currentYear + 1) {
+                throw new Error(`La temporada ${season} és massa futura.`);
             }
         }
     }
@@ -85,9 +104,6 @@ export class QuotaConfigService implements IQuotaConfigService {
     private mapUpdateDTOToPrisma(dto: UpdateQuotaConfigDTO): Prisma.QuotaConfigUpdateInput {
         return {
             ...(dto.nom === undefined ? {} : { nom: dto.nom }),
-            ...(dto.temporadesAplicada === undefined
-                ? {}
-                : { temporadesAplicada: dto.temporadesAplicada }),
         };
     }
 
@@ -114,22 +130,34 @@ export class QuotaConfigService implements IQuotaConfigService {
     }
 
     async update(id: string, dto: UpdateQuotaConfigDTO): Promise<QuotaConfigResponseDTO> {
-        if (dto.nom === undefined && dto.temporadesAplicada === undefined) {
-            throw new Error('Només es poden editar nom o temporadesAplicada.');
+        if (dto.nom === undefined) {
+            throw new Error('Només es pot editar el nom.');
         }
         if (dto.nom !== undefined && !dto.nom.trim()) {
             throw new Error('El nom no pot estar buit.');
         }
-        if (dto.temporadesAplicada !== undefined) {
-            this.validateSeasons(dto.temporadesAplicada);
-        }
-
         const config = await this.repository.update(id, this.mapUpdateDTOToPrisma(dto));
         return this.mapToDTO(config);
     }
 
+    async addTemporades(id: string, dto: AddTemporadesQuotaConfigDTO): Promise<QuotaConfigResponseDTO> {
+        const current = await this.repository.findById(id);
+        if (!current) throw new Error('QuotaConfig no trobada.');
+        if (!dto.temporadesAplicada?.length) throw new Error('Cal indicar almenys una temporada.');
+
+        this.validateSeasons(dto.temporadesAplicada);
+        const repeated = dto.temporadesAplicada.some((season) => current.temporadesAplicada.includes(season));
+        if (repeated) throw new Error('Una temporada ja existeix a la QuotaConfig.');
+
+        return this.mapToDTO(await this.repository.addTemporades(id, dto.temporadesAplicada));
+    }
+
     async activate(id: string): Promise<QuotaConfigResponseDTO> {
         return this.mapToDTO(await this.repository.activate(id));
+    }
+
+    async deactivate(id: string): Promise<QuotaConfigResponseDTO> {
+        return this.mapToDTO(await this.repository.deactivate(id));
     }
 
     async getById(id: string): Promise<QuotaConfigResponseDTO> {

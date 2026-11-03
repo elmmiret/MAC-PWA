@@ -1,8 +1,8 @@
-import { Response } from 'express';
-import { AuthenticatedRequest } from '../middlewares/auth.middleware';
-import { UsuariService } from '../services/usuari.service';
-import { UpdatePerfilDTO } from 'shared';
-import { getRouteParam } from '../utils/route-params';
+import type { Response } from 'express';
+import type { AuthenticatedRequest } from '../middlewares/auth.middleware.js';
+import { UsuariService } from '../services/usuari.service.js';
+import type { UpdatePerfilDTO } from 'shared';
+import { getRouteParam } from '../utils/route-params.js';
 
 export class UsuariController {
     private service: UsuariService;

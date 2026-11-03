@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { UsuariController } from '../controllers/usuari.controller';
-import { isAdmin, verifyFirebaseToken } from '../middlewares/auth.middleware';
+import { UsuariController } from '../controllers/usuari.controller.js';
+import { isAdmin, verifyFirebaseToken } from '../middlewares/auth.middleware.js';
 
 const router = Router();
 const usuariController = new UsuariController();

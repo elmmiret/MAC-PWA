@@ -1,15 +1,15 @@
-import { Prisma, TDocument, TSexe, Usuari } from '@prisma/client';
+import { Prisma, TDocument, TSexe, type Usuari } from '@prisma/client';
 import 'dotenv/config';
-import { UsuariRepository } from '../repositories/usuari.repository';
-import { firebaseAdmin } from '../config/firebase';
-import {
+import { UsuariRepository } from '../repositories/usuari.repository.js';
+import { firebaseAdmin } from '../config/firebase.js';
+import type {
     GoogleLoginDTO,
     OperacioUsuariResponseDTO,
     RegisterUsuariDTO,
     UpdatePerfilDTO,
     UsuariResponseDTO,
 } from 'shared';
-import { IUsuariService } from '../interfaces/usuari.interface';
+import type { IUsuariService } from '../interfaces/usuari.interface.js';
 
 export class UsuariService implements IUsuariService {
     private repository: UsuariRepository;
@@ -36,7 +36,7 @@ export class UsuariService implements IUsuariService {
     private mapToOperacioUsuariResponseDTO(message: string, usuariId?: string): OperacioUsuariResponseDTO {
         return {
             message,
-            usuariId,
+            ...(usuariId === undefined ? {} : { usuariId }),
         };
     }
 
@@ -57,9 +57,9 @@ export class UsuariService implements IUsuariService {
     private mapUpdateDTOToPrisma(dto: UpdatePerfilDTO): Prisma.UsuariUpdateInput {
         return {
             ...dto,
-            sexe: dto.sexe as TSexe | null | undefined,
-            tipusDocument: dto.tipusDocument as TDocument | null | undefined,
-            tipusDocumentTutor: dto.tipusDocumentTutor as TDocument | null | undefined,
+            ...(dto.sexe === undefined ? {} : { sexe: dto.sexe as TSexe | null }),
+            ...(dto.tipusDocument === undefined ? {} : { tipusDocument: dto.tipusDocument as TDocument | null }),
+            ...(dto.tipusDocumentTutor === undefined ? {} : { tipusDocumentTutor: dto.tipusDocumentTutor as TDocument | null }),
         };
     }
 

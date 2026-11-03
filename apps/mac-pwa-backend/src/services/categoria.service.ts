@@ -1,13 +1,13 @@
 import { DiesSetmana, Prisma, TCategoria } from '@prisma/client';
-import {
+import type {
     CategoriaResponseDTO,
     CreateCategoriaDTO,
     SetCategoriaDTO,
     UpdateCategoriaDTO,
     UsuariResponseDTO,
 } from 'shared';
-import { ICategoriaService } from '../interfaces/categoria.interface';
-import { CategoriaRepository, CategoriaWithRelations } from '../repositories/categoria.repository';
+import type { ICategoriaService } from '../interfaces/categoria.interface.js';
+import { CategoriaRepository, type CategoriaWithRelations } from '../repositories/categoria.repository.js';
 
 export class CategoriaService implements ICategoriaService {
     private repository: CategoriaRepository;

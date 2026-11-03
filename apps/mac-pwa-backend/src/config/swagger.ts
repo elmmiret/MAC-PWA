@@ -84,8 +84,15 @@ const options: swaggerJSDoc.Options = {
                     type: 'object',
                     properties: {
                         nom: { type: 'string' },
+                    },
+                },
+                AddTemporadesQuotaConfigDTO: {
+                    type: 'object',
+                    required: ['temporadesAplicada'],
+                    properties: {
                         temporadesAplicada: {
                             type: 'array',
+                            minItems: 1,
                             items: { type: 'string', pattern: '^\\d{4}-\\d{4}$' },
                         },
                     },

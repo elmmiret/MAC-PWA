@@ -1,5 +1,5 @@
-import { Prisma, TCategoria, Usuari } from '@prisma/client';
-import { prisma } from '../config/prisma';
+import { Prisma, TCategoria, type Usuari } from '@prisma/client';
+import { prisma } from '../config/prisma.js';
 
 const categoryInclude = {
     usuaris: true,
@@ -7,6 +7,7 @@ const categoryInclude = {
     quotaConfigs: true,
 } satisfies Prisma.CategoriaInclude;
 
+// Tipus que inclou la categoria i les seves relacions, per a ser utilitzat en les consultes de Categoria.
 export type CategoriaWithRelations = Prisma.CategoriaGetPayload<{
     include: typeof categoryInclude;
 }>;

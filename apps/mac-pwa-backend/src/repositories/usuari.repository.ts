@@ -1,5 +1,5 @@
-import { Prisma, Usuari } from '@prisma/client';
-import { prisma } from '../config/prisma';
+import { Prisma, type Usuari } from '@prisma/client';
+import { prisma } from '../config/prisma.js';
 
 export class UsuariRepository {
     async findAll(): Promise<Usuari[]> {
