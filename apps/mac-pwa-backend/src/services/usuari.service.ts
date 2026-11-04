@@ -1,11 +1,12 @@
-import { Prisma, TDocument, TSexe, type Usuari } from '@prisma/client';
+import { Prisma, TDocument, TSexe } from '@prisma/client';
 import 'dotenv/config';
-import { UsuariRepository } from '../repositories/usuari.repository.js';
+import { UsuariRepository, type UsuariWithPayments } from '../repositories/usuari.repository.js';
 import { firebaseAdmin } from '../config/firebase.js';
 import type {
     GoogleLoginDTO,
     OperacioUsuariResponseDTO,
     RegisterUsuariDTO,
+    SetFamiliarDTO,
     UpdatePerfilDTO,
     UsuariResponseDTO,
 } from 'shared';
@@ -20,14 +21,41 @@ export class UsuariService implements IUsuariService {
 
     // Exposa només els camps permesos per l'API i evita retornar directament
     // el model Prisma, que pot contenir informació sensible o interna de la base de dades.
-    private mapToUsuariResponseDTO(usuari: Usuari): UsuariResponseDTO {
+    private mapToUsuariResponseDTO(usuari: UsuariWithPayments): UsuariResponseDTO {
         return {
             id: usuari.id,
             firebaseUid: usuari.firebaseUid,
+            entrenador: usuari.entrenador,
+            usuariFamiliarId: usuari.usuariFamiliarId,
             emailPrincipal: usuari.emailPrincipal,
+            imatgePerfil: usuari.imatgePerfil,
+            emailSecundari: usuari.emailSecundari,
+            telefonPrincipal: usuari.telefonPrincipal,
+            telefonSecundari: usuari.telefonSecundari,
             nom: usuari.nom,
             cognom1: usuari.cognom1,
             cognom2: usuari.cognom2,
+            sexe: usuari.sexe,
+            dataNaixement: usuari.dataNaixement?.toISOString() ?? null,
+            LocalitatNaixement: usuari.LocalitatNaixement,
+            numeroLlicencia: usuari.numeroLlicencia,
+            adreca: usuari.adreca,
+            codiPostal: usuari.codiPostal,
+            poblacio: usuari.poblacio,
+            tipusDocument: usuari.tipusDocument,
+            numeroDocument: usuari.numeroDocument,
+            nomTutor: usuari.nomTutor,
+            tipusDocumentTutor: usuari.tipusDocumentTutor,
+            numeroDocumentTutor: usuari.numeroDocumentTutor,
+            numAbPatronat: usuari.numAbPatronat,
+            dataInscripcio: usuari.dataInscripcio?.toISOString() ?? null,
+            dataBaixa: usuari.dataBaixa?.toISOString() ?? null,
+            dataAltaProva: usuari.dataAltaProva?.toISOString() ?? null,
+            iban: usuari.iban,
+            categoriaId: usuari.categoriaId,
+            pagamentIds: usuari.pagaments.map((pagament) => pagament.id),
+            createdAt: usuari.createdAt.toISOString(),
+            updatedAt: usuari.updatedAt.toISOString(),
         };
     }
 
@@ -159,6 +187,23 @@ export class UsuariService implements IUsuariService {
         await firebaseAdmin.auth().revokeRefreshTokens(firebaseUid);
 
         return this.mapToOperacioUsuariResponseDTO('Sessió tancada correctament.');
+    }
+
+    async setEntrenador(id: string, entrenador: boolean): Promise<UsuariResponseDTO> {
+        return this.mapToUsuariResponseDTO(await this.repository.setEntrenador(id, entrenador));
+    }
+
+    async setFamiliar(familiarId: string, dto: SetFamiliarDTO): Promise<OperacioUsuariResponseDTO> {
+        const usuariIds = [...new Set(dto.usuariIds ?? [])];
+        if (usuariIds.length === 0) {
+            throw new Error('Cal indicar almenys un usuari.');
+        }
+
+        await this.repository.setFamiliar(familiarId, usuariIds);
+        return this.mapToOperacioUsuariResponseDTO(
+            'Usuari familiar assignat correctament.',
+            familiarId,
+        );
     }
 
     async eliminarUsuari(targetId: string, actorIsAdmin: boolean): Promise<OperacioUsuariResponseDTO> {

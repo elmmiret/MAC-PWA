@@ -37,14 +37,6 @@ export class CategoriaController {
         }
     }
 
-    async getUsersByType(req: Request, res: Response): Promise<void> {
-        try {
-            res.status(200).json(await this.service.getUsersByType(getRouteParam(req.params.type)));
-        } catch (error: any) {
-            res.status(404).json({ message: error.message });
-        }
-    }
-
     async update(req: Request, res: Response): Promise<void> {
         try {
             const result = await this.service.update(

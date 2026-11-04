@@ -2,6 +2,7 @@ import type {
     GoogleLoginDTO,
     OperacioUsuariResponseDTO,
     RegisterUsuariDTO,
+    SetFamiliarDTO,
     UpdatePerfilDTO,
     UsuariResponseDTO,
 } from 'shared';
@@ -14,5 +15,7 @@ export interface IUsuariService {
     obtenirUsuariPerFirebaseId(firebaseUid: string): Promise<UsuariResponseDTO>;
     obtenirTotsElsUsuaris(): Promise<UsuariResponseDTO[]>;
     tancarSessio(firebaseUid: string): Promise<OperacioUsuariResponseDTO>;
+    setEntrenador(id: string, entrenador: boolean): Promise<UsuariResponseDTO>;
+    setFamiliar(familiarId: string, dto: SetFamiliarDTO): Promise<OperacioUsuariResponseDTO>;
     eliminarUsuari(targetId: string, actorIsAdmin: boolean): Promise<OperacioUsuariResponseDTO>;
 }

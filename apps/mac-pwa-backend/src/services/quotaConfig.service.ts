@@ -3,7 +3,6 @@ import type {
     CreateQuotaConfigDTO,
     DeleteQuotaConfigsDTO,
     AddTemporadesQuotaConfigDTO,
-    CategoriaResponseDTO,
     QuotaConfigResponseDTO,
     UpdateQuotaConfigDTO,
 } from 'shared';
@@ -19,23 +18,6 @@ export class QuotaConfigService implements IQuotaConfigService {
 
     // Converteix el model Prisma en un DTO HTTP i serialitza les dates com ISO.
     // El DTO evita exposar directament l'estructura interna de Prisma.
-    private mapCategoriaToDTO(category: QuotaConfigWithCategory['categoria']): CategoriaResponseDTO {
-        return {
-            id: category.id,
-            tipus: category.tipus,
-            anyNaixement: category.anyNaixement,
-            diesActivitat: category.diesActivitat,
-            horaEntrada: category.horaEntrada?.toISOString().slice(11, 19) ?? null,
-            horaSortida: category.horaSortida?.toISOString().slice(11, 19) ?? null,
-            detalls: category.detalls,
-            usuaris: category.usuaris.map((user) => user.id),
-            rankings: category.rankings.map((ranking) => ranking.id),
-            quotaConfigs: category.quotaConfigs.map((quota) => quota.id),
-            createdAt: category.createdAt.toISOString(),
-            updatedAt: category.updatedAt.toISOString(),
-        };
-    }
-
     private mapToDTO(config: QuotaConfigWithCategory): QuotaConfigResponseDTO {
         return {
             id: config.id,
@@ -44,7 +26,7 @@ export class QuotaConfigService implements IQuotaConfigService {
             preuBase: config.preuBase,
             temporadesAplicada: config.temporadesAplicada,
             activa: config.activa,
-            categoria: this.mapCategoriaToDTO(config.categoria),
+            categoria: config.categoria?.id ?? null,
             createdAt: config.createdAt.toISOString(),
             updatedAt: config.updatedAt.toISOString(),
         };
@@ -178,11 +160,4 @@ export class QuotaConfigService implements IQuotaConfigService {
         return configs.map((config) => this.mapToDTO(config));
     }
 
-    async getByCategory(categoriaId: string): Promise<QuotaConfigResponseDTO[]> {
-        if (!await this.repository.categoryExists(categoriaId)) {
-            throw new Error('La categoria no existeix.');
-        }
-        const configs = await this.repository.findByCategory(categoriaId);
-        return configs.map((config) => this.mapToDTO(config));
-    }
 }

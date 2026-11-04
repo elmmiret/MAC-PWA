@@ -16,5 +16,4 @@ export interface IQuotaConfigService {
     getById(id: string): Promise<QuotaConfigResponseDTO>;
     getByName(nom: string): Promise<QuotaConfigResponseDTO>;
     getByType(tipus: string): Promise<QuotaConfigResponseDTO[]>;
-    getByCategory(categoriaId: string): Promise<QuotaConfigResponseDTO[]>;
 }

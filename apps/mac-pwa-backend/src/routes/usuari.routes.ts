@@ -60,6 +60,71 @@ router.get('/allUsuaris', ...adminOnly, (req, res) => usuariController.getAll(re
 
 /**
  * @swagger
+ * /api/usuaris/setEntrenador/{id}:
+ *   patch:
+ *     summary: Marca un usuari com a entrenador
+ *     tags: [Usuaris]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200: { description: Usuari marcat com a entrenador }
+ */
+router.patch('/setEntrenador/:id', ...adminOnly, (req, res) => usuariController.setEntrenador(req, res));
+
+/**
+ * @swagger
+ * /api/usuaris/unsetEntrenador/{id}:
+ *   patch:
+ *     summary: Desmarca un usuari com a entrenador
+ *     tags: [Usuaris]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200: { description: Usuari desmarcat com a entrenador }
+ */
+router.patch('/unsetEntrenador/:id', ...adminOnly, (req, res) => usuariController.unsetEntrenador(req, res));
+
+/**
+ * @swagger
+ * /api/usuaris/setFamiliar/{id}:
+ *   patch:
+ *     summary: Assigna un usuari familiar a diversos usuaris
+ *     tags: [Usuaris]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *         description: Usuari que serà el familiar comú
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [usuariIds]
+ *             properties:
+ *               usuariIds:
+ *                 type: array
+ *                 minItems: 1
+ *                 items: { type: string }
+ *     responses:
+ *       200: { description: Familiar assignat correctament }
+ *       400: { description: Relació circular o usuaris inexistents }
+ */
+router.patch('/setFamiliar/:id', ...adminOnly, (req, res) => usuariController.setFamiliar(req, res));
+
+/**
+ * @swagger
  * /api/usuaris/{id}:
  *   get:
  *     summary: Obté un usuari pel seu ID intern de PostgreSQL

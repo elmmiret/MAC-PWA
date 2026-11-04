@@ -1,5 +1,3 @@
-import type { CategoriaResponseDTO } from './categoria.dto';
-
 export interface CreateQuotaConfigDTO {
     nom: string;
     tipus: string;
@@ -26,7 +24,7 @@ export interface QuotaConfigResponseDTO {
     preuBase: number;
     temporadesAplicada: string[];
     activa: boolean;
-    categoria: CategoriaResponseDTO;
+    categoria: string | null;
     createdAt: string;
     updatedAt: string;
 }

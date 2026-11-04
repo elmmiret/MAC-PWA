@@ -101,11 +101,4 @@ export class QuotaConfigController {
         }
     }
 
-    async getByCategory(req: Request, res: Response): Promise<void> {
-        try {
-            res.status(200).json(await this.service.getByCategory(getRouteParam(req.params.categoriaId)));
-        } catch (error: any) {
-            res.status(404).json({ message: error.message });
-        }
-    }
 }

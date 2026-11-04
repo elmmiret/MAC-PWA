@@ -81,6 +81,7 @@ model Categoria {
 model Usuari {
   id                  String            @id @default(uuid())
   firebaseUid         String?           @unique   // S'assigna quan l'usuari inicia sessió amb Google
+  entrenador          Boolean           @default(false)
   imatgePerfil        String?
   emailPrincipal      String            @unique
   emailSecundari      String?
@@ -111,9 +112,14 @@ model Usuari {
   categoriaId         String?
   categoria           Categoria?         @relation(fields: [categoriaId], references: [id])
 
-  // Relacio amb Pagament i AtletaRanking
+  // FK amb Usuari (familiar)
+  usuariFamiliarId    String? 
+  usuariFamiliar      Usuari?           @relation("UsuariFamiliar", fields: [usuariFamiliarId], references: [id])
+
+  // Relacio amb Pagament, AtletaRanking i Usuari (familiars)
   pagaments           Pagament[]
   rankings            AtletaRanking[]
+  usuarisFamiliars    Usuari[]          @relation("UsuariFamiliar")
 
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt

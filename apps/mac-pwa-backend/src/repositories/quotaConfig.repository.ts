@@ -2,13 +2,7 @@ import { Prisma, TQuota } from '@prisma/client';
 import { prisma } from '../config/prisma.js';
 
 const quotaConfigInclude = {
-    categoria: {
-        include: {
-            usuaris: true,
-            rankings: true,
-            quotaConfigs: true,
-        },
-    },
+    categoria: { select: { id: true } },
 } satisfies Prisma.QuotaConfigInclude;
 
 // Tipus que inclou la categoria i les seves relacions, per a ser utilitzat en les consultes de QuotaConfig.
@@ -41,14 +35,6 @@ export class QuotaConfigRepository {
         return prisma.quotaConfig.findMany({
             where: { tipus },
             orderBy: { nom: 'asc' },
-            include: quotaConfigInclude,
-        });
-    }
-
-    async findByCategory(categoriaId: string): Promise<QuotaConfigWithCategory[]> {
-        return prisma.quotaConfig.findMany({
-            where: { categoriaId },
-            orderBy: [{ tipus: 'asc' }, { nom: 'asc' }],
             include: quotaConfigInclude,
         });
     }

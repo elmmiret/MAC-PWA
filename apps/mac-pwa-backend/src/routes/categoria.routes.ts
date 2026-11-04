@@ -1,11 +1,9 @@
 import { Router } from 'express';
 import { CategoriaController } from '../controllers/categoria.controller.js';
-import { QuotaConfigController } from '../controllers/quotaConfig.controller.js';
 import { isAdmin, verifyFirebaseToken } from '../middlewares/auth.middleware.js';
 
 const router = Router();
 const controller = new CategoriaController();
-const quotaConfigController = new QuotaConfigController();
 const adminOnly = [verifyFirebaseToken, isAdmin];
 
 /**
@@ -127,41 +125,6 @@ router.patch('/set/:id', ...adminOnly, (req, res) => controller.setUsers(req, re
  *       200: { description: Usuaris desassignats correctament }
  */
 router.patch('/unset/:id', ...adminOnly, (req, res) => controller.unsetUsers(req, res));
-
-/**
- * @swagger
- * /api/categories/{categoriaId}/quotaConfigs:
- *   get:
- *     summary: Obté les QuotaConfig d'una categoria
- *     tags: [Categories]
- *     security: [{ bearerAuth: [] }]
- *     parameters:
- *       - in: path
- *         name: categoriaId
- *         required: true
- *         schema: { type: string }
- *     responses:
- *       200: { description: Llista de QuotaConfig de la categoria }
- */
-router.get('/:categoriaId/quotaConfigs', ...adminOnly, (req, res) => quotaConfigController.getByCategory(req, res));
-
-/**
- * @swagger
- * /api/categories/byType/{type}/usuaris:
- *   get:
- *     summary: Obté els usuaris assignats a una categoria
- *     tags: [Categories]
- *     security: [{ bearerAuth: [] }]
- *     parameters:
- *       - in: path
- *         name: type
- *         required: true
- *         schema: { type: string }
- *     responses:
- *       200: { description: Llista d'usuaris en format UsuariResponseDTO }
- *       404: { description: Categoria no trobada }
- */
-router.get('/byType/:type/usuaris', ...adminOnly, (req, res) => controller.getUsersByType(req, res));
 
 /**
  * @swagger

@@ -4,7 +4,6 @@ import type {
     CreateCategoriaDTO,
     SetCategoriaDTO,
     UpdateCategoriaDTO,
-    UsuariResponseDTO,
 } from 'shared';
 import type { ICategoriaService } from '../interfaces/categoria.interface.js';
 import { CategoriaRepository, type CategoriaWithRelations } from '../repositories/categoria.repository.js';
@@ -33,19 +32,6 @@ export class CategoriaService implements ICategoriaService {
         const seconds = rawSeconds === undefined ? 0 : Number(rawSeconds);
         // Converteix la cadena de temps a un objecte Date amb hora UTC, evitant problemes de zona horària.
         return new Date(Date.UTC(1970, 0, 1, Number(hours), Number(minutes), seconds));
-    }
-
-    // Redueix un usuari relacionat a la representació pública permesa dins
-    // de la resposta d'una categoria.
-    private mapUserToDTO(user: CategoriaWithRelations['usuaris'][number]): UsuariResponseDTO {
-        return {
-            id: user.id,
-            firebaseUid: user.firebaseUid,
-            emailPrincipal: user.emailPrincipal,
-            nom: user.nom,
-            cognom1: user.cognom1,
-            cognom2: user.cognom2,
-        };
     }
 
     // Converteix el model Prisma amb relacions en un DTO HTTP, serialitzant dates i
@@ -109,12 +95,6 @@ export class CategoriaService implements ICategoriaService {
         const category = await this.repository.findByType(type as TCategoria);
         if (!category) throw new Error('Categoria no trobada.');
         return this.mapToDTO(category);
-    }
-
-    async getUsersByType(type: string): Promise<UsuariResponseDTO[]> {
-        const category = await this.getByType(type);
-        return (await this.repository.findUsersByCategoryType(category.tipus as TCategoria))
-            .map((user) => this.mapUserToDTO(user));
     }
 
     async update(id: string, dto: UpdateCategoriaDTO): Promise<CategoriaResponseDTO> {

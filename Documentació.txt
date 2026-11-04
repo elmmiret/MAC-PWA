@@ -4,7 +4,6 @@
 - DONE ---> Fer endpoint per obtenir usuari a partir del firebaseId (funcio feta, falta endpoint)
 - DONE ---> Fer endpoint per a /logout i /delete, on logout només ho podrà executar l'usuari per a sortir de la sessió i delete només l'admin
 
-- S'ha d'afegir la relació FAMILIARS a Usuari i també l'atribut DESCOMPTE a Pagaments (pot haber descomptes per numero de familiars al club, per altres motius, etc.).
 - Arreglar endpoint /perfil (cambiarlo a /edit o algo aixi), per a que un administrador pugui editar el perfil d'un Usuari (potser es pot fer que l'Usuari pugui editar algun camp en concret pero no crec)
 - Implementar oblit de contranssenya amb Google.
 - DONE ---> Mirar de corregir la creació d'Usuaris ADMIN, ja que no pot ser que qualsevol es pugui crear un compte d'administrador només a partir d'un atribut de l'endpoint.
@@ -24,9 +23,8 @@
 - DONE ---> Que només un administrador pugui eliminar Usuaris, Usuaris mateixos no poden eliminar el seu propi compte.
 - DONE (revisar) ---> CRUD de Categoria, només executable per administradors.
 
-- Acabar de posar als DTO les relacions que falten (de tot en general: UsuariResponseDTO, CategriaResponseDTO, QuotaConfigResponseDTO, etc.)
+- Acabar de posar als DTO les relacions que falten (de tot en general: UsuariResponseDTO, CategoriaResponseDTO, QuotaConfigResponseDTO, etc.) i fer que un admin pugui editar TOT el perfil d'un Usuari, menys ids i el correu principal.
 - Implementar imatge de perfil, imatges de noticies, etc. amb Firebase Storage.
-- Implementar UsuariCompleteResponseDTO per a fer-lo servir a /update/:id i a /:id, així s'obté tota informació de l'Usuari. (potser es millor nomes tenir un DTO que retorni totes les dades i ja)
 - Probar d'implementar la recuperació de la contrassenya, però si només es pot accedir amb Google, em sembla que no caldrà). eliminar /register vamos, demanar al chat
 - Revisar els endpoints i DTOs de Categoria i QuotaConfig (coses a arreglar al dia 30 octubre)
 
@@ -34,10 +32,16 @@
 - Al CREAR una CATEGORIA entre SUB_8 - SUB_23, atribut AnyNaixement es generi automaticament a partir de l'any actual.
 - Fer un endpoint per a ACTUALITZAR AnyNaixement de les CATEGORIES entre SUB-8 - SUB_23. Que al executarlo, s'actualitzin amb l'any actual com a referència.
 - Fer un endpoint per a ASSIGNAR automaticament els Usuaris a la seva CATEGORIA corresponent, a partir de la seva data de naixement i AnyNaixement de les CATEGORIES. (entre SUB_8 - SUB_23, més grans a mà)
-- Quan es tinguin els PAGAMENTS, si un Usuari es entrenador (entrenador: true) -30% al preu de la quota, si te usuariFamiliarId -10% al preu de la quota.
+- Quan es tinguin els PAGAMENTS, si un Usuari es entrenador (entrenador: true) -30% al preu de la quota, si te usuariFamiliarId -10% al preu de la quota. (quina quota?)
 - Afegir a PAGAMENT un camp de descompte (que sigui un enter entre 0-100), per a saber quin percentatge de descompte se li aplica al pagament. El preu del PAGAMENT ja te el descompte aplicat. Es pot veure el preu original de la quota a la QUOTACONFIG assignada.
-- Si l'USUARI del PAGAMENT d'una quota tipus SOCI es menor (estrictament) de 18 anys
+- Si l'USUARI del PAGAMENT d'una quota tipus SOCI es menor (estrictament) de 18 anys, se li descompta el 50% del preuBase.
 - Afegir endpoint POST /api/usuaris/:id/promoure-admin, per a fer administrador a un Usuari acabat de registrar.
+- Que al obtenir una QuotaConfig o més, que l'atribut categoria només retorni l'id de la categoria a la que pertany, no tota la seva informació.
+- atribut de QuotaConfig temporadesAplicada ha d'estar en ordre descendent, tenint com a referència el primer any.
+- Quan es fa DELETE d'un Usuari, posar a null tots els usuariFamiliarIds dels Usuaris afectats
+- DONE ---> Passar endpoint get /api/categories/{categoriaId}/quotaConfigs de Categoria a QuotaConfig (get /api/quotaConfigs/categoria/{categoriaId}) obtenir quotaConfigs d'una Categoria (ELIMINARLO)
+- DONE ---> Passar endpoint get /api/categories/byType/{type}/usuaris de Categoria a Usuari (get /api/usuaris/categoria/{categoriaId) obtenir Usuaris d'una Categoria (ELIMINARLO)        Amb Get Categoria ja esta
+- DONE ---> Quan es retorna una QuotaConfig, que l'atribut categoria només retorni l'id de la QuotaConfig, no tot el CategoriaResponseDTO.
 
 - Aplicar PAGINACIÓ als endpoints que poden retornar moltes dades
 - Aplicar FILTRES als endpoints podrien acceptalos, com a getAllUsuaris, getAllPagamentsFromUser, etc.
@@ -121,6 +125,19 @@
 3 novembre:
 - Arreglats alguns problemes de dependències.
 - Arreglats endpoints CRUD de QuotaConfig (coses del 30 d'octubre)
+- Identificats errors o millores en les implementacions i returns dels endpoints ja creats, llestos per a ser arreglats o millorats
+
+4 novembre:
+- Afegits atributs entrenador (boolean) i usuariFamiliarId (string) a Usuari. Aquests atributs serviran per aplicar descomptes als Pagaments de les quotes (per implementar)
+- Implementats endpoints a usuari.routes.ts per a fer a un Usuari entrenador, desfer-lo i per a setejar un familiar a molts Usuaris. (quan s'elimini un Usuari, desenllaçar-lo de tots els que el tenien com a familiar)
+- Afegit a UsuariReponseDTO (i als mappers afectats) tots els atributs d'Usuari i els ids de les seves relacions: Categoria, Pagaments i Usuari
+- Eliminat endpoints de categoria.routes.ts (i la seva implementacio) per obtenir les QuotaConfigs i Usuaris d'una Categoria
+- Getters de QuotaConfig ara retornen nomes l'id de la categoria relacionada, no CategoriaResponseDTO.
+
+
+
+
+374fb906-6673-4337-9c26-38f9c0c37604 --> id soci
 
 
 
