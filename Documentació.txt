@@ -35,8 +35,8 @@
 - Fer un endpoint per a ACTUALITZAR AnyNaixement de les CATEGORIES entre SUB-8 - SUB_23. Que al executarlo, s'actualitzin amb l'any actual com a referència.
 - Fer un endpoint per a ASSIGNAR automaticament els Usuaris a la seva CATEGORIA corresponent, a partir de la seva data de naixement i AnyNaixement de les CATEGORIES. (entre SUB_8 - SUB_23, més grans a mà)
 
-- Quan es tinguin els PAGAMENTS, si un Usuari es entrenador (entrenador: true) -30% al preu de la quota, si te usuariFamiliarId -10% al preu de la quota. (quina quota?)
-- Afegir a PAGAMENT un camp de descompte (que sigui un enter entre 0-100), per a saber quin percentatge de descompte se li aplica al pagament. El preu del PAGAMENT ja te el descompte aplicat. Es pot veure el preu original de la quota a la QUOTACONFIG assignada.
+- DONE ---> Quan es tinguin els PAGAMENTS, si un Usuari es entrenador (entrenador: true) -30% al preu de la quota, si te usuariFamiliarId -10% al preu de la quota. (quina quota?)
+- Afegir atribut 'descompteAplicat' a Pagament ?????
 - Si l'USUARI del PAGAMENT d'una quota tipus SOCI es menor (estrictament) de 18 anys, se li descompta el 50% del preuBase.
 
 - ERROR: [0] The `fromJSON` method is deprecated. Please use the `JWT` constructor instead. For more details, see https://cloud.google.com/docs/authentication/external/externally-sourced-credentials.

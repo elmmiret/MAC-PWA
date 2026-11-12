@@ -38,13 +38,14 @@ export class PagamentService implements IPagamentService {
 
     private async computePreu(preuBase: number, id: string): Promise<number> {
         let discount = 0;
-        // Obtenir l'usuari especificat per l'ID i aplicar descomptes segons les seves característiques.
         const usuariData = await this.usuariRepository.findById(id);
         if (!usuariData) {
             throw new Error(`Usuari no trobat: ${id}`);
         }
 
+        // Aplicar descompte si és entrenador
         if(usuariData.entrenador) discount += 0.3;
+        // Aplicar descompte si té un familiar associat
         if(usuariData.usuariFamiliarId) discount += 0.1;
 
         const finalPrice = preuBase * (1 - discount);
