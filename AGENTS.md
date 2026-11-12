@@ -24,7 +24,7 @@ From `mac-pwa-backend/`:
 
 - `npm run dev` starts the server with `tsx watch src/index.ts`.
 - `npm run build` compiles TypeScript with `tsc`.
-- `npm run start` runs the compiled server from `dist/index.js`.
+- `npm run start` runs the compiled server from `dist/src/index.js`.
 - `npm run set-admin-claim` runs `scripts/set-admin-claim.ts`.
 - `npm test` is a placeholder and intentionally exits with an error because no tests are defined.
 - `postinstall` runs `prisma skills sync` when dependencies are installed.
@@ -37,7 +37,7 @@ From `mac-pwa-backend/`:
 - Shared DTO imports use a `.js` extension (e.g., `'./dtos/usuari.dto.js'`) because the backend compiles with NodeNext module resolution.
 - Backend TypeScript enables `verbatimModuleSyntax`. Prisma model types (e.g., `Pagament`, `Usuari`) must be imported with `import type`; enums (e.g., `TEstat`, `TQuota`) are values and import normally.
 - Admin-only endpoints follow the `[verifyFirebaseToken, isAdmin]` middleware pattern.
-- Backend `tsconfig.json` has `outDir` and `rootDir` commented out, so `npm run build` emits `.js`, `.d.ts`, and `.map` files next to the source `.ts` files.
+
 
 ## Verification
 
