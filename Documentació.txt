@@ -51,6 +51,10 @@
 
 - Aplicar PAGINACIÓ als endpoints que poden retornar moltes dades
 - Aplicar FILTRES als endpoints podrien acceptalos, com a getAllUsuaris, getAllPagamentsFromUser, etc.
+- Fer endpoints per a que els Usuaris puguin veure la seva propia informació.
+    - Usuari: endpoint, que detecta amb el token l'Usuari, i permet veure les seves dades del perfil
+    - Categoria: endpoint, que detecta amb el token l'Usuari, i permet obtenir tota la informació de la Categoria relacionada a l'Usuari (només les dades de Categoria, res de QuotesConfig)
+    - Pagament: endpoint, que detecta amb el token l'Usuari, i permet obtenir tots els seus Pagaments, amb tota la seva informació (res de QuotesConfig, només els seus atributs)
 
 --------------------------------------------------------------------------------------------------------------------
 

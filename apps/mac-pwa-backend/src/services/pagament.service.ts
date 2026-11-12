@@ -7,12 +7,15 @@ import type {
 } from 'shared';
 import type { IPagamentService } from '../interfaces/pagament.interface.js';
 import { PagamentRepository, type PagamentWithRelations } from '../repositories/pagament.repository.js';
+import { UsuariRepository } from '../repositories/usuari.repository.js';
 
 export class PagamentService implements IPagamentService {
-    private repository: PagamentRepository;
+    private pagamentRepository: PagamentRepository;
+    private usuariRepository: UsuariRepository;
 
     constructor() {
-        this.repository = new PagamentRepository();
+        this.pagamentRepository = new PagamentRepository();
+        this.usuariRepository = new UsuariRepository();
     }
 
     private parseType(value: string): TQuota {
@@ -31,6 +34,21 @@ export class PagamentService implements IPagamentService {
     private formatMotiu(tipus: TQuota, categoriaTipus: string, data: Date): string {
         const dataStr = data.toLocaleDateString('ca-ES');
         return `Pagament de la quota '${tipus}', categoria '${categoriaTipus}', generada el dia '${dataStr}'`;
+    }
+
+    private async computePreu(preuBase: number, id: string): Promise<number> {
+        let discount = 0;
+        // Obtenir l'usuari especificat per l'ID i aplicar descomptes segons les seves característiques.
+        const usuariData = await this.usuariRepository.findById(id);
+        if (!usuariData) {
+            throw new Error(`Usuari no trobat: ${id}`);
+        }
+
+        if(usuariData.entrenador) discount += 0.3;
+        if(usuariData.usuariFamiliarId) discount += 0.1;
+
+        const finalPrice = preuBase * (1 - discount);
+        return Math.round(finalPrice * 100) / 100;
     }
 
     private mapToDTO(pagament: PagamentWithRelations): PagamentResponseDTO {
@@ -59,7 +77,7 @@ export class PagamentService implements IPagamentService {
             throw new Error('Cal indicar almenys una categoria.');
         }
 
-        const categories = await this.repository.findCategoriesWithUsersAndConfigs(categoriaIds, tipus);
+        const categories = await this.pagamentRepository.findCategoriesWithUsersAndConfigs(categoriaIds, tipus);
         const foundIds = new Set(categories.map((c) => c.id));
         const missingIds = categoriaIds.filter((id) => !foundIds.has(id));
         if (missingIds.length > 0) {
@@ -83,7 +101,7 @@ export class PagamentService implements IPagamentService {
                 createInputs.push({
                     usuariId: usuari.id,
                     quotaConfigId: activeConfig.id,
-                    preu: activeConfig.preuBase,
+                    preu: await this.computePreu(activeConfig.preuBase, usuari.id),
                     dataLimit,
                     motiu,
                 });
@@ -94,30 +112,30 @@ export class PagamentService implements IPagamentService {
             throw new Error('No hi ha usuaris associats a les categories indicades.');
         }
 
-        const pagaments = await this.repository.createMany(createInputs);
+        const pagaments = await this.pagamentRepository.createMany(createInputs);
         return pagaments.map((p) => this.mapToDTO(p));
     }
 
     async markPaid(dto: UpdatePagamentsEstatDTO): Promise<number> {
         const ids = [...new Set(dto.ids ?? [])];
         if (ids.length === 0) throw new Error('Cal indicar almenys un pagament.');
-        return this.repository.updateEstatOnlyPendent(ids, TEstat.PAGAT);
+        return this.pagamentRepository.updateEstatOnlyPendent(ids, TEstat.PAGAT);
     }
 
     async markCanceled(dto: UpdatePagamentsEstatDTO): Promise<number> {
         const ids = [...new Set(dto.ids ?? [])];
         if (ids.length === 0) throw new Error('Cal indicar almenys un pagament.');
-        return this.repository.updateEstatOnlyPendent(ids, TEstat.CANCELAT);
+        return this.pagamentRepository.updateEstatOnlyPendent(ids, TEstat.CANCELAT);
     }
 
     async deleteMany(dto: DeletePagamentsDTO): Promise<number> {
         const ids = [...new Set(dto.ids ?? [])];
         if (ids.length === 0) throw new Error('Cal indicar almenys un pagament.');
-        return this.repository.deleteMany(ids);
+        return this.pagamentRepository.deleteMany(ids);
     }
 
     async getByUsuariId(usuariId: string): Promise<PagamentResponseDTO[]> {
-        const pagaments = await this.repository.findByUsuariId(usuariId);
+        const pagaments = await this.pagamentRepository.findByUsuariId(usuariId);
         return pagaments.map((p) => this.mapToDTO(p));
     }
 }
