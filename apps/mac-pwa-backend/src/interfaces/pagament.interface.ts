@@ -1,11 +1,14 @@
-import { Pagament, TEstat} from "@prisma/client";
+import type {
+    CreatePagamentsByCategoriesDTO,
+    DeletePagamentsDTO,
+    PagamentResponseDTO,
+    UpdatePagamentsEstatDTO,
+} from 'shared';
 
 export interface IPagamentService {
-    getByUserId(userId: string): Promise<Pagament[]>;
-    getById(id: string): Promise<Pagament | null>;
-    getByEstat(estat: TEstat): Promise<Pagament[]>;
-    getByUserIdAndEstat(userId: string, estat: TEstat): Promise<Pagament[]>;
-    //createPagament(data: CreatePagamentDTO): Promise<Pagament>;
-    //updatePagament(data: UpdatePagamentDTO): Promise<Pagament>;
-    deletePagaments(id: string[]): Promise<void>;
+    createByCategories(type: string, dto: CreatePagamentsByCategoriesDTO): Promise<PagamentResponseDTO[]>;
+    markPaid(dto: UpdatePagamentsEstatDTO): Promise<number>;
+    markCanceled(dto: UpdatePagamentsEstatDTO): Promise<number>;
+    deleteMany(dto: DeletePagamentsDTO): Promise<number>;
+    getByUsuariId(usuariId: string): Promise<PagamentResponseDTO[]>;
 }

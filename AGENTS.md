@@ -29,6 +29,16 @@ From `mac-pwa-backend/`:
 - `npm test` is a placeholder and intentionally exits with an error because no tests are defined.
 - `postinstall` runs `prisma skills sync` when dependencies are installed.
 
+## Backend specifics
+
+- Prisma uses `prisma.config.ts` to load `DATABASE_URL` from `.env`; the `datasource` block in `schema.prisma` does **not** contain a hardcoded URL.
+- Migrations already exist under `apps/mac-pwa-backend/prisma/migrations/`. Use `npx prisma migrate dev --name <name>` for schema changes, not `db push`.
+- Swagger schemas are manually maintained in `src/config/swagger.ts`. Adding a DTO to `shared` does **not** automatically expose it in Swagger.
+- Shared DTO imports use a `.js` extension (e.g., `'./dtos/usuari.dto.js'`) because the backend compiles with NodeNext module resolution.
+- Backend TypeScript enables `verbatimModuleSyntax`. Prisma model types (e.g., `Pagament`, `Usuari`) must be imported with `import type`; enums (e.g., `TEstat`, `TQuota`) are values and import normally.
+- Admin-only endpoints follow the `[verifyFirebaseToken, isAdmin]` middleware pattern.
+- Backend `tsconfig.json` has `outDir` and `rootDir` commented out, so `npm run build` emits `.js`, `.d.ts`, and `.map` files next to the source `.ts` files.
+
 ## Verification
 
 - For frontend changes, run `npm run lint` and `npm run build` in `mac-pwa-frontend/`.

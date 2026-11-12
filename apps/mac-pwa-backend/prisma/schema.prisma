@@ -150,7 +150,7 @@ model Pagament {
   estat               TEstat          @default(PENDENT)
   dataPagament        DateTime?
   dataLimit           DateTime
-  dataGeneracio       DateTime        @default(now())
+  motiu               String
 
   // FK amb Usuari
   usuariId            String

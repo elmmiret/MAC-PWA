@@ -1,0 +1,123 @@
+import { TEstat, TQuota } from '@prisma/client';
+import type {
+    CreatePagamentsByCategoriesDTO,
+    DeletePagamentsDTO,
+    PagamentResponseDTO,
+    UpdatePagamentsEstatDTO,
+} from 'shared';
+import type { IPagamentService } from '../interfaces/pagament.interface.js';
+import { PagamentRepository, type PagamentWithRelations } from '../repositories/pagament.repository.js';
+
+export class PagamentService implements IPagamentService {
+    private repository: PagamentRepository;
+
+    constructor() {
+        this.repository = new PagamentRepository();
+    }
+
+    private parseType(value: string): TQuota {
+        if (!Object.values(TQuota).includes(value as TQuota)) {
+            throw new Error(`Tipus de quota invàlid: ${value}.`);
+        }
+        return value as TQuota;
+    }
+
+    private computeDataLimit(): Date {
+        const limit = new Date();
+        limit.setMonth(limit.getMonth() + 2);
+        return limit;
+    }
+
+    private formatMotiu(tipus: TQuota, categoriaTipus: string, data: Date): string {
+        const dataStr = data.toLocaleDateString('ca-ES');
+        return `Pagament de la quota '${tipus}', categoria '${categoriaTipus}', generada el dia '${dataStr}'`;
+    }
+
+    private mapToDTO(pagament: PagamentWithRelations): PagamentResponseDTO {
+        return {
+            id: pagament.id,
+            preu: pagament.preu,
+            estat: pagament.estat,
+            dataPagament: pagament.dataPagament?.toISOString() ?? null,
+            dataLimit: pagament.dataLimit.toISOString(),
+            motiu: pagament.motiu,
+            usuariId: pagament.usuari.id,
+            quotaConfigId: pagament.quotaConfig.id,
+            createdAt: pagament.createdAt.toISOString(),
+            updatedAt: pagament.updatedAt.toISOString(),
+        };
+    }
+
+    async createByCategories(
+        type: string,
+        dto: CreatePagamentsByCategoriesDTO,
+    ): Promise<PagamentResponseDTO[]> {
+        const tipus = this.parseType(type);
+        const categoriaIds = [...new Set(dto.categoriaIds ?? [])];
+
+        if (categoriaIds.length === 0) {
+            throw new Error('Cal indicar almenys una categoria.');
+        }
+
+        const categories = await this.repository.findCategoriesWithUsersAndConfigs(categoriaIds, tipus);
+        const foundIds = new Set(categories.map((c) => c.id));
+        const missingIds = categoriaIds.filter((id) => !foundIds.has(id));
+        if (missingIds.length > 0) {
+            throw new Error(`Categoria/s no trobada/s: ${missingIds.join(', ')}.`);
+        }
+
+        const now = new Date();
+        const dataLimit = this.computeDataLimit();
+        const createInputs: { usuariId: string; quotaConfigId: string; preu: number; dataLimit: Date; motiu: string }[] = [];
+
+        for (const categoria of categories) {
+            const activeConfig = categoria.quotaConfigs[0];
+            if (!activeConfig) {
+                throw new Error(
+                    `La categoria '${categoria.tipus}' no té una QuotaConfig de tipus '${tipus}' activa o configurada.`,
+                );
+            }
+
+            const motiu = this.formatMotiu(tipus, categoria.tipus, now);
+            for (const usuari of categoria.usuaris) {
+                createInputs.push({
+                    usuariId: usuari.id,
+                    quotaConfigId: activeConfig.id,
+                    preu: activeConfig.preuBase,
+                    dataLimit,
+                    motiu,
+                });
+            }
+        }
+
+        if (createInputs.length === 0) {
+            throw new Error('No hi ha usuaris associats a les categories indicades.');
+        }
+
+        const pagaments = await this.repository.createMany(createInputs);
+        return pagaments.map((p) => this.mapToDTO(p));
+    }
+
+    async markPaid(dto: UpdatePagamentsEstatDTO): Promise<number> {
+        const ids = [...new Set(dto.ids ?? [])];
+        if (ids.length === 0) throw new Error('Cal indicar almenys un pagament.');
+        return this.repository.updateEstatOnlyPendent(ids, TEstat.PAGAT);
+    }
+
+    async markCanceled(dto: UpdatePagamentsEstatDTO): Promise<number> {
+        const ids = [...new Set(dto.ids ?? [])];
+        if (ids.length === 0) throw new Error('Cal indicar almenys un pagament.');
+        return this.repository.updateEstatOnlyPendent(ids, TEstat.CANCELAT);
+    }
+
+    async deleteMany(dto: DeletePagamentsDTO): Promise<number> {
+        const ids = [...new Set(dto.ids ?? [])];
+        if (ids.length === 0) throw new Error('Cal indicar almenys un pagament.');
+        return this.repository.deleteMany(ids);
+    }
+
+    async getByUsuariId(usuariId: string): Promise<PagamentResponseDTO[]> {
+        const pagaments = await this.repository.findByUsuariId(usuariId);
+        return pagaments.map((p) => this.mapToDTO(p));
+    }
+}

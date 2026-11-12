@@ -1,4 +1,4 @@
-import { Prova } from "@prisma/client";
+import type { Prova } from "@prisma/client";
 
 export interface IProvaService {
     getById(id: string): Promise<Prova | null>;

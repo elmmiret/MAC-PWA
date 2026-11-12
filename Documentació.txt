@@ -9,6 +9,7 @@
 - DONE ---> Mirar de corregir la creació d'Usuaris ADMIN, ja que no pot ser que qualsevol es pugui crear un compte d'administrador només a partir d'un atribut de l'endpoint.
  ---Actualmente /register permite enviar "tipus": "ADMIN". Eso es un riesgo de seguridad, porque cualquier persona podría registrarse como administrador.
  ---Lo recomendable es que los registros públicos siempre sean NO_SOCI y que la creación de administradores se haga por un flujo protegido.
+
 - Fer FRONTEND per a registrar (administradors) i iniciar sessio (usuaris). Des d'on s'haurà de gestionar el pop up de Google. Fer servir patrò bLoc.
  ---El frontend debe iniciar sesión con Google mediante Firebase Client SDK y enviar el firebaseToken a /api/auth/google.
 
@@ -23,18 +24,23 @@
 - DONE ---> Que només un administrador pugui eliminar Usuaris, Usuaris mateixos no poden eliminar el seu propi compte.
 - DONE (revisar) ---> CRUD de Categoria, només executable per administradors.
 
-- Acabar de posar als DTO les relacions que falten (de tot en general: UsuariResponseDTO, CategoriaResponseDTO, QuotaConfigResponseDTO, etc.) i fer que un admin pugui editar TOT el perfil d'un Usuari, menys ids i el correu principal.
+- Acabar de posar als DTO les relacions que falten (de tot en general: UsuariResponseDTO (done), CategoriaResponseDTO, QuotaConfigResponseDTO, etc.) i fer que un admin i el propi Usuari puguin editar TOT el perfil d'un Usuari, menys ids i el correu principal.
 - Implementar imatge de perfil, imatges de noticies, etc. amb Firebase Storage.
 - Probar d'implementar la recuperació de la contrassenya, però si només es pot accedir amb Google, em sembla que no caldrà). eliminar /register vamos, demanar al chat
 - Revisar els endpoints i DTOs de Categoria i QuotaConfig (coses a arreglar al dia 30 octubre)
 
 - Afegir atributs a USUARI: entrenador (boolean, per default es false) i usuariFamiliarId (id d'un usuari ja a la base de dades que es el seu familiar (string | null)). Aquests atributs influiran en els pagaments, ja que proporcionaran descomptes %. (afegir endpoint per fer Usuaris entrenadors i per a desferlos. Tambe endpoint per a assignar un usuari existent a molts usuaris, com a familiar seu, si en tenen un, sobreescriurel, i si l'usuari familiar assignat es eliminat de la base de dades, el camp es queda null per a tots els usuaris que el tenien assignat).
+
 - Al CREAR una CATEGORIA entre SUB_8 - SUB_23, atribut AnyNaixement es generi automaticament a partir de l'any actual.
 - Fer un endpoint per a ACTUALITZAR AnyNaixement de les CATEGORIES entre SUB-8 - SUB_23. Que al executarlo, s'actualitzin amb l'any actual com a referència.
 - Fer un endpoint per a ASSIGNAR automaticament els Usuaris a la seva CATEGORIA corresponent, a partir de la seva data de naixement i AnyNaixement de les CATEGORIES. (entre SUB_8 - SUB_23, més grans a mà)
+
 - Quan es tinguin els PAGAMENTS, si un Usuari es entrenador (entrenador: true) -30% al preu de la quota, si te usuariFamiliarId -10% al preu de la quota. (quina quota?)
 - Afegir a PAGAMENT un camp de descompte (que sigui un enter entre 0-100), per a saber quin percentatge de descompte se li aplica al pagament. El preu del PAGAMENT ja te el descompte aplicat. Es pot veure el preu original de la quota a la QUOTACONFIG assignada.
 - Si l'USUARI del PAGAMENT d'una quota tipus SOCI es menor (estrictament) de 18 anys, se li descompta el 50% del preuBase.
+
+- ERROR: [0] The `fromJSON` method is deprecated. Please use the `JWT` constructor instead. For more details, see https://cloud.google.com/docs/authentication/external/externally-sourced-credentials.
+
 - Afegir endpoint POST /api/usuaris/:id/promoure-admin, per a fer administrador a un Usuari acabat de registrar.
 - Que al obtenir una QuotaConfig o més, que l'atribut categoria només retorni l'id de la categoria a la que pertany, no tota la seva informació.
 - atribut de QuotaConfig temporadesAplicada ha d'estar en ordre descendent, tenint com a referència el primer any.
@@ -134,10 +140,12 @@
 - Eliminat endpoints de categoria.routes.ts (i la seva implementacio) per obtenir les QuotaConfigs i Usuaris d'una Categoria
 - Getters de QuotaConfig ara retornen nomes l'id de la categoria relacionada, no CategoriaResponseDTO.
 
-
-
-
-374fb906-6673-4337-9c26-38f9c0c37604 --> id soci
+12 novembre:
+- Afegits endpoints per a Pagament:
+    - Creacio dels Pagaments a partir de la Categoria i el tipus de Quota. Es generen tots els Pagaments dels Usuaris de la Categoria, en estat PENDENT.
+    - Cambiar estat a PAGAT dels Pagaments indicats (nomes els que estaven en PENDENT)
+    - Cambiar estat a CANCELAT dels Pagaments indicats (nomes els que estaven en PENDENT)
+    - Eliminació dels Pagaments indicats.
 
 
 

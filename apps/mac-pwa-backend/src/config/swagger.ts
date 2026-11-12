@@ -120,6 +120,42 @@ const options: swaggerJSDoc.Options = {
                         usuariIds: { type: 'array', items: { type: 'string' }, minItems: 1 },
                     },
                 },
+                CreatePagamentsByCategoriesDTO: {
+                    type: 'object',
+                    required: ['categoriaIds'],
+                    properties: {
+                        categoriaIds: { type: 'array', items: { type: 'string' }, minItems: 1 },
+                    },
+                },
+                UpdatePagamentsEstatDTO: {
+                    type: 'object',
+                    required: ['ids'],
+                    properties: {
+                        ids: { type: 'array', items: { type: 'string' }, minItems: 1 },
+                    },
+                },
+                DeletePagamentsDTO: {
+                    type: 'object',
+                    required: ['ids'],
+                    properties: {
+                        ids: { type: 'array', items: { type: 'string' }, minItems: 1 },
+                    },
+                },
+                PagamentResponseDTO: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'string' },
+                        preu: { type: 'number', format: 'float' },
+                        estat: { type: 'string', enum: ['PENDENT', 'PAGAT', 'CANCELAT'] },
+                        dataPagament: { type: 'string', format: 'date-time', nullable: true },
+                        dataLimit: { type: 'string', format: 'date-time' },
+                        motiu: { type: 'string' },
+                        usuariId: { type: 'string' },
+                        quotaConfigId: { type: 'string' },
+                        createdAt: { type: 'string', format: 'date-time' },
+                        updatedAt: { type: 'string', format: 'date-time' },
+                    },
+                },
                 CategoriaResponseDTO: {
                     type: 'object',
                     properties: {
