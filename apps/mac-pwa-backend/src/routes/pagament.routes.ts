@@ -5,6 +5,7 @@ import { isAdmin, verifyFirebaseToken } from '../middlewares/auth.middleware.js'
 const router = Router();
 const controller = new PagamentController();
 const adminOnly: RequestHandler[] = [verifyFirebaseToken, isAdmin];
+const authenticated: RequestHandler[] = [verifyFirebaseToken];
 
 /**
  * @swagger
@@ -79,6 +80,26 @@ router.patch('/canceled', ...adminOnly, (req, res) => controller.markCanceled(re
  *       200: { description: Pagaments eliminats }
  */
 router.delete('/', ...adminOnly, (req, res) => controller.deleteMany(req, res));
+
+/**
+ * @swagger
+ * /api/pagaments/me:
+ *   get:
+ *     summary: Obté els pagaments de l'usuari autenticat
+ *     tags: [Pagaments]
+ *     security: [{ bearerAuth: [] }]
+ *     responses:
+ *       200:
+ *         description: Llista de pagaments de l'usuari autenticat
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/MePagamentResponseDTO'
+ *       401: { description: Usuari no autenticat }
+ */
+router.get('/me', ...authenticated, (req, res) => controller.getCurrent(req, res));
 
 /**
  * @swagger

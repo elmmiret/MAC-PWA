@@ -5,6 +5,7 @@ import { isAdmin, verifyFirebaseToken } from '../middlewares/auth.middleware.js'
 const router = Router();
 const controller = new CategoriaController();
 const adminOnly = [verifyFirebaseToken, isAdmin];
+const authenticated = [verifyFirebaseToken];
 
 /**
  * @swagger
@@ -59,6 +60,25 @@ router.get('/byId/:id', ...adminOnly, (req, res) => controller.getById(req, res)
  *       404: { description: Categoria no trobada }
  */
 router.get('/byType/:type', ...adminOnly, (req, res) => controller.getByType(req, res));
+
+/**
+ * @swagger
+ * /api/categories/me:
+ *   get:
+ *     summary: Obté la categoria de l'usuari autenticat
+ *     tags: [Categories]
+ *     security: [{ bearerAuth: [] }]
+ *     responses:
+ *       200:
+ *         description: Categoria de l'usuari autenticat
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/MeCategoriaResponseDTO'
+ *       401: { description: Usuari no autenticat }
+ *       404: { description: Categoria no trobada }
+ */
+router.get('/me', ...authenticated, (req, res) => controller.getCurrent(req, res));
 
 /**
  * @swagger

@@ -72,4 +72,12 @@ export class PagamentRepository {
             orderBy: { createdAt: 'desc' },
         });
     }
+
+    async findByFirebaseUid(firebaseUid: string): Promise<PagamentWithRelations[]> {
+        return prisma.pagament.findMany({
+            where: { usuari: { firebaseUid } },
+            include: pagamentInclude,
+            orderBy: { createdAt: 'desc' },
+        });
+    }
 }

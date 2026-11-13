@@ -82,3 +82,33 @@ export interface UsuariResponseDTO {
     createdAt: string;
     updatedAt: string;
 }
+
+export interface MeUsuariResponseDTO {
+    entrenador: boolean;
+    usuariFamiliarId: string | null;
+    emailPrincipal: string;
+    imatgePerfil: string | null;
+    emailSecundari: string | null;
+    telefonPrincipal: string | null;
+    telefonSecundari: string | null;
+    nom: string | null;
+    cognom1: string | null;
+    cognom2: string | null;
+    sexe: string | null;
+    dataNaixement: string | null;
+    LocalitatNaixement: string | null;
+    numeroLlicencia: string | null;
+    adreca: string | null;
+    codiPostal: string | null;
+    poblacio: string | null;
+    tipusDocument: string | null;
+    numeroDocument: string | null;
+    nomTutor: string | null;
+    tipusDocumentTutor: string | null;
+    numeroDocumentTutor: string | null;
+    numAbPatronat: number | null;
+    dataInscripcio: string | null;
+    dataBaixa: string | null;
+    dataAltaProva: string | null;
+    iban: string | null;
+}

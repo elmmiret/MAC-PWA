@@ -4,6 +4,7 @@ import { UsuariRepository, type UsuariWithPayments } from '../repositories/usuar
 import { firebaseAdmin } from '../config/firebase.js';
 import type {
     GoogleLoginDTO,
+    MeUsuariResponseDTO,
     OperacioUsuariResponseDTO,
     RegisterUsuariDTO,
     SetFamiliarDTO,
@@ -56,6 +57,38 @@ export class UsuariService implements IUsuariService {
             pagamentIds: usuari.pagaments.map((pagament) => pagament.id),
             createdAt: usuari.createdAt.toISOString(),
             updatedAt: usuari.updatedAt.toISOString(),
+        };
+    }
+
+    private mapToMeUsuariResponseDTO(usuari: UsuariWithPayments): MeUsuariResponseDTO {
+        return {
+            entrenador: usuari.entrenador,
+            usuariFamiliarId: usuari.usuariFamiliarId,
+            emailPrincipal: usuari.emailPrincipal,
+            imatgePerfil: usuari.imatgePerfil,
+            emailSecundari: usuari.emailSecundari,
+            telefonPrincipal: usuari.telefonPrincipal,
+            telefonSecundari: usuari.telefonSecundari,
+            nom: usuari.nom,
+            cognom1: usuari.cognom1,
+            cognom2: usuari.cognom2,
+            sexe: usuari.sexe,
+            dataNaixement: usuari.dataNaixement?.toISOString() ?? null,
+            LocalitatNaixement: usuari.LocalitatNaixement,
+            numeroLlicencia: usuari.numeroLlicencia,
+            adreca: usuari.adreca,
+            codiPostal: usuari.codiPostal,
+            poblacio: usuari.poblacio,
+            tipusDocument: usuari.tipusDocument,
+            numeroDocument: usuari.numeroDocument,
+            nomTutor: usuari.nomTutor,
+            tipusDocumentTutor: usuari.tipusDocumentTutor,
+            numeroDocumentTutor: usuari.numeroDocumentTutor,
+            numAbPatronat: usuari.numAbPatronat,
+            dataInscripcio: usuari.dataInscripcio?.toISOString() ?? null,
+            dataBaixa: usuari.dataBaixa?.toISOString() ?? null,
+            dataAltaProva: usuari.dataAltaProva?.toISOString() ?? null,
+            iban: usuari.iban,
         };
     }
 
@@ -161,6 +194,14 @@ export class UsuariService implements IUsuariService {
             throw new Error("L'usuair no existeix.");
         }
         return this.mapToUsuariResponseDTO(usuariDB);
+    }
+
+    async obtenirUsuariAutenticat(firebaseUid: string): Promise<MeUsuariResponseDTO> {
+        const usuariDB = await this.repository.findByFirebaseUid(firebaseUid);
+        if (!usuariDB) {
+            throw new Error("L'usuari no existeix.");
+        }
+        return this.mapToMeUsuariResponseDTO(usuariDB);
     }
 
     async obtenirTotsElsUsuaris(): Promise<UsuariResponseDTO[]> {

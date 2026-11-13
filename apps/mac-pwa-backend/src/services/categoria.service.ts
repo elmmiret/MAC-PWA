@@ -2,6 +2,7 @@ import { DiesSetmana, Prisma, TCategoria } from '@prisma/client';
 import type {
     CategoriaResponseDTO,
     CreateCategoriaDTO,
+    MeCategoriaResponseDTO,
     SetCategoriaDTO,
     UpdateCategoriaDTO,
 } from 'shared';
@@ -53,6 +54,17 @@ export class CategoriaService implements ICategoriaService {
         };
     }
 
+    private mapToMeDTO(category: CategoriaWithRelations): MeCategoriaResponseDTO {
+        return {
+            tipus: category.tipus,
+            anyNaixement: category.anyNaixement,
+            diesActivitat: category.diesActivitat,
+            horaEntrada: this.toTime(category.horaEntrada),
+            horaSortida: this.toTime(category.horaSortida),
+            detalls: category.detalls,
+        };
+    }
+
     // Converteix el DTO rebut per HTTP en l'input Prisma de creació. 
     // Aquí s'adapten especialment enums, dates i valors nuls.
     private mapCreateDTOToPrisma(dto: CreateCategoriaDTO): Prisma.CategoriaCreateInput {
@@ -95,6 +107,12 @@ export class CategoriaService implements ICategoriaService {
         const category = await this.repository.findByType(type as TCategoria);
         if (!category) throw new Error('Categoria no trobada.');
         return this.mapToDTO(category);
+    }
+
+    async getCurrentCategoria(firebaseUid: string): Promise<MeCategoriaResponseDTO> {
+        const category = await this.repository.findByFirebaseUid(firebaseUid);
+        if (!category) throw new Error('Categoria no trobada.');
+        return this.mapToMeDTO(category);
     }
 
     async update(id: string, dto: UpdateCategoriaDTO): Promise<CategoriaResponseDTO> {

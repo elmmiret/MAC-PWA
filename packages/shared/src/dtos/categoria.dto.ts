@@ -49,3 +49,12 @@ export interface CategoriaResponseDTO {
     createdAt: string;
     updatedAt: string;
 }
+
+export interface MeCategoriaResponseDTO {
+    tipus: string;
+    anyNaixement: number[];
+    diesActivitat: string[];
+    horaEntrada: string | null;
+    horaSortida: string | null;
+    detalls: string | null;
+}

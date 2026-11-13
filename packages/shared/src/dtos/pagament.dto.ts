@@ -22,3 +22,11 @@ export interface PagamentResponseDTO {
     createdAt: string;
     updatedAt: string;
 }
+
+export interface MePagamentResponseDTO {
+    preu: number;
+    estat: string;
+    dataPagament: string | null;
+    dataLimit: string;
+    motiu: string;
+}

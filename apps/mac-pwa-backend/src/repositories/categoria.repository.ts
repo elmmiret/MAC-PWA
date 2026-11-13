@@ -31,6 +31,13 @@ export class CategoriaRepository {
         });
     }
 
+    async findByFirebaseUid(firebaseUid: string): Promise<CategoriaWithRelations | null> {
+        return prisma.categoria.findFirst({
+            where: { usuaris: { some: { firebaseUid } } },
+            include: categoryInclude,
+        });
+    }
+
     async update(id: string, data: Prisma.CategoriaUpdateInput): Promise<CategoriaWithRelations> {
         return prisma.categoria.update({
             where: { id },

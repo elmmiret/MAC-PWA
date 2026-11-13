@@ -70,6 +70,22 @@ export class UsuariController {
         }
     }
 
+    async getCurrent(req: AuthenticatedRequest, res: Response): Promise<void> {
+        try {
+            const firebaseUid = req.user?.uid;
+
+            if (!firebaseUid) {
+                res.status(401).json({ message: 'Usuari no autenticat.' });
+                return;
+            }
+
+            const usuariDto = await this.service.obtenirUsuariAutenticat(firebaseUid);
+            res.status(200).json(usuariDto);
+        } catch (error: any) {
+            res.status(404).json({ message: error.message });
+        }
+    }
+
     async getAll(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
             const usuaris = await this.service.obtenirTotsElsUsuaris();

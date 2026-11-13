@@ -5,6 +5,7 @@ import { isAdmin, verifyFirebaseToken } from '../middlewares/auth.middleware.js'
 const router = Router();
 const usuariController = new UsuariController();
 const adminOnly = [verifyFirebaseToken, isAdmin];
+const authenticated = [verifyFirebaseToken];
 
 /**
  * @swagger
@@ -122,6 +123,26 @@ router.patch('/unsetEntrenador/:id', ...adminOnly, (req, res) => usuariControlle
  *       400: { description: Relació circular o usuaris inexistents }
  */
 router.patch('/setFamiliar/:id', ...adminOnly, (req, res) => usuariController.setFamiliar(req, res));
+
+/**
+ * @swagger
+ * /api/usuaris/me:
+ *   get:
+ *     summary: Obté les dades de l'usuari autenticat
+ *     tags: [Usuaris]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Retorna les dades de l'usuari autenticat sense camps interns
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/MeUsuariResponseDTO'
+ *       401:
+ *         description: Usuari no autenticat
+ */
+router.get('/me', ...authenticated, (req, res) => usuariController.getCurrent(req, res));
 
 /**
  * @swagger

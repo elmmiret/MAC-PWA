@@ -1,6 +1,7 @@
 import type {
     CreatePagamentsByCategoriesDTO,
     DeletePagamentsDTO,
+    MePagamentResponseDTO,
     PagamentResponseDTO,
     UpdatePagamentsEstatDTO,
 } from 'shared';
@@ -11,4 +12,5 @@ export interface IPagamentService {
     markCanceled(dto: UpdatePagamentsEstatDTO): Promise<number>;
     deleteMany(dto: DeletePagamentsDTO): Promise<number>;
     getByUsuariId(usuariId: string): Promise<PagamentResponseDTO[]>;
+    getCurrentPagaments(firebaseUid: string): Promise<MePagamentResponseDTO[]>;
 }

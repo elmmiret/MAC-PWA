@@ -1,4 +1,5 @@
 import type { Request, Response } from 'express';
+import type { AuthenticatedRequest } from '../middlewares/auth.middleware.js';
 import type {
     CreatePagamentsByCategoriesDTO,
     DeletePagamentsDTO,
@@ -58,6 +59,21 @@ export class PagamentController {
         try {
             const usuariId = getRouteParam(req.params.ususariId);
             res.status(200).json(await this.service.getByUsuariId(usuariId));
+        } catch (error: any) {
+            res.status(400).json({ message: error.message });
+        }
+    }
+
+    async getCurrent(req: AuthenticatedRequest, res: Response): Promise<void> {
+        try {
+            const firebaseUid = req.user?.uid;
+
+            if (!firebaseUid) {
+                res.status(401).json({ message: 'Usuari no autenticat.' });
+                return;
+            }
+
+            res.status(200).json(await this.service.getCurrentPagaments(firebaseUid));
         } catch (error: any) {
             res.status(400).json({ message: error.message });
         }

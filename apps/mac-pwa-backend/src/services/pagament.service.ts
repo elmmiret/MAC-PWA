@@ -2,6 +2,7 @@ import { TEstat, TQuota } from '@prisma/client';
 import type {
     CreatePagamentsByCategoriesDTO,
     DeletePagamentsDTO,
+    MePagamentResponseDTO,
     PagamentResponseDTO,
     UpdatePagamentsEstatDTO,
 } from 'shared';
@@ -64,6 +65,16 @@ export class PagamentService implements IPagamentService {
             quotaConfigId: pagament.quotaConfig.id,
             createdAt: pagament.createdAt.toISOString(),
             updatedAt: pagament.updatedAt.toISOString(),
+        };
+    }
+
+    private mapToMeDTO(pagament: PagamentWithRelations): MePagamentResponseDTO {
+        return {
+            preu: pagament.preu,
+            estat: pagament.estat,
+            dataPagament: pagament.dataPagament?.toISOString() ?? null,
+            dataLimit: pagament.dataLimit.toISOString(),
+            motiu: pagament.motiu,
         };
     }
 
@@ -138,5 +149,10 @@ export class PagamentService implements IPagamentService {
     async getByUsuariId(usuariId: string): Promise<PagamentResponseDTO[]> {
         const pagaments = await this.pagamentRepository.findByUsuariId(usuariId);
         return pagaments.map((p) => this.mapToDTO(p));
+    }
+
+    async getCurrentPagaments(firebaseUid: string): Promise<MePagamentResponseDTO[]> {
+        const pagaments = await this.pagamentRepository.findByFirebaseUid(firebaseUid);
+        return pagaments.map((p) => this.mapToMeDTO(p));
     }
 }
