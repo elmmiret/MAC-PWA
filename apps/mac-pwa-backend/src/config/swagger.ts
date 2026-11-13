@@ -34,6 +34,16 @@ const options: swaggerJSDoc.Options = {
                         },
                     },
                 },
+                SetAdminDTO: {
+                    type: 'object',
+                    required: ['firebaseUid'],
+                    properties: {
+                        firebaseUid: {
+                            type: 'string',
+                            description: 'Firebase UID de l\'usuari que es vol promoure a administrador.',
+                        },
+                    },
+                },
                 UpdateUsuariDTO: {
                     type: 'object',
                     properties: {

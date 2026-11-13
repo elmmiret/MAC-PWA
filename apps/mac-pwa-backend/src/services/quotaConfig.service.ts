@@ -24,7 +24,11 @@ export class QuotaConfigService implements IQuotaConfigService {
             tipus: config.tipus,
             nom: config.nom,
             preuBase: config.preuBase,
-            temporadesAplicada: config.temporadesAplicada,
+            temporadesAplicada: [...config.temporadesAplicada].sort((a, b) => {
+                const startA = Number(a.split('-')[0]);
+                const startB = Number(b.split('-')[0]);
+                return startA - startB;
+            }),
             activa: config.activa,
             categoria: config.categoria?.id ?? null,
             createdAt: config.createdAt.toISOString(),

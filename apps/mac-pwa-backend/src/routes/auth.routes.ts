@@ -86,4 +86,28 @@ router.post('/google', (req, res) => authController.google(req, res));
  */
 router.post('/logout', verifyFirebaseToken, (req, res) => authController.logout(req, res));
 
+/**
+ * @swagger
+ * /api/auth/set-admin:
+ *   post:
+ *     summary: Assigna el rol d'administrador a un usuari de Firebase
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/SetAdminDTO'
+ *     responses:
+ *       200:
+ *         description: Usuari promogut a administrador
+ *       400:
+ *         description: firebaseUid invàlid o error de Firebase
+ *       403:
+ *         description: Es requereixen permisos d'administrador
+ */
+router.post('/set-admin', verifyFirebaseToken, isAdmin, (req, res) => authController.setAdmin(req, res));
+
 export default router;

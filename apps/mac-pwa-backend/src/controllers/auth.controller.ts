@@ -1,32 +1,32 @@
 import type { Request, Response } from 'express';
-import { UsuariService } from '../services/usuari.service.js';
+import { AuthService } from '../services/auth.service.js';
 import type { AuthenticatedRequest } from '../middlewares/auth.middleware.js';
-import type { GoogleLoginDTO, RegisterUsuariDTO } from 'shared';
+import type { GoogleLoginDTO, RegisterUsuariDTO, SetAdminDTO } from 'shared';
 
 export class AuthController {
-    private service: UsuariService;
+    private service: AuthService;
 
     constructor() {
-        this.service = new UsuariService();
+        this.service = new AuthService();
     }
 
     async register(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
-        const dto = req.body as RegisterUsuariDTO;
+            const dto = req.body as RegisterUsuariDTO;
 
-        if (!dto.emailPrincipal) {
-            res.status(400).json({ message: 'El correu electrònic és obligatori.' });
-            return;
-        }
+            if (!dto.emailPrincipal) {
+                res.status(400).json({ message: 'El correu electrònic és obligatori.' });
+                return;
+            }
 
-        const usuariDto = await this.service.registrarUsuari(dto);
-        
-        res.status(201).json({
-            message: 'Pre-registre creat correctament a PostgreSQL. L\'usuari podrà accedir amb Google.',
-            usuari: usuariDto
-        });
+            const usuariDto = await this.service.registrarUsuari(dto);
+
+            res.status(201).json({
+                message: 'Pre-registre creat correctament a PostgreSQL. L\'usuari podrà accedir amb Google.',
+                usuari: usuariDto
+            });
         } catch (error: any) {
-        res.status(400).json({ message: error.message });
+            res.status(400).json({ message: error.message });
         }
     }
 
@@ -62,4 +62,19 @@ export class AuthController {
         }
     }
 
+    async setAdmin(req: AuthenticatedRequest, res: Response): Promise<void> {
+        try {
+            const dto = req.body as SetAdminDTO;
+
+            if (!dto.firebaseUid) {
+                res.status(400).json({ message: 'El firebaseUid és obligatori.' });
+                return;
+            }
+
+            await this.service.setAdmin(dto);
+            res.status(200).json({ message: 'Usuari promogut a administrador correctament.' });
+        } catch (error: any) {
+            res.status(400).json({ message: error.message });
+        }
+    }
 }

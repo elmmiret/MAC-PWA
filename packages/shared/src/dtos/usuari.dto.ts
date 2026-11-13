@@ -9,6 +9,10 @@ export interface GoogleLoginDTO {
     firebaseToken: string;
 }
 
+export interface SetAdminDTO {
+    firebaseUid: string;
+}
+
 export interface OperacioUsuariResponseDTO {
     message: string;
     usuariId?: string;
