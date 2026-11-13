@@ -4,6 +4,8 @@ import { isAdmin, verifyFirebaseToken } from '../middlewares/auth.middleware.js'
 
 const router = Router();
 const authController = new AuthController();
+const adminOnly = [verifyFirebaseToken, isAdmin];
+const authenticated = [verifyFirebaseToken];
 
 /**
  * @swagger
@@ -48,7 +50,7 @@ const authController = new AuthController();
  *       400:
  *         description: Falten camps obligatoris o error en el registre
  */
-router.post('/register', verifyFirebaseToken, isAdmin, (req, res) => authController.register(req, res));
+router.post('/register', ...adminOnly, (req, res) => authController.register(req, res));
 
 /**
  * @swagger
@@ -84,7 +86,7 @@ router.post('/google', (req, res) => authController.google(req, res));
  *       401:
  *         description: Token absent o invàlid
  */
-router.post('/logout', verifyFirebaseToken, (req, res) => authController.logout(req, res));
+router.post('/logout', ...authenticated, (req, res) => authController.logout(req, res));
 
 /**
  * @swagger
@@ -108,6 +110,6 @@ router.post('/logout', verifyFirebaseToken, (req, res) => authController.logout(
  *       403:
  *         description: Es requereixen permisos d'administrador
  */
-router.post('/set-admin', verifyFirebaseToken, isAdmin, (req, res) => authController.setAdmin(req, res));
+router.post('/set-admin', ...adminOnly, (req, res) => authController.setAdmin(req, res));
 
 export default router;
