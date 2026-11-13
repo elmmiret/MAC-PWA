@@ -1,0 +1,215 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================
+// ENUMERACIONS
+// ============================================
+
+enum TDocument {
+  DNI
+  NIF
+}
+
+enum TEstat {
+  PENDENT
+  PAGAT
+  CANCELAT
+}
+
+enum DiesSetmana {
+  DILLUNS
+  DIMARTS
+  DIMECRES
+  DIJOUS
+  DIVENDRES
+}
+
+enum TCategoria {
+  SUB_8
+  SUB_10
+  SUB_12
+  SUB_14
+  SUB_16
+  SUB_20
+  SUB_23
+  SENIOR
+  MASTER
+  G_A_S
+  INDIVIDUAL
+  NO_ATLETA
+}
+
+enum TQuota {
+  LLICENCIA
+  ACTIVITAT
+  COMPETICIO
+  SOCI
+}
+
+enum TSexe {
+  M
+  F
+}
+
+// ============================================
+// MODELS
+// ============================================
+
+model Categoria {
+  id                  String            @id @default(uuid())
+  tipus               TCategoria        @unique
+  anyNaixement        Int[]
+  diesActivitat       DiesSetmana[]
+  horaEntrada         DateTime?         @db.Time(0)
+  horaSortida         DateTime?         @db.Time(0)
+  detalls             String?
+
+  // Relacio amb Usuari, Ranking i QuotaConfig
+  usuaris             Usuari[]
+  rankings            Ranking[]
+  quotaConfigs        QuotaConfig[]
+
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+}
+
+model Usuari {
+  id                  String            @id @default(uuid())
+  firebaseUid         String?           @unique   // S'assigna quan l'usuari inicia sessió amb Google
+  entrenador          Boolean           @default(false)
+  imatgePerfil        String?
+  emailPrincipal      String            @unique
+  emailSecundari      String?
+  telefonPrincipal    String?
+  telefonSecundari    String?
+  nom                 String?
+  cognom1             String?
+  cognom2             String?
+  sexe                TSexe?
+  dataNaixement       DateTime?
+  LocalitatNaixement  String?
+  numeroLlicencia     String?
+  adreca              String?
+  codiPostal          String?
+  poblacio            String?
+  tipusDocument       TDocument?
+  numeroDocument      String?
+  nomTutor            String?
+  tipusDocumentTutor  TDocument?
+  numeroDocumentTutor String?
+  numAbPatronat       Int?
+  dataInscripcio      DateTime?
+  dataBaixa           DateTime?
+  dataAltaProva       DateTime?
+  iban                String?
+
+  // FK amb Categoria
+  categoriaId         String?
+  categoria           Categoria?         @relation(fields: [categoriaId], references: [id])
+
+  // FK amb Usuari (familiar)
+  usuariFamiliarId    String? 
+  usuariFamiliar      Usuari?           @relation("UsuariFamiliar", fields: [usuariFamiliarId], references: [id])
+
+  // Relacio amb Pagament, AtletaRanking i Usuari (familiars)
+  pagaments           Pagament[]
+  rankings            AtletaRanking[]
+  usuarisFamiliars    Usuari[]          @relation("UsuariFamiliar")
+
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+}
+
+model QuotaConfig {
+  id                  String          @id @default(uuid())
+  tipus               TQuota
+  nom                 String          @unique
+  preuBase            Float
+  temporadesAplicada  String[]
+  activa              Boolean         @default(false)
+
+  // FK amb Categoria
+  categoriaId         String
+  categoria           Categoria       @relation(fields: [categoriaId], references: [id])
+
+  // Relacio amb Pagament
+  pagaments           Pagament[]
+
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+}
+
+model Pagament {
+  id                  String          @id @default(uuid())
+  preu                Float
+  estat               TEstat          @default(PENDENT)
+  dataPagament        DateTime?
+  dataLimit           DateTime
+  motiu               String
+
+  // FK amb Usuari
+  usuariId            String
+  usuari              Usuari          @relation(fields: [usuariId], references: [id], onDelete: Cascade)
+
+  // FK amb QuotaConfig
+  quotaConfigId       String
+  quotaConfig         QuotaConfig     @relation(fields: [quotaConfigId], references: [id])
+
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+}
+
+model Prova {
+  id                  String          @id @default(uuid())
+  nom                 String          @unique
+
+  // Relacio amb Ranking
+  rankings            Ranking[]
+
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+}
+
+model Ranking {
+  id                  String          @id @default(uuid())
+  nom                 String          @unique
+  sexe                TSexe
+
+  // FK amb Prova
+  provaId             String
+  prova               Prova           @relation(fields: [provaId], references: [id])
+
+  // FK amb Categoria
+  categoriaId         String
+  categoria           Categoria       @relation(fields: [categoriaId], references: [id])
+
+  // Relacio amb AtletaRanking
+  atletaRankings      AtletaRanking[]
+
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+}
+
+model AtletaRanking {
+  id                  String          @id @default(uuid())
+  localitatMarca      String
+  dataMarca           DateTime
+  marca               String
+
+  // FK amb Usuari
+  usuariId            String
+  usuari              Usuari          @relation(fields: [usuariId], references: [id], onDelete: Cascade)
+
+  // FK amb Ranking
+  rankingId           String
+  ranking             Ranking         @relation(fields: [rankingId], references: [id])
+
+  @@unique([usuariId, rankingId])
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+}

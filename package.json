@@ -1,0 +1,14 @@
+{
+    "name": "martorell-atletic-club-monorepo",
+    "private": true,
+    "workspaces": [
+        "apps/*",
+        "packages/*"
+    ],
+    "devDependencies": {
+        "concurrently": "^10.0.6"
+    },
+    "scripts": {
+        "dev:all": "concurrently \"npm --prefix apps/mac-pwa-backend run dev \" \"npm --prefix apps/mac-pwa-frontend run dev\""
+    }
+}
