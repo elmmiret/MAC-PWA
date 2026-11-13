@@ -1,4 +1,4 @@
-import { firebaseAdmin } from '../src/config/firebase';
+import { firebaseAdmin } from '../src/config/firebase.js';
 
 const uid = process.argv[2];
 

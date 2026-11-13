@@ -1,16 +1,11 @@
-COSES PER FER:
-- Arreglar les interficies per a que estiguin implementades als serveis
-- Fer endpoint per obtenir usuari a partir del firebaseId (funcio feta, falta endpoint)
-- Fer endpoint per a /logout i /delete, on logout només ho podrà executar l'usuari per a sortir de la sessió i delete només l'usuari per al seu propi compte o l'admin
+-------------------------------------------- DONE: ------------------------------------------------
 
-- S'ha d'afegir la relació FAMILIARS a Usuari i també l'atribut DESCOMPTE a Pagaments (pot haber descomptes per numero de familiars al club, per altres motius, etc.).
-- Arreglar endpoint /perfil (cambiarlo a /edit o algo aixi), per a que un administrador pugui editar el perfil d'un Usuari (potser es pot fer que l'Usuari pugui editar algun camp en concret pero no crec)
-- Implementar oblit de contranssenya amb Google.
+- DONE ---> Arreglar les interficies per a que estiguin implementades als serveis
+- DONE ---> Fer endpoint per obtenir usuari a partir del firebaseId (funcio feta, falta endpoint)
+- DONE ---> Fer endpoint per a /logout i /delete, on logout només ho podrà executar l'usuari per a sortir de la sessió i delete només l'admin
 - DONE ---> Mirar de corregir la creació d'Usuaris ADMIN, ja que no pot ser que qualsevol es pugui crear un compte d'administrador només a partir d'un atribut de l'endpoint.
  ---Actualmente /register permite enviar "tipus": "ADMIN". Eso es un riesgo de seguridad, porque cualquier persona podría registrarse como administrador.
  ---Lo recomendable es que los registros públicos siempre sean NO_SOCI y que la creación de administradores se haga por un flujo protegido.
-- Fer FRONTEND per a registrar (administradors) i iniciar sessio (usuaris). Des d'on s'haurà de gestionar el pop up de Google. Fer servir patrò bLoc.
- ---El frontend debe iniciar sesión con Google mediante Firebase Client SDK y enviar el firebaseToken a /api/auth/google.
 
 - DONE (parlar-ho) ---> NOMES un ADMINISTRADOR podrà REGISTRAR nous Usuaris. (no cal que Categoria sigui obligatori a l'hora de crear l'Usuari, parlar-ho)
 - DONE ---> NO_SOCIs, es a dir, persones que visiten la web o webapp sense tenir un compte fet pel club, només podran accedir a les funcions bàsiques, sense necessitat de tenir un Usuari.
@@ -18,15 +13,49 @@ COSES PER FER:
     (Usuari haura de donar un compte de correu electrònic obligatoriament (i més dades si escau) per a poder registrar a l'Usuari, les demanaria el club)
 - DONE ---> ARREGLAR o ELIMINAR TUsuari, ja que amb aixo desapareix el NO_SOCI (com a molt tenir un indicador de si es atleta, entrenador, només soci, etc.) i el tipus ADMIN ha de desapareixer i
     implementar-lo tindre del token que retorna Firebase (per a més seguretat).
-- Eliminar, si es viable (una vegada implementat el front per al registre / login amb Google), l'inici de sessió amb email i contrassenya. Es farà ús exclusivament del registre / login amb Google.
-    (probar d'implementar la recuperació de la contrassenya, però si només es pot accedir amb Google, em sembla que no caldrà). eliminar /register vamos, demanar al chat.
-- Implementar imatge de perfil, imatges de noticies, etc. amb Firebase Storage.
+- DONE ---> Eliminar, si es viable (una vegada implementat el front per al registre / login amb Google), l'inici de sessió amb email i contrassenya. Es farà ús exclusivament del registre / login amb Google.
 - DONE ---> Comprovar que un Usuari normal no pot executar els endpoints d'admin.
 - DONE ---> Que només un administrador pugui eliminar Usuaris, Usuaris mateixos no poden eliminar el seu propi compte.
-- Implementar UsuariCompleteResponseDTO per a fer-lo servir a /update/:id i a /:id, així s'obté tota informació de l'Usuari. (potser es millor nomes tenir un DTO que retorni totes les dades i ja)
 - DONE (revisar) ---> CRUD de Categoria, només executable per administradors.
-- Acabar de posar als DTO les relacions que falten (de tot en general: UsuariResponseDTO, CategriaResponseDTO, QuotaConfigResponseDTO, etc.)
-- Revisar els endpoints i DTOs de Categoria i QuotaConfig (coses a arreglar al dia 30 octubre)
+- DONE ---> Quan es tinguin els PAGAMENTS, si un Usuari es entrenador (entrenador: true) -30% al preu de la quota, si te usuariFamiliarId -10% al preu de la quota. (quina quota?)
+- DONE ---> Passar endpoint get /api/categories/{categoriaId}/quotaConfigs de Categoria a QuotaConfig (get /api/quotaConfigs/categoria/{categoriaId}) obtenir quotaConfigs d'una Categoria (ELIMINARLO)
+- DONE ---> Passar endpoint get /api/categories/byType/{type}/usuaris de Categoria a Usuari (get /api/usuaris/categoria/{categoriaId) obtenir Usuaris d'una Categoria (ELIMINARLO)        Amb Get Categoria ja esta
+- DONE ---> Quan es retorna una QuotaConfig, que l'atribut categoria només retorni l'id de la QuotaConfig, no tot el CategoriaResponseDTO.
+- DONE ---> Afegir atributs a USUARI: entrenador (boolean, per default es false) i usuariFamiliarId (id d'un usuari ja a la base de dades que es el seu familiar (string | null)). Aquests atributs influiran en els pagaments, ja que proporcionaran descomptes %. (afegir endpoint per fer Usuaris entrenadors i per a desferlos. Tambe endpoint per a assignar un usuari existent a molts usuaris, com a familiar seu, si en tenen un, sobreescriurel, i si l'usuari familiar assignat es eliminat de la base de dades, el camp es queda null per a tots els usuaris que el tenien assignat).
+- DONE ---> Que al obtenir una QuotaConfig o més, que l'atribut categoria només retorni l'id de la categoria a la que pertany, no tota la seva informació.
+- DONE ---> Fer endpoints per a que els Usuaris puguin veure la seva propia informació.
+    - Usuari: endpoint, que detecta amb el token l'Usuari, i permet veure les seves dades del perfil
+    - Categoria: endpoint, que detecta amb el token l'Usuari, i permet obtenir tota la informació de la Categoria relacionada a l'Usuari (només les dades de Categoria, res de QuotesConfig)
+    - Pagament: endpoint, que detecta amb el token l'Usuari, i permet obtenir tots els seus Pagaments, amb tota la seva informació (res de QuotesConfig, només els seus atributs)
+- DONE ---> Quan es fa DELETE d'un Usuari, posar a null tots els usuariFamiliarIds dels Usuaris afectats
+
+-------------------------------------------- COSES PER FER: ------------------------------------------------
+
+- Fer FRONTEND per a registrar (administradors) i iniciar sessio (usuaris). Des d'on s'haurà de gestionar el pop up de Google. Fer servir patrò bLoc.
+ ---El frontend debe iniciar sesión con Google mediante Firebase Client SDK y enviar el firebaseToken a /api/auth/google.
+
+- Fer que un admin i el propi Usuari puguin editar TOT el perfil d'un Usuari, menys ids i el correu principal.
+            el backend actual no permite al usuario normal guardar imatgePerfil —el DTO no incluye ese campo y la ruta de actualización es solo para admins—.
+
+- Implementar imatge de perfil, imatges de noticies, etc. amb Firebase Storage. (falta la lógica de pujada/lectura y les regles de seguretat de Storage)
+- Probar d'implementar la recuperació de la contrassenya, però si només es pot accedir amb Google, em sembla que no caldrà). eliminar /register vamos, demanar al chat
+
+- Al CREAR una CATEGORIA entre SUB_8 - SUB_23, atribut AnyNaixement es generi automaticament a partir de l'any actual.
+- Fer un endpoint per a ACTUALITZAR AnyNaixement de les CATEGORIES entre SUB-8 - SUB_23. Que al executarlo, s'actualitzin amb l'any actual com a referència.
+- Fer un endpoint per a ASSIGNAR automaticament els Usuaris a la seva CATEGORIA corresponent, a partir de la seva data de naixement i AnyNaixement de les CATEGORIES. (entre SUB_8 - SUB_23, més grans a mà)
+
+- Afegir atribut 'descompteAplicat' a Pagament ?????
+- Si l'USUARI del PAGAMENT d'una quota tipus SOCI es menor (estrictament) de 18 anys, se li descompta el 50% del preuBase (si te data dataNaixement assignada, sino no se li aplica res)
+
+- ERROR: [0] The `fromJSON` method is deprecated. Please use the `JWT` constructor instead. For more details, see https://cloud.google.com/docs/authentication/external/externally-sourced-credentials.
+
+- Afegir endpoint POST /api/usuaris/:id/promoure-admin, per a fer administrador a un Usuari acabat de registrar.
+- Atribut de QuotaConfig temporadesAplicada ha d'estar en ordre descendent, tenint com a referència el primer any.
+
+- Aplicar PAGINACIÓ als endpoints que poden retornar moltes dades
+- Aplicar FILTRES als endpoints podrien acceptalos, com a getAllUsuaris, getAllPagamentsFromUser, etc.
+
+--------------------------------------------------------------------------------------------------------------------
 
 27 octubre:
 - Implementat endpoint per a registrarse a Firebase Auth i crear l'Usuari a PostgreSQL.
@@ -76,27 +105,52 @@ COSES PER FER:
 
 30 octubre:
 - Implementats endpoints CRUD per a Categoria (s'han de repassar i acabar d'arreglar: atributs, funcionalitats, afegir endpoints si escau, dtos, etc.)
-    - A arreglar:
-        - atribut anyNaixement, donarli una volta. Potser millor que sigui un string del tipus "YYYY-YYYY" amb restriccions (com a QuotaConfig)
-        - mirar de cambiar el tipus de l'atribut horaEntrada i horaSortida (que només representi l'hora), tant per crear com per editar.
-        - Que retorni només els ids dels Usuaris, no cal retornar tota la informació
-        - Que retorni només els ids de les QuotaConfigs, no cal retornar tota la informació
-        - Igual per als rankings
-        - Fer un endpoint per a obtenir tots els Usuaris assignats a una Categoria, get /:id/usuaris (aplicar paginació)
-        - Al setejar Usuaris a una Categoria, es sobreescriu el que tenien abans els Usuaris, es a dir, si estaven tots a SUB_8, ara passaran a ser tots SUB_10, sense haber fet unset. (es pot borrar /unset)
+    - A arreglar en els endpoints CRUD de Categoria:
+        - cambiar el tipus de l'atribut horaEntrada i horaSortida (que només representi l'hora), tant per crear com per editar (també tot el que aquest canvi afecti).
+        - els getters d'una Categoria, que retornin només els ids dels Usuaris, no cal retornar tota la informació
+        - els getters d'una Categoria, que retornin només els ids de les QuotaConfigs, no cal retornar tota la informació
+        - Fer un endpoint per a obtenir tots els Usuaris assignats a una Categoria, get /:id/usuaris (amb la seva informació, no només l'id)
+        - Al setejar Usuaris a una Categoria, es sobreescriu el que tenien abans els Usuaris, es a dir, si estaven tots a SUB_8, ara passaran a ser tots SUB_10, sense haber fet unset. (es pot borrar /unset) (NO APLICAR)
+        -----> FET
 
 - Implementats endpoints CRUD per a QuotaConfig (s'han de repassar i acabar d'arreglar: mateix).
     - A arrelgar:
         - Endpoints getter d'una QuotaConfig han de retorna el CategoriaResponseDTO, no el seu id.
         - Al editar una QuotaConfig per a afegir temporadesAplicada, es pot posar al segon any 2028 (com a molt, el primer any ha de ser l'actual i el segon el que ve, no més).
         - Fer endpoint /deactivate per a deixar una Categoria sense QuotaConfig activada.
-        - Donarli una volta a l'endpoint edit (es pot deixar per al nom potser), potser millor fer un endpoint que a partir de l'id / nom d'una QuotaConfig, se li puguin afegir temporadesAplicades, amb les restriccions.
+        - Donarli una volta a l'endpoint edit (es pot deixar per al nom potser), potser millor fer un endpoint que a partir de l'id d'una QuotaConfig, se li puguin afegir temporadesAplicades (FET) (temporadesAplicades ha de mantenir les restriccions que te a l'endpoint d'edit).
         - Potser aplicar paginació a al get quotaConfigs/byType, a un futur get allQuotaConfigs
-        - Al fer delete de QuotesConfig, si una d'elles estaba activa però sense pagaments encara relacionats, que retorni un missatge avisant de que s'ha eliminat una QuotaConfig activa però sense pagaments.
+        - Al fer delete de QuotesConfig, si una d'elles estaba activa (activa is true) però sense pagaments encara relacionats, que retorni un missatge avisant de que s'ha eliminat una QuotaConfig activa però sense pagaments.
+        ------> FET
 
+1 novembre:
+- Comentats mapejadors per a saber quin es el seu funcionament.
+- Actualització d'algunes funcions de serveis (ex: quotaConfig.update(), usuari.registrarUsuari(), usuari.actualitzarUsuari(), etc.) per a fer explícit els tipus de Prisma. (desapareix amb el seguent pas, però queda explícit igualment).
+- Afegits mapejadors a serveis (usuari, categoria, quotaConfig) per a convertir els DTO a tipus de Prisma (per a crear, actualitzar, registrar, etc). El DTO es el contracte d'entrada HTTP i el tipus Prisma valida que l'objecte enviat al repositori coincideixi amb l'esquema de persistència. Això manté la separació entre el model de base de dades i l'API pública.
+- Afegit endpoint get /byType/:type/usuaris a categoria.routes.ts per a obtenir tots els usuaris d'una Categoria (identificada pel seu tipus)
+- Afegit a /apps/mac-pwa-backend/src/utils arxiu route-params.ts per a tenir la utilitat compartida en tots els controladors per a obtenir els paràmetres de ruta
+- Arreglats endpoints CRUD de Categoria (coses del 30 d'octubre)
 
+3 novembre:
+- Arreglats alguns problemes de dependències.
+- Arreglats endpoints CRUD de QuotaConfig (coses del 30 d'octubre)
+- Identificats errors o millores en les implementacions i returns dels endpoints ja creats, llestos per a ser arreglats o millorats
 
+4 novembre:
+- Afegits atributs entrenador (boolean) i usuariFamiliarId (string) a Usuari. Aquests atributs serviran per aplicar descomptes als Pagaments de les quotes (per implementar)
+- Implementats endpoints a usuari.routes.ts per a fer a un Usuari entrenador, desfer-lo i per a setejar un familiar a molts Usuaris. (quan s'elimini un Usuari, desenllaçar-lo de tots els que el tenien com a familiar)
+- Afegit a UsuariReponseDTO (i als mappers afectats) tots els atributs d'Usuari i els ids de les seves relacions: Categoria, Pagaments i Usuari
+- Eliminat endpoints de categoria.routes.ts (i la seva implementacio) per obtenir les QuotaConfigs i Usuaris d'una Categoria
+- Getters de QuotaConfig ara retornen nomes l'id de la categoria relacionada, no CategoriaResponseDTO.
 
+12 novembre:
+- Afegits endpoints per a Pagament:
+    - Creacio dels Pagaments a partir de la Categoria i el tipus de Quota. Es generen tots els Pagaments dels Usuaris de la Categoria, en estat PENDENT.
+    - Cambiar estat a PAGAT dels Pagaments indicats (nomes els que estaven en PENDENT)
+    - Cambiar estat a CANCELAT dels Pagaments indicats (nomes els que estaven en PENDENT)
+    - Eliminació dels Pagaments indicats.
+- Afegida també la lògica per aplicar descomptes als Pagaments de les quotes, tenint en compte si l'Usuari es entrenador (-30%) i si te un familiar relacionat (-10%)
 
-
+13 novembre:
+-
 

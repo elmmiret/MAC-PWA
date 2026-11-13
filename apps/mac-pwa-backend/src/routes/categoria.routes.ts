@@ -1,12 +1,11 @@
 import { Router } from 'express';
-import { CategoriaController } from '../controllers/categoria.controller.ts';
-import { QuotaConfigController } from '../controllers/quotaConfig.controller.ts';
-import { isAdmin, verifyFirebaseToken } from '../middlewares/auth.middleware.ts';
+import { CategoriaController } from '../controllers/categoria.controller.js';
+import { isAdmin, verifyFirebaseToken } from '../middlewares/auth.middleware.js';
 
 const router = Router();
 const controller = new CategoriaController();
-const quotaConfigController = new QuotaConfigController();
 const adminOnly = [verifyFirebaseToken, isAdmin];
+const authenticated = [verifyFirebaseToken];
 
 /**
  * @swagger
@@ -61,6 +60,25 @@ router.get('/byId/:id', ...adminOnly, (req, res) => controller.getById(req, res)
  *       404: { description: Categoria no trobada }
  */
 router.get('/byType/:type', ...adminOnly, (req, res) => controller.getByType(req, res));
+
+/**
+ * @swagger
+ * /api/categories/me:
+ *   get:
+ *     summary: Obté la categoria de l'usuari autenticat
+ *     tags: [Categories]
+ *     security: [{ bearerAuth: [] }]
+ *     responses:
+ *       200:
+ *         description: Categoria de l'usuari autenticat
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/MeCategoriaResponseDTO'
+ *       401: { description: Usuari no autenticat }
+ *       404: { description: Categoria no trobada }
+ */
+router.get('/me', ...authenticated, (req, res) => controller.getCurrent(req, res));
 
 /**
  * @swagger
@@ -127,23 +145,6 @@ router.patch('/set/:id', ...adminOnly, (req, res) => controller.setUsers(req, re
  *       200: { description: Usuaris desassignats correctament }
  */
 router.patch('/unset/:id', ...adminOnly, (req, res) => controller.unsetUsers(req, res));
-
-/**
- * @swagger
- * /api/categories/{categoriaId}/quotaConfigs:
- *   get:
- *     summary: Obté les QuotaConfig d'una categoria
- *     tags: [Categories]
- *     security: [{ bearerAuth: [] }]
- *     parameters:
- *       - in: path
- *         name: categoriaId
- *         required: true
- *         schema: { type: string }
- *     responses:
- *       200: { description: Llista de QuotaConfig de la categoria }
- */
-router.get('/:categoriaId/quotaConfigs', ...adminOnly, (req, res) => quotaConfigController.getByCategory(req, res));
 
 /**
  * @swagger

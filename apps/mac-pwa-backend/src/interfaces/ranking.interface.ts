@@ -1,4 +1,5 @@
-import { Ranking, TSexe } from "@prisma/client";
+import type { Ranking } from "@prisma/client";
+import { TSexe } from "@prisma/client";
 
 export interface IRankingService {
     getAll(): Promise<Ranking[]>;

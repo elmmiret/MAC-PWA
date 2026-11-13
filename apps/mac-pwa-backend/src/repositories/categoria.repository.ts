@@ -1,5 +1,5 @@
 import { Prisma, TCategoria } from '@prisma/client';
-import { prisma } from '../config/prisma';
+import { prisma } from '../config/prisma.js';
 
 const categoryInclude = {
     usuaris: true,
@@ -7,6 +7,7 @@ const categoryInclude = {
     quotaConfigs: true,
 } satisfies Prisma.CategoriaInclude;
 
+// Tipus que inclou la categoria i les seves relacions, per a ser utilitzat en les consultes de Categoria.
 export type CategoriaWithRelations = Prisma.CategoriaGetPayload<{
     include: typeof categoryInclude;
 }>;
@@ -30,6 +31,13 @@ export class CategoriaRepository {
         });
     }
 
+    async findByFirebaseUid(firebaseUid: string): Promise<CategoriaWithRelations | null> {
+        return prisma.categoria.findFirst({
+            where: { usuaris: { some: { firebaseUid } } },
+            include: categoryInclude,
+        });
+    }
+
     async update(id: string, data: Prisma.CategoriaUpdateInput): Promise<CategoriaWithRelations> {
         return prisma.categoria.update({
             where: { id },
@@ -38,6 +46,7 @@ export class CategoriaRepository {
         });
     }
 
+    // Retorna els usuaris associats a una categoria concreta, ordenats per email principal.
     async findUsersByIds(ids: string[]): Promise<string[]> {
         const users = await prisma.usuari.findMany({
             where: { id: { in: ids } },

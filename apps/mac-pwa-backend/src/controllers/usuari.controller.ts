@@ -1,7 +1,8 @@
-import { Response } from 'express';
-import { AuthenticatedRequest } from '../middlewares/auth.middleware';
-import { UsuariService } from '../services/usuari.service';
-import { UpdatePerfilDTO } from 'shared';
+import type { Response } from 'express';
+import type { AuthenticatedRequest } from '../middlewares/auth.middleware.js';
+import { UsuariService } from '../services/usuari.service.js';
+import type { SetFamiliarDTO, UpdatePerfilDTO } from 'shared';
+import { getRouteParam } from '../utils/route-params.js';
 
 export class UsuariController {
     private service: UsuariService;
@@ -13,10 +14,10 @@ export class UsuariController {
 
     async update(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
-            const { id } = req.params;
+            const id = getRouteParam(req.params.id);
             const dto = req.body as UpdatePerfilDTO;
 
-            if (!id || Array.isArray(id)) {
+            if (!id) {
                 res.status(400).json({ message: "L'identificador d'usuari és obligatori." });
                 return;
             }
@@ -39,9 +40,7 @@ export class UsuariController {
 
     async getById(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
-            const { id } = req.params;
-
-            const userId = Array.isArray(id) ? id[0] : id;
+            const userId = getRouteParam(req.params.id);
 
             if (!userId) {
                 res.status(400).json({ message: "L'identificador d'usuari és obligatori." });
@@ -57,14 +56,30 @@ export class UsuariController {
 
     async getByFirebaseUid(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
-            const { firebaseUid } = req.params;
+            const firebaseUid = getRouteParam(req.params.firebaseUid);
 
-            if (!firebaseUid || Array.isArray(firebaseUid)) {
+            if (!firebaseUid) {
                 res.status(400).json({ message: 'El firebaseUid és obligatori.' });
                 return;
             }
 
             const usuariDto = await this.service.obtenirUsuariPerFirebaseId(firebaseUid);
+            res.status(200).json(usuariDto);
+        } catch (error: any) {
+            res.status(404).json({ message: error.message });
+        }
+    }
+
+    async getCurrent(req: AuthenticatedRequest, res: Response): Promise<void> {
+        try {
+            const firebaseUid = req.user?.uid;
+
+            if (!firebaseUid) {
+                res.status(401).json({ message: 'Usuari no autenticat.' });
+                return;
+            }
+
+            const usuariDto = await this.service.obtenirUsuariAutenticat(firebaseUid);
             res.status(200).json(usuariDto);
         } catch (error: any) {
             res.status(404).json({ message: error.message });
@@ -80,11 +95,56 @@ export class UsuariController {
         }
     }
 
+    async setEntrenador(req: AuthenticatedRequest, res: Response): Promise<void> {
+        try {
+            const id = getRouteParam(req.params.id);
+            if (!id) {
+                res.status(400).json({ message: "L'identificador d'usuari és obligatori." });
+                return;
+            }
+
+            res.status(200).json(await this.service.setEntrenador(id, true));
+        } catch (error: any) {
+            res.status(400).json({ message: error.message });
+        }
+    }
+
+    async unsetEntrenador(req: AuthenticatedRequest, res: Response): Promise<void> {
+        try {
+            const id = getRouteParam(req.params.id);
+            if (!id) {
+                res.status(400).json({ message: "L'identificador d'usuari és obligatori." });
+                return;
+            }
+
+            res.status(200).json(await this.service.setEntrenador(id, false));
+        } catch (error: any) {
+            res.status(400).json({ message: error.message });
+        }
+    }
+
+    async setFamiliar(req: AuthenticatedRequest, res: Response): Promise<void> {
+        try {
+            const familiarId = getRouteParam(req.params.id);
+            if (!familiarId) {
+                res.status(400).json({ message: "L'identificador de l'usuari familiar és obligatori." });
+                return;
+            }
+
+            res.status(200).json(await this.service.setFamiliar(
+                familiarId,
+                req.body as SetFamiliarDTO,
+            ));
+        } catch (error: any) {
+            res.status(400).json({ message: error.message });
+        }
+    }
+
     async delete(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
-            const { id } = req.params;
+            const id = getRouteParam(req.params.id);
 
-            if (!id || Array.isArray(id)) {
+            if (!id) {
                 res.status(400).json({ message: "L'identificador d'usuari és obligatori." });
                 return;
             }

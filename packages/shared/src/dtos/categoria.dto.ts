@@ -1,5 +1,3 @@
-import { UsuariResponseDTO } from './usuari.dto';
-
 export interface CreateCategoriaDTO {
     tipus: string;
     anyNaixement: number[];
@@ -45,9 +43,18 @@ export interface CategoriaResponseDTO {
     horaEntrada: string | null;
     horaSortida: string | null;
     detalls: string | null;
-    usuaris: UsuariResponseDTO[];
-    rankings: CategoriaRankingDTO[];
-    quotaConfigs: CategoriaQuotaConfigDTO[];
+    usuaris: string[];
+    rankings: string[];
+    quotaConfigs: string[];
     createdAt: string;
     updatedAt: string;
+}
+
+export interface MeCategoriaResponseDTO {
+    tipus: string;
+    anyNaixement: number[];
+    diesActivitat: string[];
+    horaEntrada: string | null;
+    horaSortida: string | null;
+    detalls: string | null;
 }

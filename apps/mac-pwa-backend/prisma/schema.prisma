@@ -65,8 +65,8 @@ model Categoria {
   tipus               TCategoria        @unique
   anyNaixement        Int[]
   diesActivitat       DiesSetmana[]
-  horaEntrada         DateTime?
-  horaSortida         DateTime?
+  horaEntrada         DateTime?         @db.Time(0)
+  horaSortida         DateTime?         @db.Time(0)
   detalls             String?
 
   // Relacio amb Usuari, Ranking i QuotaConfig
@@ -81,6 +81,7 @@ model Categoria {
 model Usuari {
   id                  String            @id @default(uuid())
   firebaseUid         String?           @unique   // S'assigna quan l'usuari inicia sessió amb Google
+  entrenador          Boolean           @default(false)
   imatgePerfil        String?
   emailPrincipal      String            @unique
   emailSecundari      String?
@@ -111,9 +112,14 @@ model Usuari {
   categoriaId         String?
   categoria           Categoria?         @relation(fields: [categoriaId], references: [id])
 
-  // Relacio amb Pagament i AtletaRanking
+  // FK amb Usuari (familiar)
+  usuariFamiliarId    String? 
+  usuariFamiliar      Usuari?           @relation("UsuariFamiliar", fields: [usuariFamiliarId], references: [id])
+
+  // Relacio amb Pagament, AtletaRanking i Usuari (familiars)
   pagaments           Pagament[]
   rankings            AtletaRanking[]
+  usuarisFamiliars    Usuari[]          @relation("UsuariFamiliar")
 
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
@@ -144,7 +150,7 @@ model Pagament {
   estat               TEstat          @default(PENDENT)
   dataPagament        DateTime?
   dataLimit           DateTime
-  dataGeneracio       DateTime        @default(now())
+  motiu               String
 
   // FK amb Usuari
   usuariId            String

@@ -1,13 +1,13 @@
 import { DiesSetmana, Prisma, TCategoria } from '@prisma/client';
-import {
+import type {
     CategoriaResponseDTO,
     CreateCategoriaDTO,
+    MeCategoriaResponseDTO,
     SetCategoriaDTO,
     UpdateCategoriaDTO,
-    UsuariResponseDTO,
 } from 'shared';
-import { ICategoriaService } from '../interfaces/categoria.interface';
-import { CategoriaRepository, CategoriaWithRelations } from '../repositories/categoria.repository';
+import type { ICategoriaService } from '../interfaces/categoria.interface.js';
+import { CategoriaRepository, type CategoriaWithRelations } from '../repositories/categoria.repository.js';
 
 export class CategoriaService implements ICategoriaService {
     private repository: CategoriaRepository;
@@ -16,81 +16,85 @@ export class CategoriaService implements ICategoriaService {
         this.repository = new CategoriaRepository();
     }
 
-    private toIso(value: Date | null): string | null {
-        return value?.toISOString() ?? null;
+    // Converteix un valor Date a una cadena de temps en format HH:mm:ss,
+    // o retorna null si el valor és null.
+    private toTime(value: Date | null): string | null {
+        return value?.toISOString().slice(11, 19) ?? null;
     }
 
-    private mapUserToDTO(user: CategoriaWithRelations['usuaris'][number]): UsuariResponseDTO {
-        return {
-            id: user.id,
-            firebaseUid: user.firebaseUid,
-            emailPrincipal: user.emailPrincipal,
-            nom: user.nom,
-            cognom1: user.cognom1,
-            cognom2: user.cognom2,
-        };
+    private parseTime(value: string | null | undefined): Date | null {
+        if (value === null || value === undefined) return null;
+        // Valida el format de temps abans de convertir-lo a Date. El format esperat és HH:mm:ss.
+        if (!/^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/.test(value)) {
+            throw new Error(`Hora invàlida: ${value}. Format esperat: HH:mm:ss.`);
+        }
+
+        const [hours, minutes, rawSeconds] = value.split(':');
+        const seconds = rawSeconds === undefined ? 0 : Number(rawSeconds);
+        // Converteix la cadena de temps a un objecte Date amb hora UTC, evitant problemes de zona horària.
+        return new Date(Date.UTC(1970, 0, 1, Number(hours), Number(minutes), seconds));
     }
 
+    // Converteix el model Prisma amb relacions en un DTO HTTP, serialitzant dates i
+    // adaptant enums i relacions a identificadors.
     private mapToDTO(category: CategoriaWithRelations): CategoriaResponseDTO {
         return {
             id: category.id,
             tipus: category.tipus,
             anyNaixement: category.anyNaixement,
             diesActivitat: category.diesActivitat,
-            horaEntrada: this.toIso(category.horaEntrada),
-            horaSortida: this.toIso(category.horaSortida),
+            horaEntrada: this.toTime(category.horaEntrada),
+            horaSortida: this.toTime(category.horaSortida),
             detalls: category.detalls,
-            usuaris: category.usuaris.map((user) => this.mapUserToDTO(user)),
-            rankings: category.rankings.map((ranking) => ({
-                id: ranking.id,
-                nom: ranking.nom,
-                sexe: ranking.sexe,
-                provaId: ranking.provaId,
-                createdAt: ranking.createdAt.toISOString(),
-                updatedAt: ranking.updatedAt.toISOString(),
-            })),
-            quotaConfigs: category.quotaConfigs.map((quota) => ({
-                id: quota.id,
-                tipus: quota.tipus,
-                nom: quota.nom,
-                preuBase: quota.preuBase,
-                temporadesAplicada: quota.temporadesAplicada,
-                activa: quota.activa,
-                categoriaId: quota.categoriaId,
-                createdAt: quota.createdAt.toISOString(),
-                updatedAt: quota.updatedAt.toISOString(),
-            })),
+            usuaris: category.usuaris.map((user) => user.id),
+            rankings: category.rankings.map((ranking) => ranking.id),
+            quotaConfigs: category.quotaConfigs.map((quota) => quota.id),
             createdAt: category.createdAt.toISOString(),
             updatedAt: category.updatedAt.toISOString(),
         };
     }
 
-    private mapCreateData(dto: CreateCategoriaDTO): Prisma.CategoriaCreateInput {
+    private mapToMeDTO(category: CategoriaWithRelations): MeCategoriaResponseDTO {
+        return {
+            tipus: category.tipus,
+            anyNaixement: category.anyNaixement,
+            diesActivitat: category.diesActivitat,
+            horaEntrada: this.toTime(category.horaEntrada),
+            horaSortida: this.toTime(category.horaSortida),
+            detalls: category.detalls,
+        };
+    }
+
+    // Converteix el DTO rebut per HTTP en l'input Prisma de creació. 
+    // Aquí s'adapten especialment enums, dates i valors nuls.
+    private mapCreateDTOToPrisma(dto: CreateCategoriaDTO): Prisma.CategoriaCreateInput {
         return {
             tipus: dto.tipus as TCategoria,
             anyNaixement: dto.anyNaixement,
             diesActivitat: dto.diesActivitat as DiesSetmana[],
-            horaEntrada: dto.horaEntrada ? new Date(dto.horaEntrada) : null,
-            horaSortida: dto.horaSortida ? new Date(dto.horaSortida) : null,
+            horaEntrada: this.parseTime(dto.horaEntrada),
+            horaSortida: this.parseTime(dto.horaSortida),
             detalls: dto.detalls ?? null,
         };
     }
 
-    private mapUpdateData(dto: UpdateCategoriaDTO): Prisma.CategoriaUpdateInput {
+    // Construeix un input Prisma parcial per a que el PATCH només modifiqui els camps
+    // enviats i no sobreescrigui accidentalment la resta de la categoria.
+    private mapUpdateDTOToPrisma(dto: UpdateCategoriaDTO): Prisma.CategoriaUpdateInput {
         const data: Prisma.CategoriaUpdateInput = {};
 
         if (dto.tipus !== undefined) data.tipus = dto.tipus as TCategoria;
         if (dto.anyNaixement !== undefined) data.anyNaixement = dto.anyNaixement;
         if (dto.diesActivitat !== undefined) data.diesActivitat = dto.diesActivitat as DiesSetmana[];
-        if (dto.horaEntrada !== undefined) data.horaEntrada = dto.horaEntrada ? new Date(dto.horaEntrada) : null;
-        if (dto.horaSortida !== undefined) data.horaSortida = dto.horaSortida ? new Date(dto.horaSortida) : null;
+        if (dto.horaEntrada !== undefined) data.horaEntrada = this.parseTime(dto.horaEntrada);
+        if (dto.horaSortida !== undefined) data.horaSortida = this.parseTime(dto.horaSortida);
         if (dto.detalls !== undefined) data.detalls = dto.detalls;
 
         return data;
     }
 
     async create(dto: CreateCategoriaDTO): Promise<CategoriaResponseDTO> {
-        return this.mapToDTO(await this.repository.create(this.mapCreateData(dto)));
+        return this.mapToDTO(await this.repository.create(this.mapCreateDTOToPrisma(dto)));
     }
 
     async getById(id: string): Promise<CategoriaResponseDTO> {
@@ -105,9 +109,15 @@ export class CategoriaService implements ICategoriaService {
         return this.mapToDTO(category);
     }
 
+    async getCurrentCategoria(firebaseUid: string): Promise<MeCategoriaResponseDTO> {
+        const category = await this.repository.findByFirebaseUid(firebaseUid);
+        if (!category) throw new Error('Categoria no trobada.');
+        return this.mapToMeDTO(category);
+    }
+
     async update(id: string, dto: UpdateCategoriaDTO): Promise<CategoriaResponseDTO> {
         await this.getById(id);
-        return this.mapToDTO(await this.repository.update(id, this.mapUpdateData(dto)));
+        return this.mapToDTO(await this.repository.update(id, this.mapUpdateDTOToPrisma(dto)));
     }
 
     private async updateUsers(id: string, userIds: string[], set: boolean): Promise<CategoriaResponseDTO> {

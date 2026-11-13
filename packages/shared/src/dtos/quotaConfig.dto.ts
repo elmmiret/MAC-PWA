@@ -11,7 +11,10 @@ export interface DeleteQuotaConfigsDTO {
 
 export interface UpdateQuotaConfigDTO {
     nom?: string;
-    temporadesAplicada?: string[];
+}
+
+export interface AddTemporadesQuotaConfigDTO {
+    temporadesAplicada: string[];
 }
 
 export interface QuotaConfigResponseDTO {
@@ -21,7 +24,7 @@ export interface QuotaConfigResponseDTO {
     preuBase: number;
     temporadesAplicada: string[];
     activa: boolean;
-    categoriaId: string;
+    categoria: string | null;
     createdAt: string;
     updatedAt: string;
 }

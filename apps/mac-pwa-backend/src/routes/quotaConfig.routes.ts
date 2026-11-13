@@ -1,6 +1,6 @@
-import { RequestHandler, Router } from 'express';
-import { QuotaConfigController } from '../controllers/quotaConfig.controller.ts';
-import { isAdmin, verifyFirebaseToken } from '../middlewares/auth.middleware.ts';
+import { type RequestHandler, Router } from 'express';
+import { QuotaConfigController } from '../controllers/quotaConfig.controller.js';
+import { isAdmin, verifyFirebaseToken } from '../middlewares/auth.middleware.js';
 
 const router = Router();
 const controller = new QuotaConfigController();
@@ -37,6 +37,17 @@ router.post('/create', ...adminOnly, (req, res) => controller.create(req, res));
  *           schema: { $ref: '#/components/schemas/DeleteQuotaConfigsDTO' }
  *     responses:
  *       204: { description: QuotaConfig eliminadas }
+ *       409:
+ *         description: Alguna QuotaConfig té pagaments relacionats i no se n'elimina cap
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message: { type: string }
+ *                 quotaConfigIds:
+ *                   type: array
+ *                   items: { type: string }
  */
 router.delete('/delete', ...adminOnly, (req, res) => controller.deleteMany(req, res));
 
@@ -44,7 +55,7 @@ router.delete('/delete', ...adminOnly, (req, res) => controller.deleteMany(req, 
  * @swagger
  * /api/quotaConfigs/edit/{id}:
  *   patch:
- *     summary: Edita el nom o les temporades d'una QuotaConfig
+ *     summary: Edita el nom d'una QuotaConfig
  *     tags: [QuotaConfig]
  *     security: [{ bearerAuth: [] }]
  *     parameters:
@@ -64,6 +75,28 @@ router.patch('/edit/:id', ...adminOnly, (req, res) => controller.update(req, res
 
 /**
  * @swagger
+ * /api/quotaConfigs/addTemporades/{id}:
+ *   patch:
+ *     summary: Afegeix temporades a una QuotaConfig
+ *     tags: [QuotaConfig]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema: { $ref: '#/components/schemas/AddTemporadesQuotaConfigDTO' }
+ *     responses:
+ *       200: { description: Temporades afegides correctament }
+ */
+router.patch('/addTemporades/:id', ...adminOnly, (req, res) => controller.addTemporades(req, res));
+
+/**
+ * @swagger
  * /api/quotaConfigs/activate/{id}:
  *   patch:
  *     summary: Activa una QuotaConfig i desactiva l'altra del mateix tipus i categoria
@@ -78,6 +111,23 @@ router.patch('/edit/:id', ...adminOnly, (req, res) => controller.update(req, res
  *       200: { description: QuotaConfig activada }
  */
 router.patch('/activate/:id', ...adminOnly, (req, res) => controller.activate(req, res));
+
+/**
+ * @swagger
+ * /api/quotaConfigs/deactivate/{id}:
+ *   patch:
+ *     summary: Desactiva una QuotaConfig
+ *     tags: [QuotaConfig]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200: { description: QuotaConfig desactivada correctament }
+ */
+router.patch('/deactivate/:id', ...adminOnly, (req, res) => controller.deactivate(req, res));
 
 /**
  * @swagger
