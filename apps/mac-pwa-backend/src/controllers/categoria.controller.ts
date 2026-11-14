@@ -54,6 +54,24 @@ export class CategoriaController {
         }
     }
 
+    async updateAnyNaixementOficials(req: Request, res: Response): Promise<void> {
+        try {
+            const result = await this.service.updateAnyNaixementOficials();
+            res.status(200).json(result);
+        } catch (error: any) {
+            res.status(400).json({ message: error.message });
+        }
+    }
+
+    async assignCategoriesToUsers(req: Request, res: Response): Promise<void> {
+        try {
+            const result = await this.service.assignCategoriesToUsers();
+            res.status(200).json({ message: 'Categories assignades correctament.', ...result });
+        } catch (error: any) {
+            res.status(400).json({ message: error.message });
+        }
+    }
+
     async update(req: Request, res: Response): Promise<void> {
         try {
             const result = await this.service.update(

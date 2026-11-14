@@ -2,6 +2,7 @@ import { Prisma } from '@prisma/client';
 import 'dotenv/config';
 import { firebaseAdmin } from '../config/firebase.js';
 import { UsuariRepository, type UsuariWithPayments } from '../repositories/usuari.repository.js';
+import { CategoriaRepository } from '../repositories/categoria.repository.js';
 import type { IAuthService } from '../interfaces/auth.interface.js';
 import type {
     GoogleLoginDTO,
@@ -13,9 +14,11 @@ import type {
 
 export class AuthService implements IAuthService {
     private repository: UsuariRepository;
+    private categoriaRepository: CategoriaRepository;
 
     constructor() {
         this.repository = new UsuariRepository();
+        this.categoriaRepository = new CategoriaRepository();
     }
 
     private mapToUsuariResponseDTO(usuari: UsuariWithPayments): UsuariResponseDTO {
@@ -67,19 +70,41 @@ export class AuthService implements IAuthService {
         return {
             firebaseUid: null,
             emailPrincipal: dto.emailPrincipal,
+            dataNaixement: new Date(dto.dataNaixement),
             nom: dto.nom ?? null,
             cognom1: dto.cognom1 ?? null,
             cognom2: dto.cognom2 ?? null,
         };
     }
 
+    private parseDataNaixement(value: string): Date {
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) {
+            throw new Error('La data de naixement no té un format vàlid.');
+        }
+        return date;
+    }
+
     async registrarUsuari(dto: RegisterUsuariDTO): Promise<UsuariResponseDTO> {
+        if (!dto.dataNaixement) {
+            throw new Error('La data de naixement és obligatòria.');
+        }
+
+        const dataNaixement = this.parseDataNaixement(dto.dataNaixement);
         const existingUser = await this.repository.findByEmail(dto.emailPrincipal);
         if (existingUser) {
             throw new Error('Ja existeix un usuari amb aquest correu electrònic.');
         }
 
-        const usuariDB = await this.repository.create(this.mapRegisterDTOToPrisma(dto));
+        let usuariDB = await this.repository.create(this.mapRegisterDTOToPrisma(dto));
+
+        const categoria = await this.categoriaRepository.findByBirthYear(dataNaixement.getFullYear());
+        if (categoria) {
+            usuariDB = await this.repository.updateById(usuariDB.id, {
+                categoria: { connect: { id: categoria.id } },
+            });
+        }
+
         return this.mapToUsuariResponseDTO(usuariDB);
     }
 

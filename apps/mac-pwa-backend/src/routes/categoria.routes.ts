@@ -82,6 +82,34 @@ router.get('/me', ...authenticated, (req, res) => controller.getCurrent(req, res
 
 /**
  * @swagger
+ * /api/categories/updateAnyNaixement:
+ *   post:
+ *     summary: Actualitza els anys de naixement de totes les categories oficials
+ *     tags: [Categories]
+ *     security: [{ bearerAuth: [] }]
+ *     responses:
+ *       200:
+ *         description: Categories oficials actualitzades
+ *       403: { description: Es requereixen permisos d'administrador }
+ */
+router.post('/updateAnyNaixement', ...adminOnly, (req, res) => controller.updateAnyNaixementOficials(req, res));
+
+/**
+ * @swagger
+ * /api/categories/assignCategoriesToUsers:
+ *   post:
+ *     summary: Assigna la categoria oficial a tots els usuaris segons la seva data de naixement
+ *     tags: [Categories]
+ *     security: [{ bearerAuth: [] }]
+ *     responses:
+ *       200:
+ *         description: Categories assignades correctament
+ *       403: { description: Es requereixen permisos d'administrador }
+ */
+router.post('/assignCategoriesToUsers', ...adminOnly, (req, res) => controller.assignCategoriesToUsers(req, res));
+
+/**
+ * @swagger
  * /api/categories/edit/{id}:
  *   patch:
  *     summary: Edita una categoria

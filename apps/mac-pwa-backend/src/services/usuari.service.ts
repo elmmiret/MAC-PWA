@@ -100,12 +100,20 @@ export class UsuariService implements IUsuariService {
     // Converteix el DTO parcial d'actualització en l'input Prisma equivalent
     // i adapta els enums compartits als enums generats per Prisma.
     private mapUpdateDTOToPrisma(dto: UpdatePerfilDTO): Prisma.UsuariUpdateInput {
-        return {
-            ...dto,
-            ...(dto.sexe === undefined ? {} : { sexe: dto.sexe as TSexe | null }),
-            ...(dto.tipusDocument === undefined ? {} : { tipusDocument: dto.tipusDocument as TDocument | null }),
-            ...(dto.tipusDocumentTutor === undefined ? {} : { tipusDocumentTutor: dto.tipusDocumentTutor as TDocument | null }),
-        };
+        const { dataNaixement, sexe, tipusDocument, tipusDocumentTutor, ...rest } = dto;
+        const data: Prisma.UsuariUpdateInput = { ...rest };
+
+        if (sexe !== undefined) data.sexe = sexe as TSexe | null;
+        if (tipusDocument !== undefined) data.tipusDocument = tipusDocument as TDocument | null;
+        if (tipusDocumentTutor !== undefined) data.tipusDocumentTutor = tipusDocumentTutor as TDocument | null;
+        if (dataNaixement !== undefined) {
+            if (dataNaixement === null) {
+                throw new Error('La data de naixement no pot ser buida.');
+            }
+            data.dataNaixement = new Date(dataNaixement);
+        }
+
+        return data;
     }
 
     async actualitzarUsuari(id: string, dto: UpdatePerfilDTO): Promise<UsuariResponseDTO> {

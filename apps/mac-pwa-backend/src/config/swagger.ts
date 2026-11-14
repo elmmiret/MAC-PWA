@@ -44,6 +44,17 @@ const options: swaggerJSDoc.Options = {
                         },
                     },
                 },
+                RegisterUsuariDTO: {
+                    type: 'object',
+                    required: ['emailPrincipal', 'dataNaixement'],
+                    properties: {
+                        emailPrincipal: { type: 'string' },
+                        dataNaixement: { type: 'string', format: 'date-time' },
+                        nom: { type: 'string', nullable: true },
+                        cognom1: { type: 'string', nullable: true },
+                        cognom2: { type: 'string', nullable: true },
+                    },
+                },
                 UpdateUsuariDTO: {
                     type: 'object',
                     properties: {
@@ -109,10 +120,9 @@ const options: swaggerJSDoc.Options = {
                 },
                 CreateCategoriaDTO: {
                     type: 'object',
-                    required: ['tipus', 'anyNaixement', 'diesActivitat'],
+                    required: ['tipus', 'diesActivitat'],
                     properties: {
-                        tipus: { type: 'string', enum: ['SUB_8', 'SUB_10', 'SUB_12', 'SUB_14', 'SUB_16', 'SUB_20', 'SUB_23', 'SENIOR', 'MASTER', 'G_A_S', 'INDIVIDUAL', 'NO_ATLETA'] },
-                        anyNaixement: { type: 'array', items: { type: 'integer' } },
+                        tipus: { type: 'string', enum: ['SUB_8', 'SUB_10', 'SUB_12', 'SUB_14', 'SUB_16', 'SUB_18', 'SUB_20', 'SUB_23', 'SENIOR', 'MASTER', 'G_A_S', 'INDIVIDUAL', 'NO_ATLETA'] },
                         diesActivitat: { type: 'array', items: { type: 'string', enum: ['DILLUNS', 'DIMARTS', 'DIMECRES', 'DIJOUS', 'DIVENDRES'] } },
                         horaEntrada: { type: 'string', format: 'date-time', nullable: true },
                         horaSortida: { type: 'string', format: 'date-time', nullable: true },

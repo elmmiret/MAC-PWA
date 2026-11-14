@@ -1,5 +1,6 @@
 export interface RegisterUsuariDTO {
     emailPrincipal: string;
+    dataNaixement: string;
     nom?: string;
     cognom1?: string;
     cognom2?: string;

@@ -7,13 +7,20 @@ import type {
     UpdateCategoriaDTO,
 } from 'shared';
 import type { ICategoriaService } from '../interfaces/categoria.interface.js';
-import { CategoriaRepository, type CategoriaWithRelations } from '../repositories/categoria.repository.js';
+import {
+    CategoriaRepository,
+    CATEGORIES_OFICIALS,
+    type CategoriaWithRelations,
+} from '../repositories/categoria.repository.js';
+import { UsuariRepository } from '../repositories/usuari.repository.js';
 
 export class CategoriaService implements ICategoriaService {
     private repository: CategoriaRepository;
+    private usuariRepository: UsuariRepository;
 
     constructor() {
         this.repository = new CategoriaRepository();
+        this.usuariRepository = new UsuariRepository();
     }
 
     // Converteix un valor Date a una cadena de temps en format HH:mm:ss,
@@ -65,12 +72,47 @@ export class CategoriaService implements ICategoriaService {
         };
     }
 
+    // Calcula els anys de naixement que corresponen a una categoria oficial
+    // segons l'any en curs. Retorna array buit per a categories no oficials.
+    private computeAnyNaixement(tipus: TCategoria): number[] {
+        const currentYear = new Date().getFullYear();
+
+        switch (tipus) {
+            case TCategoria.SUB_8:
+                return [currentYear - 7, currentYear - 6];
+            case TCategoria.SUB_10:
+                return [currentYear - 9, currentYear - 8];
+            case TCategoria.SUB_12:
+                return [currentYear - 11, currentYear - 10];
+            case TCategoria.SUB_14:
+                return [currentYear - 13, currentYear - 12];
+            case TCategoria.SUB_16:
+                return [currentYear - 15, currentYear - 14];
+            case TCategoria.SUB_18:
+                return [currentYear - 17, currentYear - 16];
+            case TCategoria.SUB_20:
+                return [currentYear - 19, currentYear - 18];
+            case TCategoria.SUB_23:
+                return [currentYear - 22, currentYear - 21, currentYear - 20];
+            case TCategoria.SENIOR:
+                return Array.from({ length: 12 }, (_, i) => currentYear - 34 + i);
+            case TCategoria.MASTER:
+                return Array.from({ length: 66 }, (_, i) => currentYear - 100 + i);
+            default:
+                return [];
+        }
+    }
+
+    private arraysEqual(a: number[], b: number[]): boolean {
+        return a.length === b.length && a.every((value, index) => value === b[index]);
+    }
+
     // Converteix el DTO rebut per HTTP en l'input Prisma de creació. 
     // Aquí s'adapten especialment enums, dates i valors nuls.
     private mapCreateDTOToPrisma(dto: CreateCategoriaDTO): Prisma.CategoriaCreateInput {
         return {
             tipus: dto.tipus as TCategoria,
-            anyNaixement: dto.anyNaixement,
+            anyNaixement: [],
             diesActivitat: dto.diesActivitat as DiesSetmana[],
             horaEntrada: this.parseTime(dto.horaEntrada),
             horaSortida: this.parseTime(dto.horaSortida),
@@ -84,7 +126,6 @@ export class CategoriaService implements ICategoriaService {
         const data: Prisma.CategoriaUpdateInput = {};
 
         if (dto.tipus !== undefined) data.tipus = dto.tipus as TCategoria;
-        if (dto.anyNaixement !== undefined) data.anyNaixement = dto.anyNaixement;
         if (dto.diesActivitat !== undefined) data.diesActivitat = dto.diesActivitat as DiesSetmana[];
         if (dto.horaEntrada !== undefined) data.horaEntrada = this.parseTime(dto.horaEntrada);
         if (dto.horaSortida !== undefined) data.horaSortida = this.parseTime(dto.horaSortida);
@@ -94,7 +135,14 @@ export class CategoriaService implements ICategoriaService {
     }
 
     async create(dto: CreateCategoriaDTO): Promise<CategoriaResponseDTO> {
-        return this.mapToDTO(await this.repository.create(this.mapCreateDTOToPrisma(dto)));
+        const input = this.mapCreateDTOToPrisma(dto);
+        const tipus = dto.tipus as TCategoria;
+
+        if (CATEGORIES_OFICIALS.includes(tipus)) {
+            input.anyNaixement = this.computeAnyNaixement(tipus);
+        }
+
+        return this.mapToDTO(await this.repository.create(input));
     }
 
     async getById(id: string): Promise<CategoriaResponseDTO> {
@@ -153,5 +201,49 @@ export class CategoriaService implements ICategoriaService {
     async delete(id: string): Promise<void> {
         await this.getById(id);
         await this.repository.delete(id);
+    }
+
+    async updateAnyNaixementOficials(): Promise<{ updated: boolean; message: string; categories: CategoriaResponseDTO[] }> {
+        const categories = await this.repository.findOficials();
+        if (categories.length === 0) {
+            return { updated: false, message: 'No hi ha categories oficials.', categories: [] };
+        }
+
+        const firstCategory = categories[0]!;
+        const firstComputed = this.computeAnyNaixement(firstCategory.tipus);
+        if (this.arraysEqual(firstCategory.anyNaixement, firstComputed)) {
+            return {
+                updated: false,
+                message: 'Les categories ja tenen els anys de naixement correctes.',
+                categories: [],
+            };
+        }
+
+        const updates = categories.map((category) => ({
+            id: category.id,
+            anyNaixement: this.computeAnyNaixement(category.tipus),
+        }));
+
+        const updated = await this.repository.updateManyAnyNaixement(updates);
+        return {
+            updated: true,
+            message: 'Categories oficials actualitzades correctament.',
+            categories: updated.map((category) => this.mapToDTO(category)),
+        };
+    }
+
+    async assignCategoriesToUsers(): Promise<{ updated: number }> {
+        const categories = await this.repository.findOficials();
+        const users = await this.usuariRepository.findUsersForCategoriaAssignment();
+
+        const updates: { id: string; categoriaId: string | null }[] = [];
+        for (const user of users) {
+            const birthYear = user.dataNaixement.getFullYear();
+            const category = categories.find((c) => c.anyNaixement.includes(birthYear));
+            updates.push({ id: user.id, categoriaId: category?.id ?? null });
+        }
+
+        await this.usuariRepository.updateCategoriaIds(updates);
+        return { updated: updates.length };
     }
 }

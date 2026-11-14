@@ -44,6 +44,10 @@
 - Fer un endpoint per a ACTUALITZAR AnyNaixement de les CATEGORIES entre SUB-8 - SUB_23. Que al executarlo, s'actualitzin amb l'any actual com a referència.
 - Fer un endpoint per a ASSIGNAR automaticament els Usuaris a la seva CATEGORIA corresponent, a partir de la seva data de naixement i AnyNaixement de les CATEGORIES. (entre SUB_8 - SUB_23, més grans a mà)
 
+- Treure anyNaixement de la creacio d'una Categoria, ja que s'assigna automaticament
+- En l'endpoint per a actualizar anyNaixement de TOTES les Categories oficials, si en la primera Categoria revisada no hi ha inconsistències entre els anyNaixement anteriors i els que es volen assignar, no fer res més ja que llavors tots els anyNaixement de totes les altres Categories també son correctes
+- !!!!! Afegir la Categoria SUB-18 a les Categories oficials !!!!!!!
+
 - Afegir atribut 'descompteAplicat' a Pagament ?????
 - Si l'USUARI del PAGAMENT d'una quota tipus SOCI es menor (estrictament) de 18 anys, se li descompta el 50% del preuBase (si te data dataNaixement assignada, sino no se li aplica res)
 
@@ -152,5 +156,13 @@
 - Afegida també la lògica per aplicar descomptes als Pagaments de les quotes, tenint en compte si l'Usuari es entrenador (-30%) i si te un familiar relacionat (-10%)
 
 13 novembre:
--
+- Implementades funcions per a que a partir del token de l'usuari que ha iniciat sessio, es pugui obtenir la informació d'aquest Usuari, de la seva Categoria i dels seus Pagaments
+- Implementat endpoint per a promoure un Usuari registrat a administrador (només executable per administradors, evidentment)
+
+14 novembre:
+- Implementació de tot el següent, relacionat amb les Categories i les seves assignacions als Usuaris:
+    -
+
+
+
 

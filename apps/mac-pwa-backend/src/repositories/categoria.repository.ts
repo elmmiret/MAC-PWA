@@ -12,6 +12,30 @@ export type CategoriaWithRelations = Prisma.CategoriaGetPayload<{
     include: typeof categoryInclude;
 }>;
 
+export const CATEGORIES_OFICIALS: TCategoria[] = [
+    TCategoria.SUB_8,
+    TCategoria.SUB_10,
+    TCategoria.SUB_12,
+    TCategoria.SUB_14,
+    TCategoria.SUB_16,
+    TCategoria.SUB_18,
+    TCategoria.SUB_20,
+    TCategoria.SUB_23,
+    TCategoria.SENIOR,
+    TCategoria.MASTER,
+];
+
+export const CATEGORIES_REGISTRE_AUTO: TCategoria[] = [
+    TCategoria.SUB_8,
+    TCategoria.SUB_10,
+    TCategoria.SUB_12,
+    TCategoria.SUB_14,
+    TCategoria.SUB_16,
+    TCategoria.SUB_18,
+    TCategoria.SUB_20,
+    TCategoria.SUB_23,
+];
+
 export class CategoriaRepository {
     async create(data: Prisma.CategoriaCreateInput): Promise<CategoriaWithRelations> {
         return prisma.categoria.create({ data, include: categoryInclude });
@@ -27,6 +51,24 @@ export class CategoriaRepository {
     async findByType(tipus: TCategoria): Promise<CategoriaWithRelations | null> {
         return prisma.categoria.findUnique({
             where: { tipus },
+            include: categoryInclude,
+        });
+    }
+
+    async findOficials(): Promise<CategoriaWithRelations[]> {
+        return prisma.categoria.findMany({
+            where: { tipus: { in: CATEGORIES_OFICIALS } },
+            include: categoryInclude,
+            orderBy: { tipus: 'asc' },
+        });
+    }
+
+    async findByBirthYear(year: number): Promise<CategoriaWithRelations | null> {
+        return prisma.categoria.findFirst({
+            where: {
+                tipus: { in: CATEGORIES_REGISTRE_AUTO },
+                anyNaixement: { has: year },
+            },
             include: categoryInclude,
         });
     }
@@ -71,6 +113,20 @@ export class CategoriaRepository {
             },
             data: { categoriaId: null },
         });
+    }
+
+    async updateManyAnyNaixement(
+        updates: { id: string; anyNaixement: number[] }[],
+    ): Promise<CategoriaWithRelations[]> {
+        return prisma.$transaction(
+            updates.map((update) =>
+                prisma.categoria.update({
+                    where: { id: update.id },
+                    data: { anyNaixement: update.anyNaixement },
+                    include: categoryInclude,
+                }),
+            ),
+        );
     }
 
     async delete(id: string): Promise<void> {

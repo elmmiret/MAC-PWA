@@ -1,6 +1,5 @@
 export interface CreateCategoriaDTO {
     tipus: string;
-    anyNaixement: number[];
     diesActivitat: string[];
     horaEntrada?: string | null;
     horaSortida?: string | null;
