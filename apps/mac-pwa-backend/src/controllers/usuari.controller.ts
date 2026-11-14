@@ -1,7 +1,7 @@
 import type { Response } from 'express';
 import type { AuthenticatedRequest } from '../middlewares/auth.middleware.js';
 import { UsuariService } from '../services/usuari.service.js';
-import type { SetFamiliarDTO, UpdatePerfilDTO } from 'shared';
+import type { SetFamiliarDTO, UpdateUsuariDTO } from 'shared';
 import { getRouteParam } from '../utils/route-params.js';
 
 export class UsuariController {
@@ -15,7 +15,7 @@ export class UsuariController {
     async update(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
             const id = getRouteParam(req.params.id);
-            const dto = req.body as UpdatePerfilDTO;
+            const dto = req.body as UpdateUsuariDTO;
 
             if (!id) {
                 res.status(400).json({ message: "L'identificador d'usuari és obligatori." });

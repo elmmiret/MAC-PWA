@@ -36,6 +36,20 @@ export const CATEGORIES_REGISTRE_AUTO: TCategoria[] = [
     TCategoria.SUB_23,
 ];
 
+// Ordre jeràrquic de categories competitives, de menor a major.
+export const COMPETITIVE_CATEGORIES_ORDER: TCategoria[] = [
+    TCategoria.SUB_8,
+    TCategoria.SUB_10,
+    TCategoria.SUB_12,
+    TCategoria.SUB_14,
+    TCategoria.SUB_16,
+    TCategoria.SUB_18,
+    TCategoria.SUB_20,
+    TCategoria.SUB_23,
+    TCategoria.SENIOR,
+    TCategoria.MASTER,
+];
+
 export class CategoriaRepository {
     async create(data: Prisma.CategoriaCreateInput): Promise<CategoriaWithRelations> {
         return prisma.categoria.create({ data, include: categoryInclude });

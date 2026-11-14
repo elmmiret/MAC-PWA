@@ -71,9 +71,9 @@ export class AuthService implements IAuthService {
             firebaseUid: null,
             emailPrincipal: dto.emailPrincipal,
             dataNaixement: new Date(dto.dataNaixement),
-            nom: dto.nom ?? null,
-            cognom1: dto.cognom1 ?? null,
-            cognom2: dto.cognom2 ?? null,
+            nom: dto.nom,
+            cognom1: dto.cognom1,
+            cognom2: dto.cognom2,
         };
     }
 
@@ -86,8 +86,14 @@ export class AuthService implements IAuthService {
     }
 
     async registrarUsuari(dto: RegisterUsuariDTO): Promise<UsuariResponseDTO> {
+        if (!dto.emailPrincipal?.trim()) {
+            throw new Error('El correu electrònic és obligatori.');
+        }
         if (!dto.dataNaixement) {
             throw new Error('La data de naixement és obligatòria.');
+        }
+        if (!dto.nom?.trim() || !dto.cognom1?.trim() || !dto.cognom2?.trim()) {
+            throw new Error('El nom, el primer cognom i el segon cognom són obligatoris.');
         }
 
         const dataNaixement = this.parseDataNaixement(dto.dataNaixement);

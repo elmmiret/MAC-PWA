@@ -125,7 +125,6 @@ export class CategoriaService implements ICategoriaService {
     private mapUpdateDTOToPrisma(dto: UpdateCategoriaDTO): Prisma.CategoriaUpdateInput {
         const data: Prisma.CategoriaUpdateInput = {};
 
-        if (dto.tipus !== undefined) data.tipus = dto.tipus as TCategoria;
         if (dto.diesActivitat !== undefined) data.diesActivitat = dto.diesActivitat as DiesSetmana[];
         if (dto.horaEntrada !== undefined) data.horaEntrada = this.parseTime(dto.horaEntrada);
         if (dto.horaSortida !== undefined) data.horaSortida = this.parseTime(dto.horaSortida);
@@ -164,7 +163,14 @@ export class CategoriaService implements ICategoriaService {
     }
 
     async update(id: string, dto: UpdateCategoriaDTO): Promise<CategoriaResponseDTO> {
-        await this.getById(id);
+        const current = await this.getById(id);
+        const finalEntrada = dto.horaEntrada !== undefined ? dto.horaEntrada : current.horaEntrada;
+        const finalSortida = dto.horaSortida !== undefined ? dto.horaSortida : current.horaSortida;
+
+        if (finalEntrada !== null && finalSortida !== null && finalEntrada > finalSortida) {
+            throw new Error('L\'hora d\'entrada ha de ser anterior o igual a l\'hora de sortida.');
+        }
+
         return this.mapToDTO(await this.repository.update(id, this.mapUpdateDTOToPrisma(dto)));
     }
 

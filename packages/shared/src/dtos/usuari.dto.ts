@@ -1,9 +1,9 @@
 export interface RegisterUsuariDTO {
     emailPrincipal: string;
     dataNaixement: string;
-    nom?: string;
-    cognom1?: string;
-    cognom2?: string;
+    nom: string;
+    cognom1: string;
+    cognom2: string;
 }
 
 export interface GoogleLoginDTO {
@@ -23,14 +23,10 @@ export interface SetFamiliarDTO {
     usuariIds: string[];
 }
 
-export interface UpdatePerfilDTO {
-    emailPrincipal?: string;
+export interface UpdateUsuariDTO {
     emailSecundari?: string | null;
     telefonPrincipal?: string | null;
     telefonSecundari?: string | null;
-    nom?: string | null;
-    cognom1?: string | null;
-    cognom2?: string | null;
     sexe?: 'M' | 'F' | null;
     dataNaixement?: string | null;
     LocalitatNaixement?: string | null;

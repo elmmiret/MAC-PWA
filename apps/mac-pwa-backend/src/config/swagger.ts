@@ -46,25 +46,21 @@ const options: swaggerJSDoc.Options = {
                 },
                 RegisterUsuariDTO: {
                     type: 'object',
-                    required: ['emailPrincipal', 'dataNaixement'],
+                    required: ['emailPrincipal', 'dataNaixement', 'nom', 'cognom1', 'cognom2'],
                     properties: {
                         emailPrincipal: { type: 'string' },
                         dataNaixement: { type: 'string', format: 'date-time' },
-                        nom: { type: 'string', nullable: true },
-                        cognom1: { type: 'string', nullable: true },
-                        cognom2: { type: 'string', nullable: true },
+                        nom: { type: 'string' },
+                        cognom1: { type: 'string' },
+                        cognom2: { type: 'string' },
                     },
                 },
                 UpdateUsuariDTO: {
                     type: 'object',
                     properties: {
-                        emailPrincipal: { type: 'string' },
                         emailSecundari: { type: 'string', nullable: true },
                         telefonPrincipal: { type: 'string', nullable: true },
                         telefonSecundari: { type: 'string', nullable: true },
-                        nom: { type: 'string', nullable: true },
-                        cognom1: { type: 'string', nullable: true },
-                        cognom2: { type: 'string', nullable: true },
                         sexe: { type: 'string', enum: ['M', 'F'], nullable: true },
                         dataNaixement: { type: 'string', format: 'date-time', nullable: true },
                         LocalitatNaixement: { type: 'string', nullable: true },
@@ -118,6 +114,17 @@ const options: swaggerJSDoc.Options = {
                         },
                     },
                 },
+                RemoveTemporadesQuotaConfigDTO: {
+                    type: 'object',
+                    required: ['temporadesAplicada'],
+                    properties: {
+                        temporadesAplicada: {
+                            type: 'array',
+                            minItems: 1,
+                            items: { type: 'string', pattern: '^\\d{4}-\\d{4}$' },
+                        },
+                    },
+                },
                 CreateCategoriaDTO: {
                     type: 'object',
                     required: ['tipus', 'diesActivitat'],
@@ -130,8 +137,13 @@ const options: swaggerJSDoc.Options = {
                     },
                 },
                 UpdateCategoriaDTO: {
-                    allOf: [{ $ref: '#/components/schemas/CreateCategoriaDTO' }],
-                    required: [],
+                    type: 'object',
+                    properties: {
+                        diesActivitat: { type: 'array', items: { type: 'string', enum: ['DILLUNS', 'DIMARTS', 'DIMECRES', 'DIJOUS', 'DIVENDRES'] } },
+                        horaEntrada: { type: 'string', format: 'date-time', nullable: true },
+                        horaSortida: { type: 'string', format: 'date-time', nullable: true },
+                        detalls: { type: 'string', nullable: true },
+                    },
                 },
                 SetCategoriaDTO: {
                     type: 'object',
@@ -244,6 +256,90 @@ const options: swaggerJSDoc.Options = {
                         dataBaixa: { type: 'string', format: 'date-time', nullable: true },
                         dataAltaProva: { type: 'string', format: 'date-time', nullable: true },
                         iban: { type: 'string', nullable: true },
+                    },
+                },
+                CreateProvaDTO: {
+                    type: 'object',
+                    required: ['nom'],
+                    properties: {
+                        nom: { type: 'string' },
+                    },
+                },
+                DeleteProvasDTO: {
+                    type: 'object',
+                    required: ['ids'],
+                    properties: {
+                        ids: { type: 'array', items: { type: 'string' }, minItems: 1 },
+                    },
+                },
+                ProvaResponseDTO: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'string' },
+                        nom: { type: 'string' },
+                        createdAt: { type: 'string', format: 'date-time' },
+                        updatedAt: { type: 'string', format: 'date-time' },
+                    },
+                },
+                CreateRankingDTO: {
+                    type: 'object',
+                    required: ['nom', 'sexe', 'categoriaId', 'provaId'],
+                    properties: {
+                        nom: { type: 'string' },
+                        sexe: { type: 'string', enum: ['M', 'F'] },
+                        categoriaId: { type: 'string' },
+                        provaId: { type: 'string' },
+                    },
+                },
+                UpdateRankingDTO: {
+                    type: 'object',
+                    properties: {
+                        nom: { type: 'string' },
+                    },
+                },
+                RankingResponseDTO: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'string' },
+                        nom: { type: 'string' },
+                        sexe: { type: 'string', enum: ['M', 'F'] },
+                        categoriaId: { type: 'string' },
+                        provaId: { type: 'string' },
+                        atletaRankingIds: { type: 'array', items: { type: 'string' } },
+                        createdAt: { type: 'string', format: 'date-time' },
+                        updatedAt: { type: 'string', format: 'date-time' },
+                    },
+                },
+                CreateAtletaRankingDTO: {
+                    type: 'object',
+                    required: ['usuariId', 'rankingId', 'localitatMarca', 'dataMarca', 'marca'],
+                    properties: {
+                        usuariId: { type: 'string' },
+                        rankingId: { type: 'string' },
+                        localitatMarca: { type: 'string' },
+                        dataMarca: { type: 'string', format: 'date-time' },
+                        marca: { type: 'string' },
+                    },
+                },
+                UpdateAtletaRankingDTO: {
+                    type: 'object',
+                    properties: {
+                        localitatMarca: { type: 'string' },
+                        dataMarca: { type: 'string', format: 'date-time' },
+                        marca: { type: 'string' },
+                    },
+                },
+                AtletaRankingResponseDTO: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'string' },
+                        localitatMarca: { type: 'string' },
+                        dataMarca: { type: 'string', format: 'date-time' },
+                        marca: { type: 'string' },
+                        usuariId: { type: 'string' },
+                        rankingId: { type: 'string' },
+                        createdAt: { type: 'string', format: 'date-time' },
+                        updatedAt: { type: 'string', format: 'date-time' },
                     },
                 },
             },

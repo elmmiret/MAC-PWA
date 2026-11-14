@@ -6,7 +6,6 @@
 - DONE ---> Mirar de corregir la creació d'Usuaris ADMIN, ja que no pot ser que qualsevol es pugui crear un compte d'administrador només a partir d'un atribut de l'endpoint.
  ---Actualmente /register permite enviar "tipus": "ADMIN". Eso es un riesgo de seguridad, porque cualquier persona podría registrarse como administrador.
  ---Lo recomendable es que los registros públicos siempre sean NO_SOCI y que la creación de administradores se haga por un flujo protegido.
-
 - DONE (parlar-ho) ---> NOMES un ADMINISTRADOR podrà REGISTRAR nous Usuaris. (no cal que Categoria sigui obligatori a l'hora de crear l'Usuari, parlar-ho)
 - DONE ---> NO_SOCIs, es a dir, persones que visiten la web o webapp sense tenir un compte fet pel club, només podran accedir a les funcions bàsiques, sense necessitat de tenir un Usuari.
 - DONE ---> SOCIs seran els que tinguin un compte creat pel club, aixi que desapareix de TUsuari.
@@ -28,25 +27,22 @@
     - Categoria: endpoint, que detecta amb el token l'Usuari, i permet obtenir tota la informació de la Categoria relacionada a l'Usuari (només les dades de Categoria, res de QuotesConfig)
     - Pagament: endpoint, que detecta amb el token l'Usuari, i permet obtenir tots els seus Pagaments, amb tota la seva informació (res de QuotesConfig, només els seus atributs)
 - DONE ---> Quan es fa DELETE d'un Usuari, posar a null tots els usuariFamiliarIds dels Usuaris afectats
+- DONE ---> Al CREAR una CATEGORIA entre SUB_8 - SUB_23, atribut AnyNaixement es generi automaticament a partir de l'any actual.
+- DONE ---> Fer un endpoint per a ACTUALITZAR AnyNaixement de les CATEGORIES entre SUB-8 - SUB_23. Que al executarlo, s'actualitzin amb l'any actual com a referència.
+- DONE ---> Fer un endpoint per a ASSIGNAR automaticament els Usuaris a la seva CATEGORIA corresponent, a partir de la seva data de naixement i AnyNaixement de les CATEGORIES. (entre SUB_8 - SUB_23, més grans a mà)
+- DONE ---> Treure anyNaixement de la creacio d'una Categoria, ja que s'assigna automaticament
+- DONE ---> En l'endpoint per a actualizar anyNaixement de TOTES les Categories oficials, si en la primera Categoria revisada no hi ha inconsistències entre els anyNaixement anteriors i els que es volen assignar, no fer res més ja que llavors tots els anyNaixement de totes les altres Categories també son correctes
+- DONE ---> !!!!! Afegir la Categoria SUB-18 a les Categories oficials !!!!!!!
 
 -------------------------------------------- COSES PER FER: ------------------------------------------------
 
 - Fer FRONTEND per a registrar (administradors) i iniciar sessio (usuaris). Des d'on s'haurà de gestionar el pop up de Google. Fer servir patrò bLoc.
  ---El frontend debe iniciar sesión con Google mediante Firebase Client SDK y enviar el firebaseToken a /api/auth/google.
 
-- Fer que un admin i el propi Usuari puguin editar TOT el perfil d'un Usuari, menys ids i el correu principal.
-            el backend actual no permite al usuario normal guardar imatgePerfil —el DTO no incluye ese campo y la ruta de actualización es solo para admins—.
+- Fer que un admin pugui editar TOT el perfil d'un Usuari, menys ids i el correu principal.
 
 - Implementar imatge de perfil, imatges de noticies, etc. amb Firebase Storage. (falta la lógica de pujada/lectura y les regles de seguretat de Storage)
 - Probar d'implementar la recuperació de la contrassenya, però si només es pot accedir amb Google, em sembla que no caldrà). eliminar /register vamos, demanar al chat
-
-- Al CREAR una CATEGORIA entre SUB_8 - SUB_23, atribut AnyNaixement es generi automaticament a partir de l'any actual.
-- Fer un endpoint per a ACTUALITZAR AnyNaixement de les CATEGORIES entre SUB-8 - SUB_23. Que al executarlo, s'actualitzin amb l'any actual com a referència.
-- Fer un endpoint per a ASSIGNAR automaticament els Usuaris a la seva CATEGORIA corresponent, a partir de la seva data de naixement i AnyNaixement de les CATEGORIES. (entre SUB_8 - SUB_23, més grans a mà)
-
-- Treure anyNaixement de la creacio d'una Categoria, ja que s'assigna automaticament
-- En l'endpoint per a actualizar anyNaixement de TOTES les Categories oficials, si en la primera Categoria revisada no hi ha inconsistències entre els anyNaixement anteriors i els que es volen assignar, no fer res més ja que llavors tots els anyNaixement de totes les altres Categories també son correctes
-- !!!!! Afegir la Categoria SUB-18 a les Categories oficials !!!!!!!
 
 - Afegir atribut 'descompteAplicat' a Pagament ?????
 - Si l'USUARI del PAGAMENT d'una quota tipus SOCI es menor (estrictament) de 18 anys, se li descompta el 50% del preuBase (si te data dataNaixement assignada, sino no se li aplica res)
@@ -58,6 +54,15 @@
 
 - Aplicar PAGINACIÓ als endpoints que poden retornar moltes dades
 - Aplicar FILTRES als endpoints podrien acceptalos, com a getAllUsuaris, getAllPagamentsFromUser, etc.
+
+- Que el /register d'un Usuari, els atributs nom, congnom1, cognom2 siguin obligatoris
+- Repassar el pach de temporadesAplicada de QuotaConfig (que es puguin afegir i eliminar temporades, i que apareguin en ordre descendent (crec que ja passa))
+- Fer endpoint per a poder editar una Categoria: diesActivitat, horaEntrada, horaSortida, detalls
+- Endpoint per a poder editar un Usuari NO ha de deixar editar: id, firebaseUid, correuPrincipal, entrenador (hi ha un endpoint concret per aixo), nom, cognom1 y cognom2.
+    - tipusDocument y numeroDocument van junts, si un camp està poblat, l'altre també
+    - nomTutor, tipusDocumentTutor y numeroDocumentTutor també van junts, si un està poblat, els altres també ho han d'estar
+    - dataBaixa > dataInscripcio y dataAltaProva
+    - dataInscripcio >= dataAltaProva (un atleta s'inscriu el mateix dia o més tard de donar-se d'alta de prova)(en cas de que els dos camps estiguin poblats)
 
 --------------------------------------------------------------------------------------------------------------------
 

@@ -4,6 +4,7 @@ import type {
     DeleteQuotaConfigsDTO,
     AddTemporadesQuotaConfigDTO,
     QuotaConfigResponseDTO,
+    RemoveTemporadesQuotaConfigDTO,
     UpdateQuotaConfigDTO,
 } from 'shared';
 import type { IQuotaConfigService } from '../interfaces/quotaConfig.interface.js';
@@ -136,6 +137,32 @@ export class QuotaConfigService implements IQuotaConfigService {
         if (repeated) throw new Error('Una temporada ja existeix a la QuotaConfig.');
 
         return this.mapToDTO(await this.repository.addTemporades(id, dto.temporadesAplicada));
+    }
+
+    async removeTemporades(
+        id: string,
+        dto: RemoveTemporadesQuotaConfigDTO,
+    ): Promise<{ quotaConfig: QuotaConfigResponseDTO; removed: string[]; notFound: string[] }> {
+        const current = await this.repository.findById(id);
+        if (!current) throw new Error('QuotaConfig no trobada.');
+        if (!dto.temporadesAplicada?.length) throw new Error('Cal indicar almenys una temporada.');
+
+        this.validateSeasons(dto.temporadesAplicada);
+
+        const currentSeasons = new Set(current.temporadesAplicada);
+        const removed: string[] = [];
+        const notFound: string[] = [];
+
+        for (const season of dto.temporadesAplicada) {
+            if (currentSeasons.has(season)) {
+                removed.push(season);
+            } else {
+                notFound.push(season);
+            }
+        }
+
+        const updated = await this.repository.removeTemporades(id, removed);
+        return { quotaConfig: this.mapToDTO(updated), removed, notFound };
     }
 
     async activate(id: string): Promise<QuotaConfigResponseDTO> {

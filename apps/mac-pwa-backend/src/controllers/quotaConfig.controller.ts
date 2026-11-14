@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import type {
     CreateQuotaConfigDTO,
     DeleteQuotaConfigsDTO,
+    RemoveTemporadesQuotaConfigDTO,
     UpdateQuotaConfigDTO,
 } from 'shared';
 import { QuotaConfigService } from '../services/quotaConfig.service.js';
@@ -64,6 +65,23 @@ export class QuotaConfigController {
                 getRouteParam(req.params.id),
                 req.body,
             ));
+        } catch (error: any) {
+            res.status(400).json({ message: error.message });
+        }
+    }
+
+    async removeTemporades(req: Request, res: Response): Promise<void> {
+        try {
+            const { quotaConfig, removed, notFound } = await this.service.removeTemporades(
+                getRouteParam(req.params.id),
+                req.body as RemoveTemporadesQuotaConfigDTO,
+            );
+
+            const message = notFound.length > 0
+                ? `S'han eliminat les temporades existents. Les següents no existeixen: ${notFound.join(', ')}.`
+                : 'Temporades eliminades correctament.';
+
+            res.status(200).json({ message, quotaConfig, removed, notFound });
         } catch (error: any) {
             res.status(400).json({ message: error.message });
         }

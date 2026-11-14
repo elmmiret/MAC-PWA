@@ -6,7 +6,12 @@ export interface CreateCategoriaDTO {
     detalls?: string | null;
 }
 
-export type UpdateCategoriaDTO = Partial<CreateCategoriaDTO>;
+export interface UpdateCategoriaDTO {
+    diesActivitat?: string[];
+    horaEntrada?: string | null;
+    horaSortida?: string | null;
+    detalls?: string | null;
+}
 
 export interface SetCategoriaDTO {
     usuariIds: string[];
