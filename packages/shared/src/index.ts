@@ -3,3 +3,6 @@
  export * from './dtos/categoria.dto.js';
  export * from './dtos/quotaConfig.dto.js';
  export * from './dtos/pagament.dto.js';
+ export * from './dtos/prova.dto.js';
+ export * from './dtos/ranking.dto.js';
+ export * from './dtos/atletaRanking.dto.js';

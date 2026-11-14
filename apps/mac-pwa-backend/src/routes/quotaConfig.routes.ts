@@ -97,6 +97,28 @@ router.patch('/addTemporades/:id', ...adminOnly, (req, res) => controller.addTem
 
 /**
  * @swagger
+ * /api/quotaConfigs/removeTemporades/{id}:
+ *   patch:
+ *     summary: Elimina temporades d'una QuotaConfig
+ *     tags: [QuotaConfig]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema: { $ref: '#/components/schemas/RemoveTemporadesQuotaConfigDTO' }
+ *     responses:
+ *       200: { description: Temporades eliminades parcialment o totalment }
+ */
+router.patch('/removeTemporades/:id', ...adminOnly, (req, res) => controller.removeTemporades(req, res));
+
+/**
+ * @swagger
  * /api/quotaConfigs/activate/{id}:
  *   patch:
  *     summary: Activa una QuotaConfig i desactiva l'altra del mateix tipus i categoria

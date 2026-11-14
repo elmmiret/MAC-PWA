@@ -119,4 +119,21 @@ export class QuotaConfigRepository {
             });
         });
     }
+
+    async removeTemporades(id: string, temporadesAplicada: string[]): Promise<QuotaConfigWithCategory> {
+        return prisma.$transaction(async (transaction) => {
+            const target = await transaction.quotaConfig.findUnique({ where: { id } });
+            if (!target) throw new Error('QuotaConfig no trobada.');
+
+            return transaction.quotaConfig.update({
+                where: { id },
+                data: {
+                    temporadesAplicada: {
+                        set: target.temporadesAplicada.filter((season) => !temporadesAplicada.includes(season)),
+                    },
+                },
+                include: quotaConfigInclude,
+            });
+        });
+    }
 }

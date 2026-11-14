@@ -17,6 +17,10 @@ export interface AddTemporadesQuotaConfigDTO {
     temporadesAplicada: string[];
 }
 
+export interface RemoveTemporadesQuotaConfigDTO {
+    temporadesAplicada: string[];
+}
+
 export interface QuotaConfigResponseDTO {
     id: string;
     tipus: string;

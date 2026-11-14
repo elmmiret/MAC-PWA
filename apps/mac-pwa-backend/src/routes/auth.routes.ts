@@ -27,20 +27,10 @@ const authenticated = [verifyFirebaseToken];
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - emailPrincipal
- *             properties:
- *               emailPrincipal:
- *                 type: string
- *               nom:
- *                 type: string
- *               cognom1:
- *                 type: string
- *               cognom2:
- *                 type: string
+ *             $ref: '#/components/schemas/RegisterUsuariDTO'
  *           example:
  *             emailPrincipal: "pere@gmail.com"
+ *             dataNaixement: "2015-06-15T00:00:00.000Z"
  *             nom: "Pere"
  *             cognom1: "Martorell"
  *             cognom2: "Atlètic"

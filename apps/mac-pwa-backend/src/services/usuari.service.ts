@@ -5,7 +5,7 @@ import type {
     MeUsuariResponseDTO,
     OperacioUsuariResponseDTO,
     SetFamiliarDTO,
-    UpdatePerfilDTO,
+    UpdateUsuariDTO,
     UsuariResponseDTO,
 } from 'shared';
 import type { IUsuariService } from '../interfaces/usuari.interface.js';
@@ -97,22 +97,91 @@ export class UsuariService implements IUsuariService {
         };
     }
 
-    // Converteix el DTO parcial d'actualització en l'input Prisma equivalent
-    // i adapta els enums compartits als enums generats per Prisma.
-    private mapUpdateDTOToPrisma(dto: UpdatePerfilDTO): Prisma.UsuariUpdateInput {
-        return {
-            ...dto,
-            ...(dto.sexe === undefined ? {} : { sexe: dto.sexe as TSexe | null }),
-            ...(dto.tipusDocument === undefined ? {} : { tipusDocument: dto.tipusDocument as TDocument | null }),
-            ...(dto.tipusDocumentTutor === undefined ? {} : { tipusDocumentTutor: dto.tipusDocumentTutor as TDocument | null }),
-        };
+    private parseDate(value: string | null | undefined): Date | null {
+        if (value === null || value === undefined) return null;
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) {
+            throw new Error('Format de data invàlid.');
+        }
+        return date;
     }
 
-    async actualitzarUsuari(id: string, dto: UpdatePerfilDTO): Promise<UsuariResponseDTO> {
+    // Converteix el DTO parcial d'actualització en l'input Prisma equivalent
+    // i adapta els enums compartits als enums generats per Prisma.
+    private mapUpdateDTOToPrisma(dto: UpdateUsuariDTO): Prisma.UsuariUpdateInput {
+        const {
+            dataNaixement,
+            dataInscripcio,
+            dataBaixa,
+            dataAltaProva,
+            sexe,
+            tipusDocument,
+            tipusDocumentTutor,
+            ...rest
+        } = dto;
+        const data: Prisma.UsuariUpdateInput = { ...rest };
+
+        if (sexe !== undefined) data.sexe = sexe as TSexe | null;
+        if (tipusDocument !== undefined) data.tipusDocument = tipusDocument as TDocument | null;
+        if (tipusDocumentTutor !== undefined) data.tipusDocumentTutor = tipusDocumentTutor as TDocument | null;
+        if (dataNaixement !== undefined) {
+            if (dataNaixement === null) {
+                throw new Error('La data de naixement no pot ser buida.');
+            }
+            data.dataNaixement = new Date(dataNaixement);
+        }
+        if (dataInscripcio !== undefined) data.dataInscripcio = { set: this.parseDate(dataInscripcio) };
+        if (dataBaixa !== undefined) data.dataBaixa = { set: this.parseDate(dataBaixa) };
+        if (dataAltaProva !== undefined) data.dataAltaProva = { set: this.parseDate(dataAltaProva) };
+
+        return data;
+    }
+
+    private validateUpdateUsuari(existing: UsuariWithPayments, dto: UpdateUsuariDTO): void {
+        const finalTipusDocument = dto.tipusDocument !== undefined ? dto.tipusDocument : existing.tipusDocument;
+        const finalNumeroDocument = dto.numeroDocument !== undefined ? dto.numeroDocument : existing.numeroDocument;
+        if ((finalTipusDocument !== null) !== (finalNumeroDocument !== null)) {
+            throw new Error('tipusDocument i numeroDocument han d\'anar junts.');
+        }
+
+        const finalNomTutor = dto.nomTutor !== undefined ? dto.nomTutor : existing.nomTutor;
+        const finalTipusDocumentTutor = dto.tipusDocumentTutor !== undefined
+            ? dto.tipusDocumentTutor
+            : existing.tipusDocumentTutor;
+        const finalNumeroDocumentTutor = dto.numeroDocumentTutor !== undefined
+            ? dto.numeroDocumentTutor
+            : existing.numeroDocumentTutor;
+        const tutorFields = [finalNomTutor, finalTipusDocumentTutor, finalNumeroDocumentTutor];
+        if (tutorFields.some((value) => value !== null) && !tutorFields.every((value) => value !== null)) {
+            throw new Error('nomTutor, tipusDocumentTutor i numeroDocumentTutor han d\'anar junts.');
+        }
+
+        const finalDataInscripcio = dto.dataInscripcio !== undefined
+            ? this.parseDate(dto.dataInscripcio)
+            : existing.dataInscripcio;
+        const finalDataBaixa = dto.dataBaixa !== undefined ? this.parseDate(dto.dataBaixa) : existing.dataBaixa;
+        const finalDataAltaProva = dto.dataAltaProva !== undefined
+            ? this.parseDate(dto.dataAltaProva)
+            : existing.dataAltaProva;
+
+        if (finalDataBaixa && finalDataInscripcio && finalDataBaixa <= finalDataInscripcio) {
+            throw new Error('dataBaixa ha de ser posterior a dataInscripcio.');
+        }
+        if (finalDataBaixa && finalDataAltaProva && finalDataBaixa <= finalDataAltaProva) {
+            throw new Error('dataBaixa ha de ser posterior a dataAltaProva.');
+        }
+        if (finalDataInscripcio && finalDataAltaProva && finalDataInscripcio < finalDataAltaProva) {
+            throw new Error('dataInscripcio ha de ser igual o posterior a dataAltaProva.');
+        }
+    }
+
+    async actualitzarUsuari(id: string, dto: UpdateUsuariDTO): Promise<UsuariResponseDTO> {
         const usuariExistent = await this.repository.findById(id);
         if (!usuariExistent) {
             throw new Error("L'usuari no existeix a la base de dades.");
         }
+
+        this.validateUpdateUsuari(usuariExistent, dto);
 
         const usuariActualitzat = await this.repository.updateById(
             id,

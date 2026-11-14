@@ -108,4 +108,23 @@ export class UsuariRepository {
             include: userInclude,
         });
     }
+
+    async findUsersForCategoriaAssignment(): Promise<{ id: string; dataNaixement: Date }[]> {
+        return await prisma.usuari.findMany({
+            select: { id: true, dataNaixement: true },
+        });
+    }
+
+    async updateCategoriaIds(updates: { id: string; categoriaId: string | null }[]): Promise<void> {
+        if (updates.length === 0) return;
+
+        await prisma.$transaction(
+            updates.map((update) =>
+                prisma.usuari.update({
+                    where: { id: update.id },
+                    data: { categoriaId: update.categoriaId },
+                }),
+            ),
+        );
+    }
 }

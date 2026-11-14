@@ -35,6 +35,7 @@ enum TCategoria {
   SUB_12
   SUB_14
   SUB_16
+  SUB_18
   SUB_20
   SUB_23
   SENIOR
@@ -91,7 +92,7 @@ model Usuari {
   cognom1             String?
   cognom2             String?
   sexe                TSexe?
-  dataNaixement       DateTime?
+  dataNaixement       DateTime
   LocalitatNaixement  String?
   numeroLlicencia     String?
   adreca              String?

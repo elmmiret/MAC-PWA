@@ -15,4 +15,6 @@ export interface ICategoriaService {
     setUsers(id: string, dto: SetCategoriaDTO): Promise<CategoriaResponseDTO>;
     unsetUsers(id: string, dto: SetCategoriaDTO): Promise<CategoriaResponseDTO>;
     delete(id: string): Promise<void>;
+    updateAnyNaixementOficials(): Promise<{ updated: boolean; message: string; categories: CategoriaResponseDTO[] }>;
+    assignCategoriesToUsers(): Promise<{ updated: number }>;
 }

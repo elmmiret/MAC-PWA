@@ -2,12 +2,12 @@ import type {
     MeUsuariResponseDTO,
     OperacioUsuariResponseDTO,
     SetFamiliarDTO,
-    UpdatePerfilDTO,
+    UpdateUsuariDTO,
     UsuariResponseDTO,
 } from 'shared';
 
 export interface IUsuariService {
-    actualitzarUsuari(id: string, dto: UpdatePerfilDTO): Promise<UsuariResponseDTO>;
+    actualitzarUsuari(id: string, dto: UpdateUsuariDTO): Promise<UsuariResponseDTO>;
     obtenirUsuariPerId(id: string): Promise<UsuariResponseDTO>;
     obtenirUsuariPerFirebaseId(firebaseUid: string): Promise<UsuariResponseDTO>;
     obtenirUsuariAutenticat(firebaseUid: string): Promise<MeUsuariResponseDTO>;
