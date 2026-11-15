@@ -9,7 +9,7 @@
     "start": "node dist/src/index.js",
     "set-admin-claim": "tsx scripts/set-admin-claim.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "prisma skills sync || exit 0"
+    "postinstall": "prisma skills sync >/dev/null 2>&1 || true; DATABASE_URL=\"${DATABASE_URL:-postgresql://localhost:5433/mac_pwa_db?schema=public}\" prisma generate"
   },
   "keywords": [],
   "type": "module",

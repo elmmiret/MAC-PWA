@@ -10,5 +10,11 @@
     },
     "scripts": {
         "dev:all": "concurrently \"npm --prefix apps/mac-pwa-backend run dev \" \"npm --prefix apps/mac-pwa-frontend run dev\""
+    },
+    "overrides": {
+        "glob": "^14.0.6",
+        "minimatch": "^11.0.8",
+        "@grpc/grpc-js": "^1.13.6",
+        "deepmerge": "^4.3.1"
     }
 }

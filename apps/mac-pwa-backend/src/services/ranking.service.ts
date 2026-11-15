@@ -102,6 +102,11 @@ export class RankingService implements IRankingService {
         return this.mapToDTO(await this.repository.create(input));
     }
 
+    async getAll(): Promise<RankingResponseDTO[]> {
+        const rankings = await this.repository.findAll();
+        return rankings.map((r) => this.mapToDTO(r));
+    }
+
     async getById(id: string): Promise<RankingResponseDTO> {
         const ranking = await this.repository.findById(id);
         if (!ranking) {

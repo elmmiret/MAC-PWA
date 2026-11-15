@@ -27,6 +27,24 @@ router.post('/create', ...adminOnly, (req, res) => controller.create(req, res));
 
 /**
  * @swagger
+ * /api/categories:
+ *   get:
+ *     summary: Obté totes les categories
+ *     tags: [Categories]
+ *     security: [{ bearerAuth: [] }]
+ *     responses:
+ *       200:
+ *         description: Llista de categories
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items: { $ref: '#/components/schemas/CategoriaResponseDTO' }
+ */
+router.get('/', ...adminOnly, (req, res) => controller.getAll(req, res));
+
+/**
+ * @swagger
  * /api/categories/byId/{id}:
  *   get:
  *     summary: Obté una categoria pel seu id PostgreSQL

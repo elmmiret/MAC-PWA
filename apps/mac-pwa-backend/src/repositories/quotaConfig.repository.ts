@@ -27,6 +27,10 @@ export class QuotaConfigRepository {
         return prisma.quotaConfig.findUnique({ where: { id }, include: quotaConfigInclude });
     }
 
+    async findAll(): Promise<QuotaConfigWithCategory[]> {
+        return prisma.quotaConfig.findMany({ orderBy: [{ tipus: 'asc' }, { nom: 'asc' }], include: quotaConfigInclude });
+    }
+
     async findByName(nom: string): Promise<QuotaConfigWithCategory | null> {
         return prisma.quotaConfig.findUnique({ where: { nom }, include: quotaConfigInclude });
     }
