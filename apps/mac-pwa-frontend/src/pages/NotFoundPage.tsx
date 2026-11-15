@@ -7,7 +7,7 @@ export function NotFoundPage() {
       <p className="mb-6 text-lg text-text-secondary">Pàgina no trobada</p>
       <Link
         to="/"
-        className="rounded-xl bg-accent-500 px-6 py-3 font-medium text-brand-500 shadow-sm transition-colors hover:bg-accent-400"
+        className="min-h-11 rounded-xl bg-accent-500 px-6 py-3 font-medium text-brand-500 shadow-sm transition-colors hover:bg-accent-400"
       >
         Tornar a l'inici
       </Link>

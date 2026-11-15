@@ -51,6 +51,17 @@ body {
   margin: 0;
 }
 
+button,
+input,
+select,
+textarea {
+  min-height: 44px;
+}
+
+:where(a, button, input, select, textarea) {
+  touch-action: manipulation;
+}
+
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
@@ -58,6 +69,11 @@ select:focus-visible,
 textarea:focus-visible {
   outline: 3px solid var(--color-accent-500);
   outline-offset: 2px;
+}
+
+::selection {
+  color: var(--color-brand-900);
+  background: var(--color-accent-200);
 }
 
 /* Safe area para móviles con notch */

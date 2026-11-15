@@ -52,6 +52,7 @@ From `mac-pwa-backend/`:
 - Styling uses Tailwind CSS v4 with a CSS-first configuration in `src/index.css`.
 - Routing uses `react-router-dom`; the layout is responsive with a bottom navigation bar on mobile and a sidebar on desktop (`md:` breakpoint).
 - Global state uses `AuthContext` (Firebase Auth + backend login) and data fetching uses `@tanstack/react-query`.
+- Reusable query loading, error, and empty states live in `src/components/ui/`; shared locale formatting helpers live in `src/lib/format.ts`.
 - HTTP requests go through `src/lib/api.ts`, which injects the Firebase ID token as `Authorization: Bearer <token>`.
 - The navigation differs by role:
   - Admin: Inici, Perfil, Pagaments, Rankings, Categories, QuotesConfig.

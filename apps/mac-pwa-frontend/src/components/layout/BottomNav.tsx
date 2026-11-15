@@ -23,7 +23,7 @@ export function BottomNav({ items }: BottomNavProps) {
             <NavLink
               to={item.to}
               className={({ isActive }) =>
-                `flex flex-col items-center justify-center gap-1 py-2.5 text-xs font-medium transition-colors ${
+                  `flex min-h-16 flex-col items-center justify-center gap-1 py-2.5 text-xs font-medium transition-colors ${
                   isActive
                     ? 'text-accent-400'
                     : 'text-brand-100 hover:text-white'
@@ -31,7 +31,7 @@ export function BottomNav({ items }: BottomNavProps) {
               }
               end={item.to === '/'}
             >
-              <span className="flex h-6 w-6 items-center justify-center">{item.icon}</span>
+              <span aria-hidden="true" className="flex h-6 w-6 items-center justify-center">{item.icon}</span>
               <span className="truncate px-1">{item.label}</span>
             </NavLink>
           </li>

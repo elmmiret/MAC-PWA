@@ -55,10 +55,14 @@ export async function apiFetch(
 
 async function parseJson<T>(response: Response): Promise<T> {
   if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    throw new ApiError(body.message ?? `Error ${response.status}`, response.status, body);
+    const body: unknown = await response.json().catch(() => ({}));
+    const message = typeof body === 'object' && body !== null && 'message' in body && typeof body.message === 'string'
+      ? body.message
+      : `Error ${response.status}`;
+    throw new ApiError(message, response.status, body);
   }
-  return response.json() as Promise<T>;
+  const body: unknown = await response.json();
+  return body as T;
 }
 
 export async function apiGet<T>(input: RequestInfo | URL): Promise<T> {

@@ -8,7 +8,10 @@ import App from './App.tsx'
 // Registra el Service Worker per a funcionalitats PWA (offline + instal·lació)
 registerSW({ immediate: true })
 
-createRoot(document.getElementById('root')!).render(
+const rootElement = document.getElementById('root')
+if (!rootElement) throw new Error('No s’ha trobat l’element arrel de l’aplicació.')
+
+createRoot(rootElement).render(
   <StrictMode>
     <BrowserRouter>
       <App />

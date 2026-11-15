@@ -1,5 +1,6 @@
 import { useAuth } from '../hooks/useAuth';
 import { UserIcon, CardIcon, TrophyIcon, GridIcon, GearIcon } from '../components/icons';
+import { Link } from 'react-router-dom';
 
 const dashboardItems = [
   { to: '/usuaris', label: 'Usuaris', icon: UserIcon, description: 'Gestiona els usuaris del club' },
@@ -21,17 +22,17 @@ export function HomePage() {
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {dashboardItems.map((item) => (
-          <a
+          <Link
             key={item.to}
-            href={item.to}
-            className="group rounded-2xl bg-surface p-5 shadow-sm ring-1 ring-brand-100 transition hover:shadow-md hover:ring-accent-300"
+            to={item.to}
+            className="group block min-h-28 rounded-2xl bg-surface p-5 shadow-sm ring-1 ring-brand-100 transition-colors hover:bg-brand-50 hover:ring-accent-500"
           >
             <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-accent-100 text-accent-700 group-hover:bg-accent-500 group-hover:text-white">
-              <item.icon className="h-5 w-5" />
+              <item.icon aria-hidden="true" className="h-5 w-5" />
             </div>
             <h2 className="font-semibold text-text">{item.label}</h2>
             <p className="text-sm text-text-secondary">{item.description}</p>
-          </a>
+          </Link>
         ))}
       </section>
     </div>

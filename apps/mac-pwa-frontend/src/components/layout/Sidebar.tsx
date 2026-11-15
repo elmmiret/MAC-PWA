@@ -46,9 +46,9 @@ export function Sidebar({ items }: SidebarProps) {
         <button
           type="button"
           onClick={logout}
-          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-brand-100 transition-colors hover:bg-brand-600 hover:text-white"
+          className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-brand-100 transition-colors hover:bg-brand-600 hover:text-white"
         >
-          <span className="flex h-6 w-6 items-center justify-center">
+          <span aria-hidden="true" className="flex h-6 w-6 items-center justify-center">
             <LogoutIcon className="h-5 w-5" />
           </span>
           Tancar sessió
