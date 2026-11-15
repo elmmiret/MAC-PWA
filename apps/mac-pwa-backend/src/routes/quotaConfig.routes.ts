@@ -25,6 +25,24 @@ router.post('/create', ...adminOnly, (req, res) => controller.create(req, res));
 
 /**
  * @swagger
+ * /api/quotaConfigs:
+ *   get:
+ *     summary: Obté totes les QuotaConfig
+ *     tags: [QuotaConfig]
+ *     security: [{ bearerAuth: [] }]
+ *     responses:
+ *       200:
+ *         description: Llista de QuotaConfig
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items: { $ref: '#/components/schemas/QuotaConfigResponseDTO' }
+ */
+router.get('/', ...adminOnly, (req, res) => controller.getAll(req, res));
+
+/**
+ * @swagger
  * /api/quotaConfigs/delete:
  *   delete:
  *     summary: Elimina varies QuotaConfig sense pagaments relacionats

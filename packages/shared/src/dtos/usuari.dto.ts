@@ -52,6 +52,7 @@ export interface UsuariResponseDTO {
     id: string;
     firebaseUid: string | null;
     entrenador: boolean;
+    admin: boolean;
     usuariFamiliarId: string | null;
     emailPrincipal: string;
     imatgePerfil: string | null;

@@ -4,6 +4,7 @@ import { isAdmin, verifyFirebaseToken } from '../middlewares/auth.middleware.js'
 
 const router = Router();
 const controller = new RankingController();
+const authenticated: RequestHandler[] = [verifyFirebaseToken];
 const adminOnly: RequestHandler[] = [verifyFirebaseToken, isAdmin];
 
 /**
@@ -12,6 +13,24 @@ const adminOnly: RequestHandler[] = [verifyFirebaseToken, isAdmin];
  *   name: Rankings
  *   description: Gestió de rankings
  */
+
+/**
+ * @swagger
+ * /api/rankings:
+ *   get:
+ *     summary: Obté tots els rankings
+ *     tags: [Rankings]
+ *     security: [{ bearerAuth: [] }]
+ *     responses:
+ *       200:
+ *         description: Llista de rankings
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items: { $ref: '#/components/schemas/RankingResponseDTO' }
+ */
+router.get('/', ...authenticated, (req, res) => controller.getAll(req, res));
 
 /**
  * @swagger

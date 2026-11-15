@@ -62,6 +62,10 @@ export class CategoriaRepository {
         });
     }
 
+    async findAll(): Promise<CategoriaWithRelations[]> {
+        return prisma.categoria.findMany({ orderBy: { tipus: 'asc' }, include: categoryInclude });
+    }
+
     async findByType(tipus: TCategoria): Promise<CategoriaWithRelations | null> {
         return prisma.categoria.findUnique({
             where: { tipus },

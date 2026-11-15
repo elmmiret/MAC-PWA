@@ -24,6 +24,7 @@ export class UsuariService implements IUsuariService {
             id: usuari.id,
             firebaseUid: usuari.firebaseUid,
             entrenador: usuari.entrenador,
+            admin: false,
             usuariFamiliarId: usuari.usuariFamiliarId,
             emailPrincipal: usuari.emailPrincipal,
             imatgePerfil: usuari.imatgePerfil,

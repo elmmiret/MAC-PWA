@@ -191,4 +191,9 @@ export class QuotaConfigService implements IQuotaConfigService {
         return configs.map((config) => this.mapToDTO(config));
     }
 
+    async getAll(): Promise<QuotaConfigResponseDTO[]> {
+        const configs = await this.repository.findAll();
+        return configs.map((c) => this.mapToDTO(c));
+    }
+
 }

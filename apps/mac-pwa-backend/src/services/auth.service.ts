@@ -21,11 +21,12 @@ export class AuthService implements IAuthService {
         this.categoriaRepository = new CategoriaRepository();
     }
 
-    private mapToUsuariResponseDTO(usuari: UsuariWithPayments): UsuariResponseDTO {
+    private mapToUsuariResponseDTO(usuari: UsuariWithPayments, admin = false): UsuariResponseDTO {
         return {
             id: usuari.id,
             firebaseUid: usuari.firebaseUid,
             entrenador: usuari.entrenador,
+            admin,
             usuariFamiliarId: usuari.usuariFamiliarId,
             emailPrincipal: usuari.emailPrincipal,
             imatgePerfil: usuari.imatgePerfil,
@@ -111,7 +112,7 @@ export class AuthService implements IAuthService {
             });
         }
 
-        return this.mapToUsuariResponseDTO(usuariDB);
+        return this.mapToUsuariResponseDTO(usuariDB, false);
     }
 
     async iniciarSessioGoogle(dto: GoogleLoginDTO): Promise<UsuariResponseDTO> {
@@ -128,7 +129,7 @@ export class AuthService implements IAuthService {
 
         const existingByFirebaseUid = await this.repository.findByFirebaseUid(decodedToken.uid);
         if (existingByFirebaseUid) {
-            return this.mapToUsuariResponseDTO(existingByFirebaseUid);
+            return this.mapToUsuariResponseDTO(existingByFirebaseUid, decodedToken.admin === true);
         }
 
         const preRegisteredUser = await this.repository.findByEmail(decodedToken.email);
@@ -141,7 +142,7 @@ export class AuthService implements IAuthService {
             decodedToken.uid,
         );
 
-        return this.mapToUsuariResponseDTO(usuariDB);
+        return this.mapToUsuariResponseDTO(usuariDB, decodedToken.admin === true);
     }
 
     async tancarSessio(firebaseUid: string): Promise<OperacioUsuariResponseDTO> {

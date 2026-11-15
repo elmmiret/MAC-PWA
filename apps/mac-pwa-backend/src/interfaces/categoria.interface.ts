@@ -9,6 +9,7 @@ import type {
 export interface ICategoriaService {
     create(dto: CreateCategoriaDTO): Promise<CategoriaResponseDTO>;
     getById(id: string): Promise<CategoriaResponseDTO>;
+    getAll(): Promise<CategoriaResponseDTO[]>;
     getByType(type: string): Promise<CategoriaResponseDTO>;
     getCurrentCategoria(firebaseUid: string): Promise<MeCategoriaResponseDTO>;
     update(id: string, dto: UpdateCategoriaDTO): Promise<CategoriaResponseDTO>;

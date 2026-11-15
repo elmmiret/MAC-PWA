@@ -150,6 +150,11 @@ export class CategoriaService implements ICategoriaService {
         return this.mapToDTO(category);
     }
 
+    async getAll(): Promise<CategoriaResponseDTO[]> {
+        const categories = await this.repository.findAll();
+        return categories.map((c) => this.mapToDTO(c));
+    }
+
     async getByType(type: string): Promise<CategoriaResponseDTO> {
         const category = await this.repository.findByType(type as TCategoria);
         if (!category) throw new Error('Categoria no trobada.');

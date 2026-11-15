@@ -29,6 +29,14 @@ export class CategoriaController {
         }
     }
 
+    async getAll(req: Request, res: Response): Promise<void> {
+        try {
+            res.status(200).json(await this.service.getAll());
+        } catch (error: any) {
+            res.status(400).json({ message: error.message });
+        }
+    }
+
     async getByType(req: Request, res: Response): Promise<void> {
         try {
             const result = await this.service.getByType(getRouteParam(req.params.type));

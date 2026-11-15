@@ -20,6 +20,10 @@ export class RankingRepository {
         return prisma.ranking.findUnique({ where: { id }, include: rankingInclude });
     }
 
+    async findAll(): Promise<RankingWithRelations[]> {
+        return prisma.ranking.findMany({ orderBy: { nom: 'asc' }, include: rankingInclude });
+    }
+
     async findByCategoriaProvaSexe(
         categoriaId: string,
         provaId: string,
